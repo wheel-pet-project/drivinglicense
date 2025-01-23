@@ -7,7 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Adapters\" />
+      <Folder Include="Adapters\Postgres\" />
+      <Folder Include="Adapters\S3\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentResults" Version="3.16.0" />
+      <PackageReference Include="Npgsql" Version="9.0.2" />
     </ItemGroup>
 
 </Project>

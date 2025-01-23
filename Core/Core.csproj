@@ -8,8 +8,12 @@
 
     <ItemGroup>
       <Folder Include="Application\" />
-      <Folder Include="Domain\SharedKernel\" />
-      <Folder Include="Ports\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CSharpFunctionalExtensions" Version="3.4.3" />
+      <PackageReference Include="FluentResults" Version="3.16.0" />
+      <PackageReference Include="MediatR" Version="12.4.1" />
     </ItemGroup>
 
 </Project>
