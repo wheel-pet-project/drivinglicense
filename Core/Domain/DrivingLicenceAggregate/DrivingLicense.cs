@@ -10,7 +10,7 @@ public sealed class DrivingLicense : Aggregate
 
     private DrivingLicense(
         Guid accountId,
-        List<Category> categories,
+        CategoryList categoryList,
         DrivingLicenseNumber number,
         Name name,
         string cityOfBirth,
@@ -22,7 +22,7 @@ public sealed class DrivingLicense : Aggregate
         Id = Guid.NewGuid();
         AccountId = accountId;
         Status = Status.Unprocessed;
-        Categories = categories;
+        Categories = categoryList;
         Number = number;
         Name = name;
         CityOfBirth = cityOfBirth;
@@ -39,7 +39,7 @@ public sealed class DrivingLicense : Aggregate
 
     public Status Status { get; private set; } = null!;
 
-    public IReadOnlyList<Category> Categories { get; private set; } = null!;
+    public CategoryList Categories { get; private set; } = null!;
 
     public DrivingLicenseNumber Number { get; private set; } = null!;
     
@@ -57,7 +57,7 @@ public sealed class DrivingLicense : Aggregate
 
     public static DrivingLicense Create(
         Guid accountId,
-        List<Category> categories,
+        CategoryList categoryList,
         DrivingLicenseNumber number,
         Name name,
         string cityOfBirth,
@@ -68,8 +68,8 @@ public sealed class DrivingLicense : Aggregate
     {
         if (accountId == Guid.Empty) 
             throw new ValueIsRequiredException($"{nameof(accountId)} cannot be empty");
-        if (categories.Count == 0) 
-            throw new ValueIsRequiredException($"{nameof(categories)} cannot be empty");
+        if (categoryList == null) 
+            throw new ValueIsRequiredException($"{nameof(categoryList)} cannot be null");
         if (number is null) 
             throw new ValueIsRequiredException($"{nameof(number)} cannot be null");
         if (name is null) 
@@ -88,7 +88,7 @@ public sealed class DrivingLicense : Aggregate
         if (dateOfBirth > dateOfIssue || dateOfExpiry < DateOnly.FromDateTime(DateTime.UtcNow))
             throw new ValueOutOfRangeException("invalid date(-s) in driving licence");
 
-        return new DrivingLicense(accountId, categories, number, name, cityOfBirth, dateOfBirth, dateOfIssue, 
+        return new DrivingLicense(accountId, categoryList, number, name, cityOfBirth, dateOfBirth, dateOfIssue, 
             codeOfIssue,
             dateOfExpiry);
     }

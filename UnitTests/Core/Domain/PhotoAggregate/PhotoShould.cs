@@ -14,7 +14,7 @@ public class PhotoShould
 
     private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
         accountId: Guid.NewGuid(), 
-        categories: [Category.BCategory],
+        categoryList: CategoryList.Create([CategoryList.BCategory]),
         number: DrivingLicenseNumber.Create(input: "1234 567891"), 
         name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
         cityOfBirth: "Москва",

@@ -8,6 +8,7 @@ public sealed class Status : Entity<int>
     public static readonly Status Unprocessed = new(1, nameof(Unprocessed).ToLowerInvariant());
     public static readonly Status Approved = new(2, nameof(Approved).ToLowerInvariant());
     public static readonly Status Declined = new(3, nameof(Declined).ToLowerInvariant());
+    public static readonly Status Expired = new(4, nameof(Expired).ToLowerInvariant());
     
     private Status(){}
 
@@ -24,7 +25,8 @@ public sealed class Status : Entity<int>
     [
         Unprocessed, 
         Approved, 
-        Declined
+        Declined,
+        Expired
     ];
 
     public static Status FromName(string name)
