@@ -9,7 +9,7 @@ namespace UnitTests.Core.Domain.SharedKernel.ValueObjects;
 public class CodeOfIssueShould
 {
     [Fact]
-    public void CanCreateInstanceWithCorrectCode()
+    public void CreateInstanceWithCorrectCode()
     {
         // Arrange
         var input = "1255";
@@ -23,7 +23,7 @@ public class CodeOfIssueShould
     }
 
     [Fact]
-    public void CanTrimInputCode()
+    public void TrimInputCode()
     {
         // Arrange
         var input = " 1255  ";
@@ -39,7 +39,7 @@ public class CodeOfIssueShould
     [Theory]
     [InlineData("55555")]
     [InlineData("333")]
-    public void CanThrowValueOutOfRangeExceptionIfCodeLengthIsNot4(string invalidCode)
+    public void ThrowValueOutOfRangeExceptionIfCodeLengthIsNot4(string invalidCode)
     {
         // Arrange
 
@@ -54,7 +54,7 @@ public class CodeOfIssueShould
     [InlineData("12_2")]
     [InlineData("#112")]
     [InlineData("12r1")]
-    public void CanThrowValueIsInvalidExceptionIfCodeContainAnySymbolOtherThanDigit(string invalidCode)
+    public void ThrowValueIsInvalidExceptionIfCodeContainAnySymbolOtherThanDigit(string invalidCode)
     {
         // Arrange
 
@@ -66,7 +66,7 @@ public class CodeOfIssueShould
     }
     
     [Fact]
-    public void CanEqualOperatorReturnTrueForEqualCodes()
+    public void EqualOperatorReturnTrueForEqualCodes()
     {
         // Arrange
         var input = "1255";
@@ -81,7 +81,7 @@ public class CodeOfIssueShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnFalseForDifferentCodes()
+    public void EqualOperatorReturnFalseForDifferentCodes()
     {
         // Arrange
         var codeOfIssue1 = CodeOfIssue.Create("1111");

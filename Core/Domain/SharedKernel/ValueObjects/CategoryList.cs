@@ -1,7 +1,7 @@
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
 using CSharpFunctionalExtensions;
 
-namespace Core.Domain.DrivingLicenceAggregate;
+namespace Core.Domain.SharedKernel.ValueObjects;
 
 public class CategoryList : ValueObject
 {

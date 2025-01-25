@@ -20,7 +20,7 @@ public class DrivingLicenseShould
     
     
     [Fact]
-    public void CanCreateInstanceWithCorrectValues()
+    public void CreateInstanceWithCorrectValues()
     {
         // Arrange
 
@@ -43,7 +43,7 @@ public class DrivingLicenseShould
     }
 
     [Fact]
-    public void CanThrowValueIsRequiredExceptionIfAccountIdIsEmpty()
+    public void ThrowValueIsRequiredExceptionIfAccountIdIsEmpty()
     {
         // Arrange
         var emptyAccountId = Guid.Empty;

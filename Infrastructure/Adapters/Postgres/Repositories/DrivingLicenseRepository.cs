@@ -8,15 +8,24 @@ namespace Infrastructure.Adapters.Postgres.Repositories;
 public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepository
 {
     public async Task<List<DrivingLicense>> GetAll(int page, int pageSize, 
-        Expression<Func<DrivingLicense, bool>> predicate)
+        Expression<Func<DrivingLicense, bool>>? predicate = null)
     {
-        return await context.DrivingLicenses
+        var queryable = context.DrivingLicenses
             .Include(x => x.Status)
-            .Include(x => x.Categories)
-            .Where(predicate)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+            .Include(x => x.Categories);
+
+        return await (predicate != null
+            ? queryable
+                .Where(predicate)
+                .Skip(GetSkipCount(page, pageSize))
+                .Take(pageSize)
+                .ToListAsync()
+            : queryable
+                .Skip(GetSkipCount(page, pageSize))
+                .Take(pageSize)
+                .ToListAsync());
+
+        int GetSkipCount(int p, int pSize) => (p - 1) * pSize;
     }
 
     public async Task<DrivingLicense?> GetById(Guid id)

@@ -1,14 +1,14 @@
-using System.Reflection;
 using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using Core.Domain.SharedKernel.ValueObjects;
 using Xunit;
 
-namespace UnitTests.Core.Domain.DrivingLicenseAggregate;
+namespace UnitTests.Core.Domain.SharedKernel.ValueObjects;
 
 public class CategoryShould
 {
     [Fact]
-    public void CanCreateInstanceWithCorrectValues()
+    public void CreateInstanceWithCorrectValues()
     {
         // Arrange
         var category = 'B';
@@ -22,7 +22,7 @@ public class CategoryShould
     }
 
     [Fact]
-    public void CanThrowValueOutOfRangeExceptionIfCategoryIsUnsupported()
+    public void ThrowValueOutOfRangeExceptionIfCategoryIsUnsupported()
     {
         // Arrange
         var unsupportedCategory = 'Y';
@@ -35,7 +35,7 @@ public class CategoryShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnTrueForEqualCategories()
+    public void EqualOperatorReturnTrueForEqualCategories()
     {
         // Arrange
         var category1 = CategoryList.Create([CategoryList.BCategory]);
@@ -49,7 +49,7 @@ public class CategoryShould
     }
 
     [Fact]
-    public void CanNonEqualOperatorReturnFalseForEqualCategories()
+    public void NonEqualOperatorReturnFalseForEqualCategories()
     {
         // Arrange
         var category1 = CategoryList.Create([CategoryList.BCategory]);

@@ -3,13 +3,16 @@ namespace Api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
-        var builder = WebApplication.CreateBuilder(args);
-
+        var builder = WebApplication.CreateBuilder();
+        var services = builder.Services;
         
-        builder.Services.AddGrpc();
+        services.AddGrpc();
 
+        services.RegisterPostgresDataContext(builder.Configuration);
+        
+        
         var app = builder.Build();
         
 

@@ -9,7 +9,7 @@ namespace UnitTests.Core.Domain.SharedKernel.ValueObjects;
 public class DrivingLicenseNumberShould
 {
     [Fact]
-    public void CanCreateInstanceWithCorrectNumber()
+    public void CreateInstanceWithCorrectNumber()
     {
         // Arrange
         var input = "1255 102030";
@@ -23,7 +23,7 @@ public class DrivingLicenseNumberShould
     }
 
     [Fact]
-    public void CanTrimInputNumber()
+    public void TrimInputNumber()
     {
         // Arrange
         var input = "  1255 102030  ";
@@ -36,7 +36,7 @@ public class DrivingLicenseNumberShould
     }
 
     [Fact]
-    public void CanReplaceWhiteSpaces()
+    public void ReplaceWhiteSpaces()
     {
         // Arrange
         var input = "  1255 10 2 030  ";
@@ -51,7 +51,7 @@ public class DrivingLicenseNumberShould
     [Theory]
     [InlineData("12441214121")] // 11 symbols
     [InlineData("999999999")] // 9 symbols
-    public void CanThrowValueOutOfRangeExceptionIfNumberLengthIsNot10(string invalidCode)
+    public void ThrowValueOutOfRangeExceptionIfNumberLengthIsNot10(string invalidCode)
     {
         // Arrange
 
@@ -66,7 +66,7 @@ public class DrivingLicenseNumberShould
     [InlineData("1244 12_412")]    //
     [InlineData("  a 244 121412")] // (length after trim == 10)
     [InlineData("1244 1#1412")]    //
-    public void CanThrowValueIsInvalidExceptionIfNumberContainAnySymbolOtherThanDigit(string invalidCode)
+    public void ThrowValueIsInvalidExceptionIfNumberContainAnySymbolOtherThanDigit(string invalidCode)
     {
         // Arrange
 
@@ -78,7 +78,7 @@ public class DrivingLicenseNumberShould
     }
     
     [Fact]
-    public void CanEqualOperatorReturnTrueForEqualNumbers()
+    public void EqualOperatorReturnTrueForEqualNumbers()
     {
         // Arrange
         var number1 = DrivingLicenseNumber.Create("1255 102030");
@@ -92,7 +92,7 @@ public class DrivingLicenseNumberShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnFalseForDifferentNumbers()
+    public void EqualOperatorReturnFalseForDifferentNumbers()
     {
         // Arrange
         var number1 = DrivingLicenseNumber.Create("1255 102030");

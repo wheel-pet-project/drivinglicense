@@ -45,7 +45,7 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
 
         builder.OwnsOne(x => x.Categories, cfg =>
         {
-            cfg.Property(x => x.Categories).HasColumnName("categories").IsRequired();
+            cfg.Property(x => x.Categories).HasField("_categories").HasConversion<char[]>().HasColumnName("categories");
         });
         
         builder.OwnsOne(x => x.Name, cfg =>
@@ -53,20 +53,19 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
             cfg.Property(x => x.FirstName).HasColumnName("first_name").IsRequired();
             cfg.Property(x => x.LastName).HasColumnName("last_name").IsRequired();
             cfg.Property(x => x.Patronymic).HasColumnName("patronymic").IsRequired(false);
-            // cfg.WithOwner(); // TODO: Убрать WithOwner если все будет ОК
         });
 
         builder.OwnsOne(x => x.Number, cfg =>
         {
             cfg.Property(x => x.Value).HasColumnName("number").IsRequired();
-            // cfg.WithOwner();
         });
 
         builder.OwnsOne(x => x.CodeOfIssue, cfg =>
         {
             cfg.Property(x => x.Value).HasColumnName("code_of_issue").IsRequired();
-            // cfg.WithOwner();
         });
+        
+        builder.Ignore(x => x.DomainEvents);
     }
 }
 

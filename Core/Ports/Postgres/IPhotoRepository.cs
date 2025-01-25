@@ -8,5 +8,5 @@ public interface IPhotoRepository
     
     Task Add(Photo photo);
 
-    void Update(Photo photo);
+    void Delete(Photo photo);
 }

@@ -17,7 +17,6 @@ public class UnitOfWork(DataContext context) : IUnitOfWork, IDisposable
     
     public void Dispose()
     {
-        context.Dispose();
         GC.SuppressFinalize(this);
     }
 

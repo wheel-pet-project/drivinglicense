@@ -16,8 +16,8 @@ public class PhotoRepository(DataContext context) : IPhotoRepository
         await context.Photos.AddAsync(photo);
     }
 
-    public void Update(Photo photo)
+    public void Delete(Photo photo)
     {
-        context.Update(photo);
+        context.Photos.Remove(photo);
     }
 }

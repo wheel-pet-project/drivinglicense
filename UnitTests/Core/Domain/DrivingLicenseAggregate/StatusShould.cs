@@ -1,3 +1,4 @@
+using System.Reflection;
 using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
 using Xunit;
@@ -7,7 +8,7 @@ namespace UnitTests.Core.Domain.DrivingLicenseAggregate;
 public class StatusShould
 {
     [Fact]
-    public void CanReturnRightStatusFromName()
+    public void ReturnRightStatusFromName()
     {
         // Arrange
         var unprocessedName = Status.Unprocessed.Name;
@@ -20,7 +21,7 @@ public class StatusShould
     }
 
     [Fact]
-    public void CanThrowValueOutOfRangeExceptionIfStatusNameIsUnknown()
+    public void ThrowValueOutOfRangeExceptionIfStatusNameIsUnknown()
     {
         // Arrange
         var invalidName = "unsupportedName";
@@ -33,7 +34,7 @@ public class StatusShould
     }
     
     [Fact]
-    public void CanReturnRightStatusFromId()
+    public void ReturnRightStatusFromId()
     {
         // Arrange
         var unprocessedId = Status.Unprocessed.Id;
@@ -46,7 +47,7 @@ public class StatusShould
     }
 
     [Fact]
-    public void CanThrowValueOutOfRangeExceptionIfStatusIdIsUnknown()
+    public void ThrowValueOutOfRangeExceptionIfStatusIdIsUnknown()
     {
         // Arrange
         var invalidId = 111;
@@ -59,7 +60,7 @@ public class StatusShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnTrueForEqualStatuses()
+    public void EqualOperatorReturnTrueForEqualStatuses()
     {
         // Arrange
         var status1 = Status.Unprocessed;
@@ -73,7 +74,7 @@ public class StatusShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnFalseForDifferentStatuses()
+    public void EqualOperatorReturnFalseForDifferentStatuses()
     {
         // Arrange
         var status1 = Status.Unprocessed;
@@ -87,7 +88,7 @@ public class StatusShould
     }
 
     [Fact]
-    public void CanNonEqualOperatorReturnFalseForEqualStatuses()
+    public void NonEqualOperatorReturnFalseForEqualStatuses()
     {
         // Arrange
         var status1 = Status.Unprocessed;
@@ -98,5 +99,74 @@ public class StatusShould
 
         // Assert
         Assert.False(actual);
+    }
+
+    [Fact]
+    public void ReturnTrueForCorrectPotentialStatuses()
+    {
+        // Arrange
+        var unprocessed = Status.Unprocessed;
+        var approved = Status.Approved;
+
+        // Act
+        var unprocessedToApproved = unprocessed.CanBeChangedToThisStatus(Status.Approved);
+        var unprocessedToDeclined = unprocessed.CanBeChangedToThisStatus(Status.Declined);
+        var approvedToExpired = approved.CanBeChangedToThisStatus(Status.Expired);
+
+        // Assert
+        Assert.True(unprocessedToApproved);
+        Assert.True(unprocessedToDeclined);
+        Assert.True(approvedToExpired);
+    }
+
+    [Fact]
+    public void ReturnFalseForIncorrectPotentialStatuses()
+    {
+        // Arrange
+        var unprocessed = Status.Unprocessed;
+        var approved = Status.Approved;
+        var declined = Status.Declined;
+        var expired = Status.Expired;
+
+        // Act
+        var unprocessedToExpired = unprocessed.CanBeChangedToThisStatus(Status.Expired);
+        
+        var approvedToDeclined = approved.CanBeChangedToThisStatus(Status.Declined);
+        var approvedToUnprocessed = approved.CanBeChangedToThisStatus(Status.Unprocessed);
+        
+        var declinedToExpired = declined.CanBeChangedToThisStatus(Status.Declined);
+        var declinedToApproved = declined.CanBeChangedToThisStatus(Status.Approved);
+        var declinedToUnprocessed = declined.CanBeChangedToThisStatus(Status.Unprocessed);
+        
+        var expiredToDeclined = expired.CanBeChangedToThisStatus(Status.Declined);
+        var expiredToUnprocessed = expired.CanBeChangedToThisStatus(Status.Unprocessed);
+        var expiredToApproved = expired.CanBeChangedToThisStatus(Status.Approved);
+        
+        // Assert
+        Assert.False(unprocessedToExpired);
+        
+        Assert.False(approvedToDeclined);
+        Assert.False(approvedToUnprocessed);
+        
+        Assert.False(declinedToExpired);
+        Assert.False(declinedToApproved);
+        Assert.False(declinedToUnprocessed);
+        
+        Assert.False(expiredToDeclined);
+        Assert.False(expiredToUnprocessed);
+        Assert.False(expiredToApproved);
+    }
+
+    [Fact]
+    public void ThrowValueIsRequiredExceptionIfPotentialStatusIsNull()
+    {
+        // Arrange
+        var status = Status.Unprocessed;
+
+        // Act
+        void Act() => status.CanBeChangedToThisStatus(null); 
+
+        // Assert
+        Assert.Throws<ValueIsRequiredException>(Act);
     }
 }

@@ -1,5 +1,6 @@
 using Core.Domain.SharedKernel;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using Core.Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Core.Domain.SharedKernel.ValueObjects;
 
 namespace Core.Domain.DrivingLicenceAggregate;
@@ -55,6 +56,14 @@ public sealed class DrivingLicense : Aggregate
     
     public DateOnly DateOfExpiry { get; private set; }
 
+    public void SetStatus(Status potentialStatus)
+    {
+        if (Status.CanBeChangedToThisStatus(potentialStatus) == false)
+            throw new DomainRulesViolationException($"{potentialStatus} can't be settled");
+        
+        Status = potentialStatus;
+    }
+    
     public static DrivingLicense Create(
         Guid accountId,
         CategoryList categoryList,

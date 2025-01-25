@@ -1,5 +1,6 @@
 using Core.Domain.SharedKernel;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using Core.Domain.SharedKernel.ValueObjects;
 
 namespace Core.Domain.DrivingLicenceAggregate.DomainEvents;
 

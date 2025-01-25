@@ -9,7 +9,7 @@ namespace UnitTests.Core.Domain.SharedKernel.ValueObjects;
 public class NameShould
 {
     [Fact]
-    public void CanCreateNameWithCorrectValues()
+    public void CreateNameWithCorrectValues()
     {
         // Arrange
         var firstName = "Иван";
@@ -26,7 +26,7 @@ public class NameShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnTrueForEqualNames()
+    public void EqualOperatorReturnTrueForEqualNames()
     {
         // Arrange
         var firstName = "Иван";
@@ -43,7 +43,7 @@ public class NameShould
     }
 
     [Fact]
-    public void CanEqualOperatorReturnFalseForDifferentNames()
+    public void EqualOperatorReturnFalseForDifferentNames()
     {
         // Arrange
         var firstName = "Иван";
@@ -70,7 +70,7 @@ public class NameShould
     
     [InlineData("Иван", "Иванов", "")]       // empty patronymic
     [InlineData("Иван", "Иванов", "  ")]     // 
-    public void CanThrowValueIsRequiredExceptionIfSomeNamePartIsInvalid(string? firstName, string? lastName, 
+    public void ThrowValueIsRequiredExceptionIfSomeNamePartIsInvalid(string? firstName, string? lastName, 
         string? patronymic)
     {
         // Arrange

@@ -9,16 +9,14 @@ public class Photo : Entity<Guid>
     private Photo(){}
 
     private Photo(
-        DrivingLicense drivingLicense, 
-        Guid frontPhotoStorageId, 
-        Guid backPhotoStorageId, 
+        DrivingLicense drivingLicense,
         byte[] frontPhotoBytes, 
         byte[] backPhotoBytes) : this()
     {
         Id = Guid.NewGuid();
+        FrontPhotoStorageId = Guid.NewGuid();
+        BackPhotoStorageId = Guid.NewGuid();
         DrivingLicenseId = drivingLicense.Id;
-        FrontPhotoStorageId = frontPhotoStorageId;
-        BackPhotoStorageId = backPhotoStorageId;
         FrontPhotoBytes = frontPhotoBytes;
         BackPhotoBytes = backPhotoBytes;
     }
@@ -36,22 +34,16 @@ public class Photo : Entity<Guid>
 
     public static Photo Create(
         DrivingLicense drivingLicense, 
-        Guid frontPhotoStorageId, 
-        Guid backPhotoStorageId, 
         byte[] frontPhotoBytes, 
         byte[] backPhotoBytes)
     {
         if (drivingLicense is null) 
             throw new ValueIsRequiredException($"{nameof(drivingLicense)} cannot be null");
-        if (frontPhotoStorageId == Guid.Empty)
-            throw new ValueIsRequiredException($"{nameof(frontPhotoStorageId)} cannot be empty");
-        if (backPhotoStorageId == Guid.Empty)
-            throw new ValueIsRequiredException($"{nameof(backPhotoStorageId)} cannot be empty");
         if (frontPhotoBytes is null || frontPhotoBytes.Length == 0)
             throw new ValueIsRequiredException($"{nameof(frontPhotoBytes)} cannot be null or empty");
         if (backPhotoBytes is null || backPhotoBytes.Length == 0)
             throw new ValueIsRequiredException($"{nameof(backPhotoBytes)} cannot be null or empty");
 
-        return new Photo(drivingLicense, frontPhotoStorageId, backPhotoStorageId, frontPhotoBytes, backPhotoBytes);
+        return new Photo(drivingLicense, frontPhotoBytes, backPhotoBytes);
     }
 }

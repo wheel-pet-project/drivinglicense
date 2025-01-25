@@ -24,14 +24,14 @@ public class PhotoShould
         dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1));
     
     [Fact]
-    public void CanCreateInstanceWithCorrectValues()
+    public void CreateInstanceWithCorrectValues()
     {
         // Arrange
         var frontPhotoStorageId = Guid.NewGuid();
         var backPhotoStorageId = Guid.NewGuid();
 
         // Act
-        var actual = Photo.Create(_drivingLicense, frontPhotoStorageId, backPhotoStorageId, _photoBytes, _photoBytes);
+        var actual = Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
 
         // Assert
         Assert.Equal(frontPhotoStorageId, actual.FrontPhotoStorageId);
@@ -42,42 +42,42 @@ public class PhotoShould
     }
 
     [Fact]
-    public void CanThrowValueIsRequiredExceptionIfDrivingLicenseIsNull()
+    public void ThrowValueIsRequiredExceptionIfDrivingLicenseIsNull()
     {
         // Arrange
         var frontPhotoStorageId = Guid.NewGuid();
         var backPhotoStorageId = Guid.NewGuid();
 
         // Act
-        void Act() => Photo.Create(null, frontPhotoStorageId, backPhotoStorageId, _photoBytes, _photoBytes);
+        void Act() => Photo.Create(null, _photoBytes, _photoBytes);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
 
     [Fact]
-    public void CanThrowValueIsRequiredExceptionIfFrontPhotoStorageIdIsEmpty()
+    public void ThrowValueIsRequiredExceptionIfFrontPhotoStorageIdIsEmpty()
     {
         // Arrange
         var frontPhotoStorageId = Guid.Empty;
         var backPhotoStorageId = Guid.NewGuid();
 
         // Act
-        void Act() => Photo.Create(_drivingLicense, frontPhotoStorageId, backPhotoStorageId, _photoBytes, _photoBytes);
+        void Act() => Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
     
     [Fact]
-    public void CanThrowValueIsRequiredExceptionIfBackPhotoStorageIdIsEmpty()
+    public void ThrowValueIsRequiredExceptionIfBackPhotoStorageIdIsEmpty()
     {
         // Arrange
         var frontPhotoStorageId = Guid.NewGuid();
         var backPhotoStorageId = Guid.Empty;
 
         // Act
-        void Act() => Photo.Create(_drivingLicense, frontPhotoStorageId, backPhotoStorageId, _photoBytes, _photoBytes);
+        void Act() => Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -86,14 +86,14 @@ public class PhotoShould
     [Theory]
     [InlineData(new byte[] { })]
     [InlineData(null)]
-    public void CanThrowValueIsRequiredExceptionIfFrontPhotoBytesIsNullOrEmpty(byte[] invalidFrontPhotoBytes)
+    public void ThrowValueIsRequiredExceptionIfFrontPhotoBytesIsNullOrEmpty(byte[] invalidFrontPhotoBytes)
     {
         // Arrange
         var frontPhotoStorageId = Guid.NewGuid();
         var backPhotoStorageId = Guid.NewGuid();
 
         // Act
-        void Act() => Photo.Create(_drivingLicense, frontPhotoStorageId, backPhotoStorageId, invalidFrontPhotoBytes, 
+        void Act() => Photo.Create(_drivingLicense, invalidFrontPhotoBytes, 
             _photoBytes);
 
         // Assert
@@ -103,14 +103,14 @@ public class PhotoShould
     [Theory]
     [InlineData(new byte[] { })]
     [InlineData(null)]
-    public void CanThrowValueIsRequiredExceptionIfBackPhotoBytesIsNullOrEmpty(byte[] invalidBackPhotoBytes)
+    public void ThrowValueIsRequiredExceptionIfBackPhotoBytesIsNullOrEmpty(byte[] invalidBackPhotoBytes)
     {
         // Arrange
         var frontPhotoStorageId = Guid.NewGuid();
         var backPhotoStorageId = Guid.NewGuid();
 
         // Act
-        void Act() => Photo.Create(_drivingLicense, frontPhotoStorageId, backPhotoStorageId, _photoBytes, 
+        void Act() => Photo.Create(_drivingLicense, _photoBytes, 
             invalidBackPhotoBytes);
 
         // Assert

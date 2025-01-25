@@ -5,7 +5,7 @@ namespace Core.Ports.Postgres;
 
 public interface IDrivingLicenseRepository
 {
-    Task<List<DrivingLicense>> GetAll(int page, int pageSize, Expression<Func<DrivingLicense, bool>> predicate);
+    Task<List<DrivingLicense>> GetAll(int page, int pageSize, Expression<Func<DrivingLicense, bool>>? predicate = null);
 
     Task<DrivingLicense?> GetById(Guid id);
 
