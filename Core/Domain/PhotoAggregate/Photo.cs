@@ -1,4 +1,3 @@
-using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
 using CSharpFunctionalExtensions;
 

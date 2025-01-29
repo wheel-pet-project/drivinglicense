@@ -1,7 +1,5 @@
-using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.PhotoAggregate;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
-using Core.Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Xunit;
 

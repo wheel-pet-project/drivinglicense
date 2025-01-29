@@ -1,6 +1,4 @@
-using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.PhotoAggregate;
-using Core.Domain.SharedKernel.ValueObjects;
 using Core.Ports.Postgres;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Repositories;

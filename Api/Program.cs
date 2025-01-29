@@ -12,7 +12,6 @@ public class Program
 
         services.RegisterPostgresDataContext(builder.Configuration);
         
-        
         var app = builder.Build();
         
 
