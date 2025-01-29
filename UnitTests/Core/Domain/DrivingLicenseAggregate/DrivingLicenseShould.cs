@@ -16,7 +16,7 @@ public class DrivingLicenseShould
         DrivingLicenseNumber.Create(input: "1234 567891");
     private readonly Name _name = Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович");
     private readonly CategoryList _categories = CategoryList.Create([CategoryList.BCategory]);
-    private readonly string _cityOfBirth = "Москва";
+    private readonly City _cityOfBirth = City.Create("Москва");
     private readonly DateOnly _dateOfBirth = new(1990, 1, 1);
     private readonly DateOnly _dateOfIssue = new(2020, 1, 1);
     private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create(input: "1234");
@@ -99,16 +99,13 @@ public class DrivingLicenseShould
         Assert.Throws<ValueIsRequiredException>(Act);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("  ")]
-    public void ThrowValueIsRequiredExceptionIfCityOfBirthIsNullOrEmpty(string invalidCityOfBirth)
+    [Fact]
+    public void ThrowValueIsRequiredExceptionIfCityOfBirthIsNull()
     {
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, invalidCityOfBirth, _dateOfBirth, 
+        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, null, _dateOfBirth, 
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
 
         // Assert
@@ -168,11 +165,26 @@ public class DrivingLicenseShould
     }
 
     [Fact]
+    public void SetPendingProcessingStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+
+        // Act
+        license.MarkAsPendingProcessing();
+
+        // Assert
+        Assert.Equal(Status.PendingProcessing, license.Status);
+    }
+    
+    [Fact]
     public void SetApproveStatus()
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.MarkAsPendingProcessing();
 
         // Act
         license.Approve();
@@ -187,6 +199,7 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.MarkAsPendingProcessing();
 
         // Act
         license.Approve();
@@ -202,9 +215,7 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
-        license.Approve();
-        license.Expire();
-
+        
         // Act
         void Act() => license.Approve();
 
@@ -218,6 +229,7 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.MarkAsPendingProcessing();
 
         // Act
         license.Reject();
@@ -227,12 +239,11 @@ public class DrivingLicenseShould
     }
     
     [Fact]
-    public void ThrowDomainRulesViolationExceptionIfRejectInvokeWithRejectedLicense()
+    public void ThrowDomainRulesViolationExceptionIfRejectInvokeWithApprovedLicense()
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
-        license.Approve();
 
         // Act
         void Act() => license.Reject();
@@ -247,6 +258,7 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.MarkAsPendingProcessing();
         license.Approve();
 
         // Act
@@ -262,6 +274,7 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.MarkAsPendingProcessing();
         license.Approve();
 
         // Act
@@ -278,7 +291,6 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry);
-        license.Reject();
 
         // Act
         void Act() => license.Expire();

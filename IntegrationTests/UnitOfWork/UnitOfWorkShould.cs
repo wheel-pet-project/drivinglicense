@@ -25,7 +25,7 @@ public class UnitOfWorkShould : IntegrationTestBase
         categoryList: CategoryList.Create([CategoryList.BCategory]),
         number: DrivingLicenseNumber.Create(input: "1234 567891"), 
         name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
-        cityOfBirth: "Москва",
+        cityOfBirth: City.Create("Москва"), 
         dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
         dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
         codeOfIssue: CodeOfIssue.Create(input: "1234"), 

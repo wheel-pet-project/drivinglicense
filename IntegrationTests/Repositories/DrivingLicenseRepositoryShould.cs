@@ -17,7 +17,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         categoryList: CategoryList.Create([CategoryList.BCategory]),
         number: DrivingLicenseNumber.Create(input: "1234 567891"), 
         name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
-        cityOfBirth: "Москва",
+        cityOfBirth: City.Create("Москва"),
         dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
         dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
         codeOfIssue: CodeOfIssue.Create(input: "1234"), 
@@ -47,7 +47,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         // Arrange
         var licenseForUpdate = DrivingLicense.Create(Guid.NewGuid(), 
             CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create(input: "1234 567891"), 
-            Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), "Москва",
+            Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
             new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
             CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1));
         
@@ -116,7 +116,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         // Arrange
         var expectedLicense = DrivingLicense.Create(Guid.NewGuid(), 
             CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create(input: "1234 567891"), 
-            Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), "Москва",
+            Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
             new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
             CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1));
         expectedLicense.Approve();

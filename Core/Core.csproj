@@ -7,13 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Application\UseCases\ApproveDrivingLicense\" />
-      <Folder Include="Application\UseCases\GetDrivingLicenses\" />
-      <Folder Include="Application\UseCases\RejectDrivingLicense\" />
-      <Folder Include="Application\UseCases\UploadDrivingLicense\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="CSharpFunctionalExtensions" Version="3.4.3" />
       <PackageReference Include="FluentResults" Version="3.16.0" />
       <PackageReference Include="MediatR" Version="12.4.1" />

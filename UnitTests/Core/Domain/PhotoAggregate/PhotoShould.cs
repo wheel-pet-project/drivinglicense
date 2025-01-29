@@ -12,16 +12,7 @@ public class PhotoShould
 {
     private readonly byte[] _photoBytes = [1, 2, 3];
 
-    private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
-        accountId: Guid.NewGuid(), 
-        categoryList: CategoryList.Create([CategoryList.BCategory]),
-        number: DrivingLicenseNumber.Create(input: "1234 567891"), 
-        name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
-        cityOfBirth: "Москва",
-        dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
-        dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
-        codeOfIssue: CodeOfIssue.Create(input: "1234"), 
-        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1));
+    private readonly Guid _drivingLicenseId = Guid.NewGuid();
     
     [Fact]
     public void CreateInstanceWithCorrectValues()
@@ -29,7 +20,7 @@ public class PhotoShould
         // Arrange
 
         // Act
-        var actual = Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
+        var actual = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
 
         // Assert
         Assert.NotEqual(Guid.Empty, actual.FrontPhotoStorageId);
@@ -40,12 +31,12 @@ public class PhotoShould
     }
 
     [Fact]
-    public void ThrowValueIsRequiredExceptionIfDrivingLicenseIsNull()
+    public void ThrowValueIsRequiredExceptionIfDrivingLicenseIdIsEmpty()
     {
         // Arrange
 
         // Act
-        void Act() => Photo.Create(null, _photoBytes, _photoBytes);
+        void Act() => Photo.Create(Guid.Empty, _photoBytes, _photoBytes);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -59,7 +50,7 @@ public class PhotoShould
         // Arrange
 
         // Act
-        void Act() => Photo.Create(_drivingLicense, invalidFrontPhotoBytes, 
+        void Act() => Photo.Create(_drivingLicenseId, invalidFrontPhotoBytes, 
             _photoBytes);
 
         // Assert
@@ -74,7 +65,7 @@ public class PhotoShould
         // Arrange
 
         // Act
-        void Act() => Photo.Create(_drivingLicense, _photoBytes, 
+        void Act() => Photo.Create(_drivingLicenseId, _photoBytes, 
             invalidBackPhotoBytes);
 
         // Assert

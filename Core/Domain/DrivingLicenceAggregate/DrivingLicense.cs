@@ -15,7 +15,7 @@ public sealed class DrivingLicense : Aggregate
         CategoryList categoryListList,
         DrivingLicenseNumber number,
         Name name,
-        string cityOfBirth,
+        City cityOfBirth,
         DateOnly dateOfBirth,
         DateOnly dateOfIssue,
         CodeOfIssue codeOfIssue,
@@ -23,7 +23,7 @@ public sealed class DrivingLicense : Aggregate
     {
         Id = Guid.NewGuid();
         AccountId = accountId;
-        Status = Status.Unprocessed;
+        Status = Status.PendingPhotosAdding;
         CategoryList = categoryListList;
         Number = number;
         Name = name;
@@ -47,7 +47,7 @@ public sealed class DrivingLicense : Aggregate
     
     public Name Name { get; private set; } = null!;
     
-    public string CityOfBirth { get; private set; } = null!;
+    public City CityOfBirth { get; private set; } = null!;
 
     public DateOnly DateOfBirth { get; private set; }
     
@@ -83,13 +83,21 @@ public sealed class DrivingLicense : Aggregate
         Status = Status.Expired;
         AddDomainEvent(new DrivingLicenseExpiredDomainEvent(AccountId));
     }
+
+    public void MarkAsPendingProcessing()
+    {
+        if (!Status.CanBeChangedToThisStatus(Status.PendingProcessing))
+            throw new DomainRulesViolationException($"{nameof(Status.Rejected)} status can't be settled");
+        
+        Status = Status.PendingProcessing;
+    }
     
     public static DrivingLicense Create(
         Guid accountId,
         CategoryList categoryList,
         DrivingLicenseNumber number,
         Name name,
-        string cityOfBirth,
+        City cityOfBirth,
         DateOnly dateOfBirth,
         DateOnly dateOfIssue,
         CodeOfIssue codeOfIssue,
@@ -103,7 +111,7 @@ public sealed class DrivingLicense : Aggregate
             throw new ValueIsRequiredException($"{nameof(number)} cannot be null");
         if (name is null) 
             throw new ValueIsRequiredException($"{nameof(name)} cannot be  null");
-        if (string.IsNullOrWhiteSpace(cityOfBirth)) 
+        if (cityOfBirth is null) 
             throw new ValueIsRequiredException($"{nameof(cityOfBirth)} cannot null");
         if (dateOfBirth == default) 
             throw new ValueIsRequiredException($"{nameof(dateOfBirth)} cannot be default value");
@@ -118,7 +126,6 @@ public sealed class DrivingLicense : Aggregate
             throw new ValueOutOfRangeException("invalid date(-s) in driving licence");
 
         return new DrivingLicense(accountId, categoryList, number, name, cityOfBirth, dateOfBirth, dateOfIssue, 
-            codeOfIssue,
-            dateOfExpiry);
+            codeOfIssue, dateOfExpiry);
     }
 }

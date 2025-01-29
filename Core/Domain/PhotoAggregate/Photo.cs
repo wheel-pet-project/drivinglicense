@@ -9,14 +9,14 @@ public class Photo : Entity<Guid>
     private Photo(){}
 
     private Photo(
-        DrivingLicense drivingLicense,
+        Guid drivingLicenseId,
         byte[] frontPhotoBytes, 
         byte[] backPhotoBytes) : this()
     {
         Id = Guid.NewGuid();
         FrontPhotoStorageId = Guid.NewGuid();
         BackPhotoStorageId = Guid.NewGuid();
-        DrivingLicenseId = drivingLicense.Id;
+        DrivingLicenseId = drivingLicenseId;
         FrontPhotoBytes = frontPhotoBytes;
         BackPhotoBytes = backPhotoBytes;
     }
@@ -33,17 +33,17 @@ public class Photo : Entity<Guid>
     public byte[] BackPhotoBytes { get; private set; } = null!;
 
     public static Photo Create(
-        DrivingLicense drivingLicense, 
+        Guid drivingLicenseId, 
         byte[] frontPhotoBytes, 
         byte[] backPhotoBytes)
     {
-        if (drivingLicense is null) 
-            throw new ValueIsRequiredException($"{nameof(drivingLicense)} cannot be null");
+        if (drivingLicenseId == Guid.Empty) 
+            throw new ValueIsRequiredException($"{nameof(drivingLicenseId)} cannot be empty");
         if (frontPhotoBytes is null || frontPhotoBytes.Length == 0)
             throw new ValueIsRequiredException($"{nameof(frontPhotoBytes)} cannot be null or empty");
         if (backPhotoBytes is null || backPhotoBytes.Length == 0)
             throw new ValueIsRequiredException($"{nameof(backPhotoBytes)} cannot be null or empty");
 
-        return new Photo(drivingLicense, frontPhotoBytes, backPhotoBytes);
+        return new Photo(drivingLicenseId, frontPhotoBytes, backPhotoBytes);
     }
 }

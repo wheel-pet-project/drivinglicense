@@ -1,12 +1,14 @@
 using Core.Domain.DrivingLicenceAggregate.DomainEvents;
+using Core.Ports.Kafka;
 using MediatR;
 
 namespace Core.Application.DomainEventHandlers;
 
-public class DrivingLicenseApprovedHandler : INotificationHandler<DrivingLicenseApprovedDomainEvent>
+public class DrivingLicenseApprovedHandler(IMessageBus messageBus) 
+    : INotificationHandler<DrivingLicenseApprovedDomainEvent>
 {
-    public Task Handle(DrivingLicenseApprovedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(DrivingLicenseApprovedDomainEvent @event, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await messageBus.Publish(@event, cancellationToken);
     }
 }

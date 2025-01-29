@@ -5,10 +5,11 @@ namespace Core.Domain.DrivingLicenceAggregate;
 
 public sealed class Status : Entity<int>
 {
-    public static readonly Status Unprocessed = new(1, nameof(Unprocessed).ToLowerInvariant());
-    public static readonly Status Approved = new(2, nameof(Approved).ToLowerInvariant());
-    public static readonly Status Rejected = new(3, nameof(Rejected).ToLowerInvariant());
-    public static readonly Status Expired = new(4, nameof(Expired).ToLowerInvariant());
+    public static readonly Status PendingPhotosAdding = new(1, nameof(PendingPhotosAdding).ToLowerInvariant());
+    public static readonly Status PendingProcessing = new(2, nameof(PendingProcessing).ToLowerInvariant());
+    public static readonly Status Approved = new(3, nameof(Approved).ToLowerInvariant());
+    public static readonly Status Rejected = new(4, nameof(Rejected).ToLowerInvariant());
+    public static readonly Status Expired = new(5, nameof(Expired).ToLowerInvariant());
     
     private Status(){}
 
@@ -23,7 +24,8 @@ public sealed class Status : Entity<int>
     
     public static IEnumerable<Status> All() =>
     [
-        Unprocessed, 
+        PendingPhotosAdding,
+        PendingProcessing, 
         Approved, 
         Rejected,
         Expired
@@ -38,7 +40,8 @@ public sealed class Status : Entity<int>
         return potentialStatus switch
         {
             _ when this == potentialStatus => false,
-            _ when this == Unprocessed && (potentialStatus == Approved || potentialStatus == Rejected) => true,
+            _ when this == PendingPhotosAdding && potentialStatus == PendingProcessing => true,
+            _ when this == PendingProcessing && (potentialStatus == Approved || potentialStatus == Rejected) => true,
             _ when this == Approved && potentialStatus == Expired => true,
             _ => false
         };

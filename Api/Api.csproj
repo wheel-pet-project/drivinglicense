@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="FluentResults" Version="3.16.0" />
-        <PackageReference Include="From.DrivingLicenseKafkaEvents" Version="1.0.0" />
+        <PackageReference Include="From.DrivingLicenseKafkaEvents" Version="1.1.0" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.57.0"/>
         <PackageReference Include="MassTransit" Version="8.3.4" />
         <PackageReference Include="MassTransit.Kafka" Version="8.3.4" />
@@ -30,7 +30,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Adapters\Grpc\" />
       <Folder Include="PipelineBehaviours\" />
     </ItemGroup>
 

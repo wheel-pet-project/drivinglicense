@@ -12,13 +12,13 @@ public class StatusShould
     public void ReturnRightStatusFromName()
     {
         // Arrange
-        var unprocessedName = Status.Unprocessed.Name;
+        var pendingProcessingName = Status.PendingProcessing.Name;
 
         // Act
-        var actual = Status.FromName(unprocessedName);
+        var actual = Status.FromName(pendingProcessingName);
 
         // Assert
-        Assert.Equal(Status.Unprocessed, actual);
+        Assert.Equal(Status.PendingProcessing, actual);
     }
 
     [Fact]
@@ -38,13 +38,13 @@ public class StatusShould
     public void ReturnRightStatusFromId()
     {
         // Arrange
-        var unprocessedId = Status.Unprocessed.Id;
+        var pendingProcessingId = Status.PendingProcessing.Id;
 
         // Act
-        var actual = Status.FromId(unprocessedId);
+        var actual = Status.FromId(pendingProcessingId);
 
         // Assert
-        Assert.Equal(Status.Unprocessed, actual);
+        Assert.Equal(Status.PendingProcessing, actual);
     }
 
     [Fact]
@@ -64,8 +64,8 @@ public class StatusShould
     public void EqualOperatorReturnTrueForEqualStatuses()
     {
         // Arrange
-        var status1 = Status.Unprocessed;
-        var status2 = Status.Unprocessed;
+        var status1 = Status.PendingProcessing;
+        var status2 = Status.PendingProcessing;
 
         // Act
         var actual = status1 == status2;
@@ -78,7 +78,7 @@ public class StatusShould
     public void EqualOperatorReturnFalseForDifferentStatuses()
     {
         // Arrange
-        var status1 = Status.Unprocessed;
+        var status1 = Status.PendingProcessing;
         var status2 = Status.Approved;
 
         // Act
@@ -92,8 +92,8 @@ public class StatusShould
     public void NonEqualOperatorReturnFalseForEqualStatuses()
     {
         // Arrange
-        var status1 = Status.Unprocessed;
-        var status2 = Status.Unprocessed;
+        var status1 = Status.PendingProcessing;
+        var status2 = Status.PendingProcessing;
 
         // Act
         var actual = status1 != status2;
@@ -106,17 +106,21 @@ public class StatusShould
     public void ReturnTrueForCorrectPotentialStatuses()
     {
         // Arrange
-        var unprocessed = Status.Unprocessed;
+        var pendingPhotosAdding = Status.PendingPhotosAdding;
+        var pendingProcessing = Status.PendingProcessing;
         var approved = Status.Approved;
 
         // Act
-        var unprocessedToApproved = unprocessed.CanBeChangedToThisStatus(Status.Approved);
-        var unprocessedToRejected = unprocessed.CanBeChangedToThisStatus(Status.Rejected);
+        var pendingPhotosAddingToPendingProcessing =
+            pendingPhotosAdding.CanBeChangedToThisStatus(Status.PendingProcessing);
+        var pendingProcessingToApproved = pendingProcessing.CanBeChangedToThisStatus(Status.Approved);
+        var pendingProcessingToRejected = pendingProcessing.CanBeChangedToThisStatus(Status.Rejected);
         var approvedToExpired = approved.CanBeChangedToThisStatus(Status.Expired);
 
         // Assert
-        Assert.True(unprocessedToApproved);
-        Assert.True(unprocessedToRejected);
+        Assert.True(pendingPhotosAddingToPendingProcessing);
+        Assert.True(pendingProcessingToApproved);
+        Assert.True(pendingProcessingToRejected);
         Assert.True(approvedToExpired);
     }
 
@@ -124,45 +128,63 @@ public class StatusShould
     public void ReturnFalseForIncorrectPotentialStatuses()
     {
         // Arrange
-        var unprocessed = Status.Unprocessed;
+        var pendingPhotosAdding = Status.PendingPhotosAdding;
+        var pendingProcessing = Status.PendingProcessing;
         var approved = Status.Approved;
         var rejected = Status.Rejected;
         var expired = Status.Expired;
 
         // Act
-        var unprocessedToExpired = unprocessed.CanBeChangedToThisStatus(Status.Expired);
+        var pendingPhotosAddingToApproved = pendingPhotosAdding.CanBeChangedToThisStatus(Status.Approved);
+        var pendingPhotosAddingToRejected = pendingPhotosAdding.CanBeChangedToThisStatus(Status.Rejected);
+        var pendingPhotosAddingToExpired = pendingPhotosAdding.CanBeChangedToThisStatus(Status.Expired);
+        
+        var pendingProcessingToExpired = pendingProcessing.CanBeChangedToThisStatus(Status.Expired);
+        var pendingProcessingToPendingPhotosAdding =
+            pendingProcessing.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
         
         var approvedToRejected = approved.CanBeChangedToThisStatus(Status.Rejected);
-        var approvedToUnprocessed = approved.CanBeChangedToThisStatus(Status.Unprocessed);
+        var approvedToUnprocessed = approved.CanBeChangedToThisStatus(Status.PendingProcessing);
+        var approvedToPendingPhotosAdding = approved.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
         
         var rejectedToExpired = rejected.CanBeChangedToThisStatus(Status.Rejected);
         var rejectedToApproved = rejected.CanBeChangedToThisStatus(Status.Approved);
-        var rejectedToUnprocessed = rejected.CanBeChangedToThisStatus(Status.Unprocessed);
+        var rejectedToUnprocessed = rejected.CanBeChangedToThisStatus(Status.PendingProcessing);
+        var rejectedToPendingPhotosAdding = rejected.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
         
         var expiredToRejected = expired.CanBeChangedToThisStatus(Status.Rejected);
-        var expiredToUnprocessed = expired.CanBeChangedToThisStatus(Status.Unprocessed);
+        var expiredToUnprocessed = expired.CanBeChangedToThisStatus(Status.PendingProcessing);
         var expiredToApproved = expired.CanBeChangedToThisStatus(Status.Approved);
+        var expiredToPendingPhotosAdding = expired.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
         
         // Assert
-        Assert.False(unprocessedToExpired);
+        Assert.False(pendingPhotosAddingToApproved);
+        Assert.False(pendingPhotosAddingToRejected);
+        Assert.False(pendingPhotosAddingToExpired);
+        
+        Assert.False(pendingProcessingToExpired);
+        Assert.False(pendingProcessingToPendingPhotosAdding);
         
         Assert.False(approvedToRejected);
         Assert.False(approvedToUnprocessed);
+        Assert.False(approvedToPendingPhotosAdding);
         
         Assert.False(rejectedToExpired);
         Assert.False(rejectedToApproved);
         Assert.False(rejectedToUnprocessed);
+        Assert.False(rejectedToPendingPhotosAdding);
         
         Assert.False(expiredToRejected);
         Assert.False(expiredToUnprocessed);
         Assert.False(expiredToApproved);
+        Assert.False(expiredToPendingPhotosAdding);
     }
 
     [Fact]
     public void ThrowValueIsRequiredExceptionIfPotentialStatusIsNull()
     {
         // Arrange
-        var status = Status.Unprocessed;
+        var status = Status.PendingProcessing;
 
         // Act
         void Act() => status.CanBeChangedToThisStatus(null); 

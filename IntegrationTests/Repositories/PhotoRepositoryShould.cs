@@ -13,23 +13,14 @@ namespace IntegrationTests.Repositories;
 [TestSubject(typeof(PhotoRepository))]
 public class PhotoRepositoryShould : IntegrationTestBase
 {
-    private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
-        accountId: Guid.NewGuid(), 
-        categoryList: CategoryList.Create([CategoryList.BCategory]),
-        number: DrivingLicenseNumber.Create(input: "1234 567891"), 
-        name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
-        cityOfBirth: "Москва",
-        dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
-        dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
-        codeOfIssue: CodeOfIssue.Create(input: "1234"), 
-        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1));
+    private readonly Guid _drivingLicenseId = Guid.NewGuid();
     private readonly byte[] _photoBytes = [1, 2, 3];
     
     [Fact]
     public async Task Add()
     {
         // Arrange
-        var photo = Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
+        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
 
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
@@ -49,7 +40,7 @@ public class PhotoRepositoryShould : IntegrationTestBase
     public async Task Delete()
     {
         // Arrange
-        var photo = Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
+        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
 
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
@@ -72,7 +63,7 @@ public class PhotoRepositoryShould : IntegrationTestBase
     public async Task GetById()
     {
         // Arrange
-        var photo = Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
+        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
 
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
