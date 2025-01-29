@@ -92,7 +92,7 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                 {
                     { 1, "unprocessed" },
                     { 2, "approved" },
-                    { 3, "declined" },
+                    { 3, "rejected" },
                     { 4, "expired" }
                 });
 

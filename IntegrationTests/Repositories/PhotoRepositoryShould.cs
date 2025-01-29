@@ -4,11 +4,13 @@ using Core.Domain.SharedKernel.ValueObjects;
 using Core.Ports.Postgres;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Repositories;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace IntegrationTests.Repositories;
 
+[TestSubject(typeof(PhotoRepository))]
 public class PhotoRepositoryShould : IntegrationTestBase
 {
     private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(

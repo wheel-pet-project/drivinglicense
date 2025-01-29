@@ -1,5 +1,4 @@
 using Infrastructure.Adapters.Postgres;
-using Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -10,19 +9,19 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection RegisterPostgresDataContext(this IServiceCollection services, 
         IConfiguration configuration)
     {
-        var dbSettings = configuration.GetSection("DbConnectionSettings").Get<DbConnectionSettings>();
         var dataSourceBuilder = new NpgsqlDataSourceBuilder
         {
             ConnectionStringBuilder =
             {
-                ApplicationName = "Notification",
-                Host = dbSettings!.Host,
-                Port = dbSettings.Port,
-                Database = dbSettings.Database,
-                Username = dbSettings.Username,
-                Password = dbSettings.Password
+                ApplicationName = "Driving_license#" + Environment.MachineName,
+                Host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost",
+                Port = int.Parse(Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5430"),
+                Database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "drivinglicense_db",
+                Username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "postgres",
+                Password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password"
             }
         };
+        Console.WriteLine(dataSourceBuilder.ConnectionString);
         var dataSource = dataSourceBuilder.Build(); 
         
         services.AddDbContext<DataContext>(optionsBuilder =>

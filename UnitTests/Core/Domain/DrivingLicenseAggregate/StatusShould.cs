@@ -1,10 +1,11 @@
-using System.Reflection;
 using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using JetBrains.Annotations;
 using Xunit;
 
 namespace UnitTests.Core.Domain.DrivingLicenseAggregate;
 
+[TestSubject(typeof(Status))]
 public class StatusShould
 {
     [Fact]
@@ -110,12 +111,12 @@ public class StatusShould
 
         // Act
         var unprocessedToApproved = unprocessed.CanBeChangedToThisStatus(Status.Approved);
-        var unprocessedToDeclined = unprocessed.CanBeChangedToThisStatus(Status.Declined);
+        var unprocessedToRejected = unprocessed.CanBeChangedToThisStatus(Status.Rejected);
         var approvedToExpired = approved.CanBeChangedToThisStatus(Status.Expired);
 
         // Assert
         Assert.True(unprocessedToApproved);
-        Assert.True(unprocessedToDeclined);
+        Assert.True(unprocessedToRejected);
         Assert.True(approvedToExpired);
     }
 
@@ -125,34 +126,34 @@ public class StatusShould
         // Arrange
         var unprocessed = Status.Unprocessed;
         var approved = Status.Approved;
-        var declined = Status.Declined;
+        var rejected = Status.Rejected;
         var expired = Status.Expired;
 
         // Act
         var unprocessedToExpired = unprocessed.CanBeChangedToThisStatus(Status.Expired);
         
-        var approvedToDeclined = approved.CanBeChangedToThisStatus(Status.Declined);
+        var approvedToRejected = approved.CanBeChangedToThisStatus(Status.Rejected);
         var approvedToUnprocessed = approved.CanBeChangedToThisStatus(Status.Unprocessed);
         
-        var declinedToExpired = declined.CanBeChangedToThisStatus(Status.Declined);
-        var declinedToApproved = declined.CanBeChangedToThisStatus(Status.Approved);
-        var declinedToUnprocessed = declined.CanBeChangedToThisStatus(Status.Unprocessed);
+        var rejectedToExpired = rejected.CanBeChangedToThisStatus(Status.Rejected);
+        var rejectedToApproved = rejected.CanBeChangedToThisStatus(Status.Approved);
+        var rejectedToUnprocessed = rejected.CanBeChangedToThisStatus(Status.Unprocessed);
         
-        var expiredToDeclined = expired.CanBeChangedToThisStatus(Status.Declined);
+        var expiredToRejected = expired.CanBeChangedToThisStatus(Status.Rejected);
         var expiredToUnprocessed = expired.CanBeChangedToThisStatus(Status.Unprocessed);
         var expiredToApproved = expired.CanBeChangedToThisStatus(Status.Approved);
         
         // Assert
         Assert.False(unprocessedToExpired);
         
-        Assert.False(approvedToDeclined);
+        Assert.False(approvedToRejected);
         Assert.False(approvedToUnprocessed);
         
-        Assert.False(declinedToExpired);
-        Assert.False(declinedToApproved);
-        Assert.False(declinedToUnprocessed);
+        Assert.False(rejectedToExpired);
+        Assert.False(rejectedToApproved);
+        Assert.False(rejectedToUnprocessed);
         
-        Assert.False(expiredToDeclined);
+        Assert.False(expiredToRejected);
         Assert.False(expiredToUnprocessed);
         Assert.False(expiredToApproved);
     }

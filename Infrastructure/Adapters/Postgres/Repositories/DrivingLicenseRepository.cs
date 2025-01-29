@@ -12,7 +12,7 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
     {
         var queryable = context.DrivingLicenses
             .Include(x => x.Status)
-            .Include(x => x.Categories);
+            .Include(x => x.CategoryList);
 
         return await (predicate != null
             ? queryable
@@ -32,14 +32,14 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
     {
         return await context.DrivingLicenses
             .Include(x => x.Status)
-            .Include(x => x.Categories)
+            .Include(x => x.CategoryList)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public void Update(DrivingLicense drivingLicense)
     {
         context.Attach(drivingLicense.Status);
-        context.Attach(drivingLicense.Categories);
+        context.Attach(drivingLicense.CategoryList);
         
         context.Update(drivingLicense);
     }
@@ -47,7 +47,7 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
     public async Task Add(DrivingLicense drivingLicense)
     {
         context.Attach(drivingLicense.Status);
-        context.Attach(drivingLicense.Categories);
+        context.Attach(drivingLicense.CategoryList);
         
         await context.AddAsync(drivingLicense);
     }

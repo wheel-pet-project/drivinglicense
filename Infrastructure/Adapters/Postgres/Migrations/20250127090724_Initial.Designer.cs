@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Adapters.Postgres.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250125084125_Initial")]
+    [Migration("20250127090724_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -95,7 +95,7 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                         new
                         {
                             Id = 3,
-                            Name = "declined"
+                            Name = "rejected"
                         },
                         new
                         {
@@ -165,7 +165,7 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Core.Domain.DrivingLicenceAggregate.CategoryList", "Categories", b1 =>
+                    b.OwnsOne("Core.Domain.SharedKernel.ValueObjects.CategoryList", "Categories", b1 =>
                         {
                             b1.Property<Guid>("DrivingLicenseId")
                                 .HasColumnType("uuid");

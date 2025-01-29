@@ -21,7 +21,6 @@
 
     <ItemGroup>
       <Folder Include="Core\Application\" />
-      <Folder Include="Core\Domain\DrivingLicenseAggregate\DomainEvents\" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,11 +1,12 @@
-using Core.Domain.DrivingLicenceAggregate;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
 using Core.Domain.SharedKernel.ValueObjects;
+using JetBrains.Annotations;
 using Xunit;
 
 namespace UnitTests.Core.Domain.SharedKernel.ValueObjects;
 
-public class CategoryShould
+[TestSubject(typeof(CategoryList))]
+public class CategoryListShould
 {
     [Fact]
     public void CreateInstanceWithCorrectValues()

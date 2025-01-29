@@ -3,11 +3,13 @@ using Core.Domain.SharedKernel.ValueObjects;
 using Core.Ports.Postgres;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Repositories;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace IntegrationTests.Repositories;
 
+[TestSubject(typeof(DrivingLicense))]
 public class DrivingLicenseRepositoryShould : IntegrationTestBase
 {
     private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
@@ -58,7 +60,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         var (repository, uow) = repositoryAndUowBuilder.Build();
         
         // Act
-        licenseForUpdate.SetStatus(Status.Approved);
+        licenseForUpdate.Approve();
         repository.Update(licenseForUpdate);
         await uow.Commit();
 
@@ -117,7 +119,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
             Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), "Москва",
             new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
             CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1));
-        expectedLicense.SetStatus(Status.Approved);
+        expectedLicense.Approve();
         
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);

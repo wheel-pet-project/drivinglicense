@@ -1,10 +1,14 @@
 using Core.Domain.DrivingLicenceAggregate;
+using Core.Domain.DrivingLicenceAggregate.DomainEvents;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using Core.Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Core.Domain.SharedKernel.ValueObjects;
+using JetBrains.Annotations;
 using Xunit;
 
 namespace UnitTests.Core.Domain.DrivingLicenseAggregate;
 
+[TestSubject(typeof(DrivingLicense))]
 public class DrivingLicenseShould
 {
     private readonly Guid _accountId = Guid.NewGuid();
@@ -31,7 +35,7 @@ public class DrivingLicenseShould
         // Assert
         Assert.NotNull(actual);
         Assert.Equal(_accountId, actual.AccountId);
-        Assert.Equal(_categories, actual.Categories);
+        Assert.Equal(_categories, actual.CategoryList);
         Assert.Equal(_number, actual.Number);
         Assert.Equal(_dateOfBirth, actual.DateOfBirth);
         Assert.Equal(_dateOfExpiry, actual.DateOfExpiry);
@@ -161,5 +165,125 @@ public class DrivingLicenseShould
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
+    }
+
+    [Fact]
+    public void SetApproveStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+
+        // Act
+        license.Approve();
+
+        // Assert
+        Assert.Equal(Status.Approved, license.Status);
+    }
+
+    [Fact]
+    public void AddDomainEventIfLicenseApproved()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+
+        // Act
+        license.Approve();
+
+        // Assert
+        Assert.NotNull(license.DomainEvents[0]);
+        Assert.IsType<DrivingLicenseApprovedDomainEvent>(license.DomainEvents[0]);
+    }
+
+    [Fact]
+    public void ThrowDomainRulesViolationExceptionIfApproveInvokeWithInvalidStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.Approve();
+        license.Expire();
+
+        // Act
+        void Act() => license.Approve();
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
+    }
+
+    [Fact]
+    public void SetRejectedStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+
+        // Act
+        license.Reject();
+
+        // Assert
+        Assert.Equal(Status.Rejected, license.Status);
+    }
+    
+    [Fact]
+    public void ThrowDomainRulesViolationExceptionIfRejectInvokeWithRejectedLicense()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.Approve();
+
+        // Act
+        void Act() => license.Reject();
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
+    }
+
+    [Fact]
+    public void SetExpiredStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.Approve();
+
+        // Act
+        license.Expire();
+
+        // Assert
+        Assert.Equal(Status.Expired, license.Status);
+    }
+
+    [Fact]
+    public void AddDomainEventIfLicenseExpired()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.Approve();
+
+        // Act
+        license.Expire();
+
+        // Assert
+        Assert.NotNull(license.DomainEvents[1]);
+        Assert.IsType<DrivingLicenseExpiredDomainEvent>(license.DomainEvents[1]);
+    }
+    
+    [Fact]
+    public void ThrowDomainRulesViolationExceptionIfExpireInvokeWithInvalidStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.Reject();
+
+        // Act
+        void Act() => license.Expire();
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
     }
 }

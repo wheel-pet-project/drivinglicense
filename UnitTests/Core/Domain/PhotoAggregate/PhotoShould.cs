@@ -27,15 +27,13 @@ public class PhotoShould
     public void CreateInstanceWithCorrectValues()
     {
         // Arrange
-        var frontPhotoStorageId = Guid.NewGuid();
-        var backPhotoStorageId = Guid.NewGuid();
 
         // Act
         var actual = Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
 
         // Assert
-        Assert.Equal(frontPhotoStorageId, actual.FrontPhotoStorageId);
-        Assert.Equal(backPhotoStorageId, actual.BackPhotoStorageId);
+        Assert.NotEqual(Guid.Empty, actual.FrontPhotoStorageId);
+        Assert.NotEqual(Guid.Empty, actual.BackPhotoStorageId);
         Assert.NotEqual(Guid.Empty, actual.Id);
         Assert.Equal(_photoBytes, actual.FrontPhotoBytes);
         Assert.Equal(_photoBytes, actual.BackPhotoBytes);
@@ -45,39 +43,9 @@ public class PhotoShould
     public void ThrowValueIsRequiredExceptionIfDrivingLicenseIsNull()
     {
         // Arrange
-        var frontPhotoStorageId = Guid.NewGuid();
-        var backPhotoStorageId = Guid.NewGuid();
 
         // Act
         void Act() => Photo.Create(null, _photoBytes, _photoBytes);
-
-        // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
-    }
-
-    [Fact]
-    public void ThrowValueIsRequiredExceptionIfFrontPhotoStorageIdIsEmpty()
-    {
-        // Arrange
-        var frontPhotoStorageId = Guid.Empty;
-        var backPhotoStorageId = Guid.NewGuid();
-
-        // Act
-        void Act() => Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
-
-        // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
-    }
-    
-    [Fact]
-    public void ThrowValueIsRequiredExceptionIfBackPhotoStorageIdIsEmpty()
-    {
-        // Arrange
-        var frontPhotoStorageId = Guid.NewGuid();
-        var backPhotoStorageId = Guid.Empty;
-
-        // Act
-        void Act() => Photo.Create(_drivingLicense, _photoBytes, _photoBytes);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -89,8 +57,6 @@ public class PhotoShould
     public void ThrowValueIsRequiredExceptionIfFrontPhotoBytesIsNullOrEmpty(byte[] invalidFrontPhotoBytes)
     {
         // Arrange
-        var frontPhotoStorageId = Guid.NewGuid();
-        var backPhotoStorageId = Guid.NewGuid();
 
         // Act
         void Act() => Photo.Create(_drivingLicense, invalidFrontPhotoBytes, 
@@ -106,8 +72,6 @@ public class PhotoShould
     public void ThrowValueIsRequiredExceptionIfBackPhotoBytesIsNullOrEmpty(byte[] invalidBackPhotoBytes)
     {
         // Arrange
-        var frontPhotoStorageId = Guid.NewGuid();
-        var backPhotoStorageId = Guid.NewGuid();
 
         // Act
         void Act() => Photo.Create(_drivingLicense, _photoBytes, 

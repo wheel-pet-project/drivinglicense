@@ -9,7 +9,10 @@
 
     <ItemGroup>
         <PackageReference Include="FluentResults" Version="3.16.0" />
+        <PackageReference Include="From.DrivingLicenseKafkaEvents" Version="1.0.0" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.57.0"/>
+        <PackageReference Include="MassTransit" Version="8.3.4" />
+        <PackageReference Include="MassTransit.Kafka" Version="8.3.4" />
         <PackageReference Include="MediatR" Version="12.4.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
@@ -22,6 +25,8 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+        <PackageReference Include="Quartz" Version="3.13.1" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.1" />
     </ItemGroup>
 
     <ItemGroup>

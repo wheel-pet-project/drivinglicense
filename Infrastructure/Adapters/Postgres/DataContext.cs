@@ -43,7 +43,7 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
 
         builder.HasOne(x => x.Status).WithMany().IsRequired().HasForeignKey("status_id");
 
-        builder.OwnsOne(x => x.Categories, cfg =>
+        builder.OwnsOne(x => x.CategoryList, cfg =>
         {
             cfg.Property(x => x.Categories).HasField("_categories").HasConversion<char[]>().HasColumnName("categories");
         });

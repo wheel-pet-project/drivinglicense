@@ -1,3 +1,4 @@
+using Core.Domain.DrivingLicenceAggregate.DomainEvents;
 using Core.Domain.SharedKernel;
 using Core.Domain.SharedKernel.Exceptions.ArgumentException;
 using Core.Domain.SharedKernel.Exceptions.DomainRulesViolationException;
@@ -11,7 +12,7 @@ public sealed class DrivingLicense : Aggregate
 
     private DrivingLicense(
         Guid accountId,
-        CategoryList categoryList,
+        CategoryList categoryListList,
         DrivingLicenseNumber number,
         Name name,
         string cityOfBirth,
@@ -23,7 +24,7 @@ public sealed class DrivingLicense : Aggregate
         Id = Guid.NewGuid();
         AccountId = accountId;
         Status = Status.Unprocessed;
-        Categories = categoryList;
+        CategoryList = categoryListList;
         Number = number;
         Name = name;
         CityOfBirth = cityOfBirth;
@@ -40,7 +41,7 @@ public sealed class DrivingLicense : Aggregate
 
     public Status Status { get; private set; } = null!;
 
-    public CategoryList Categories { get; private set; } = null!;
+    public CategoryList CategoryList { get; private set; } = null!;
 
     public DrivingLicenseNumber Number { get; private set; } = null!;
     
@@ -56,12 +57,31 @@ public sealed class DrivingLicense : Aggregate
     
     public DateOnly DateOfExpiry { get; private set; }
 
-    public void SetStatus(Status potentialStatus)
+
+    public void Approve()
     {
-        if (Status.CanBeChangedToThisStatus(potentialStatus) == false)
-            throw new DomainRulesViolationException($"{potentialStatus} can't be settled");
+        if (!Status.CanBeChangedToThisStatus(Status.Approved))
+            throw new DomainRulesViolationException($"{nameof(Status.Approved)} status can't be settled");
         
-        Status = potentialStatus;
+        Status = Status.Approved;
+        AddDomainEvent(new DrivingLicenseApprovedDomainEvent(AccountId, [..CategoryList.Categories]));
+    }
+
+    public void Reject()
+    {
+        if (!Status.CanBeChangedToThisStatus(Status.Rejected))
+            throw new DomainRulesViolationException($"{nameof(Status.Rejected)} status can't be settled");
+        
+        Status = Status.Rejected;
+    }
+
+    public void Expire()
+    {
+        if (!Status.CanBeChangedToThisStatus(Status.Expired))
+            throw new DomainRulesViolationException($"{nameof(Status.Expired)} status can't be settled");
+        
+        Status = Status.Expired;
+        AddDomainEvent(new DrivingLicenseExpiredDomainEvent(AccountId));
     }
     
     public static DrivingLicense Create(

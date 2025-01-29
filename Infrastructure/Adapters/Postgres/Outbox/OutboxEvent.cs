@@ -10,5 +10,8 @@ public class OutboxEvent
     
     public required DateTime OccurredOnUtc { get; init; }
 
-    public DateTime? ProcessedOnUtc { get; init; }
+    public DateTime? ProcessedOnUtc { get; private set; }
+    
+    
+    public void MarkProcessed() => ProcessedOnUtc = DateTime.UtcNow;
 }
