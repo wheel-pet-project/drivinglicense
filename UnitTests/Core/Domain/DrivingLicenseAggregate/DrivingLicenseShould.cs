@@ -1,8 +1,8 @@
-using Core.Domain.DrivingLicenceAggregate;
-using Core.Domain.DrivingLicenceAggregate.DomainEvents;
-using Core.Domain.SharedKernel.Exceptions.ArgumentException;
-using Core.Domain.SharedKernel.Exceptions.DomainRulesViolationException;
-using Core.Domain.SharedKernel.ValueObjects;
+using Domain.DrivingLicenceAggregate;
+using Domain.DrivingLicenceAggregate.DomainEvents;
+using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
+using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Xunit;
 

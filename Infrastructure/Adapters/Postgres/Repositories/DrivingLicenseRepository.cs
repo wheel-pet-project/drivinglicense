@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
-using Core.Domain.DrivingLicenceAggregate;
-using Core.Ports.Postgres;
+using Application.Ports.Postgres;
+using Domain.DrivingLicenceAggregate;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Adapters.Postgres.Repositories;

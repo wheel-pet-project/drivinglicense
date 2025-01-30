@@ -1,6 +1,6 @@
-using Core.Domain.DrivingLicenceAggregate.DomainEvents;
-using Core.Domain.SharedKernel.Exceptions.ArgumentException;
-using Core.Domain.SharedKernel.ValueObjects;
+using Domain.DrivingLicenceAggregate.DomainEvents;
+using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Xunit;
 

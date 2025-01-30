@@ -1,7 +1,7 @@
-using Core.Domain.DrivingLicenceAggregate;
-using Core.Domain.SharedKernel;
-using Core.Domain.SharedKernel.ValueObjects;
-using Core.Ports.Postgres;
+using Application.Ports.Postgres;
+using Domain.DrivingLicenceAggregate;
+using Domain.SharedKernel;
+using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using JetBrains.Annotations;
 using JsonNet.ContractResolvers;
@@ -35,6 +35,7 @@ public class UnitOfWorkShould : IntegrationTestBase
     public async Task SaveDomainEvent()
     {
         // Arrange
+        _drivingLicense.MarkAsPendingProcessing();
         _drivingLicense.Approve();
         var expectedEvent = _drivingLicense.DomainEvents[0];
         var uowBuilder = new UnitOfWorkBuilder();

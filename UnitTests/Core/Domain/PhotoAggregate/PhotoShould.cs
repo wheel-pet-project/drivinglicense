@@ -1,5 +1,5 @@
-using Core.Domain.PhotoAggregate;
-using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.PhotoAggregate;
+using Domain.SharedKernel.Exceptions.ArgumentException;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -68,5 +68,18 @@ public class PhotoShould
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
+    }
+
+    [Fact]
+    public void AddDomainEvent()
+    {
+        // Arrange
+        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
+
+        // Act
+        photo.AddPhotoAddedDomainEvent();
+
+        // Assert
+        Assert.NotEmpty(photo.DomainEvents);
     }
 }

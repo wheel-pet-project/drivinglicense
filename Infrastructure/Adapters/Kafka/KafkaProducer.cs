@@ -1,5 +1,5 @@
-using Core.Domain.DrivingLicenceAggregate.DomainEvents;
-using Core.Ports.Kafka;
+using Application.Ports.Kafka;
+using Domain.DrivingLicenceAggregate.DomainEvents;
 using From.DrivingLicenseKafkaEvents;
 using MassTransit;
 

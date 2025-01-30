@@ -1,5 +1,5 @@
-using Core.Domain.PhotoAggregate;
-using Core.Ports.Postgres;
+using Application.Ports.Postgres;
+using Domain.PhotoAggregate;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Repositories;
 using JetBrains.Annotations;

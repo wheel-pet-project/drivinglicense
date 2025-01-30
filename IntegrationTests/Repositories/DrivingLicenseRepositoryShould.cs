@@ -1,6 +1,6 @@
-using Core.Domain.DrivingLicenceAggregate;
-using Core.Domain.SharedKernel.ValueObjects;
-using Core.Ports.Postgres;
+using Application.Ports.Postgres;
+using Domain.DrivingLicenceAggregate;
+using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Repositories;
 using JetBrains.Annotations;
@@ -60,7 +60,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         var (repository, uow) = repositoryAndUowBuilder.Build();
         
         // Act
-        licenseForUpdate.Approve();
+        licenseForUpdate.MarkAsPendingProcessing();
         repository.Update(licenseForUpdate);
         await uow.Commit();
 
@@ -119,7 +119,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
             Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
             new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
             CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1));
-        expectedLicense.Approve();
+        expectedLicense.MarkAsPendingProcessing();
         
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
@@ -131,7 +131,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         var (repository, _) = repositoryAndUowBuilder.Build();
         
         // Act
-        var licenseFromDb = await repository.GetAll(1, 1, x => x.Status == Status.Approved);
+        var licenseFromDb = await repository.GetAll(1, 1, x => x.Status == Status.PendingProcessing);
 
         // Assert
         Assert.NotNull(licenseFromDb);

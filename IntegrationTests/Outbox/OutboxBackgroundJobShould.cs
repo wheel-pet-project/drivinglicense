@@ -1,5 +1,5 @@
-using Core.Domain.DrivingLicenceAggregate.DomainEvents;
-using Core.Domain.SharedKernel.ValueObjects;
+using Domain.DrivingLicenceAggregate.DomainEvents;
+using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Outbox;
 using JetBrains.Annotations;

@@ -1,5 +1,6 @@
 using Infrastructure.Adapters.Postgres;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -16,6 +17,7 @@ public class IntegrationTestBase : IAsyncLifetime
         .Build();
 
     protected DataContext Context = null!;
+    protected NpgsqlDataSource DataSource = null!;
         
 
     public async ValueTask InitializeAsync()
@@ -27,6 +29,8 @@ public class IntegrationTestBase : IAsyncLifetime
         Context = new DataContext(options.Options);
         
         await Context.Database.MigrateAsync();
+
+        DataSource = new NpgsqlDataSourceBuilder(_postgreSqlContainer.GetConnectionString()).Build();
     }
 
     public async ValueTask DisposeAsync() => 

@@ -1,5 +1,5 @@
-using Core.Domain.SharedKernel;
-using Core.Ports.Postgres;
+using Application.Ports.Postgres;
+using Domain.SharedKernel;
 using Infrastructure.Adapters.Postgres.Outbox;
 using Newtonsoft.Json;
 

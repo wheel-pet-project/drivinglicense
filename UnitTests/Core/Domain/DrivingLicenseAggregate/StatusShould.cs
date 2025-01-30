@@ -1,5 +1,5 @@
-using Core.Domain.DrivingLicenceAggregate;
-using Core.Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.DrivingLicenceAggregate;
+using Domain.SharedKernel.Exceptions.ArgumentException;
 using JetBrains.Annotations;
 using Xunit;
 

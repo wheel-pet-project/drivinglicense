@@ -1,4 +1,4 @@
-using Core.Domain.SharedKernel;
+using Domain.SharedKernel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;

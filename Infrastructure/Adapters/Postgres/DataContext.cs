@@ -1,5 +1,5 @@
-using Core.Domain.DrivingLicenceAggregate;
-using Core.Domain.PhotoAggregate;
+using Domain.DrivingLicenceAggregate;
+using Domain.PhotoAggregate;
 using Infrastructure.Adapters.Postgres.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -36,12 +36,11 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
         
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.AccountId).HasColumnName("account_id").IsRequired();
-        builder.Property(x => x.CityOfBirth).HasColumnName("city_of_birth").IsRequired();
         builder.Property(x => x.DateOfBirth).HasColumnName("date_of_birth").IsRequired();
         builder.Property(x => x.DateOfIssue).HasColumnName("date_of_issue").IsRequired();
         builder.Property(x => x.DateOfExpiry).HasColumnName("date_of_expiry").IsRequired();
 
-        builder.HasOne(x => x.Status).WithMany().IsRequired().HasForeignKey("status_id");
+        builder.HasOne(x => x.Status).WithMany().HasForeignKey("status_id").IsRequired();
 
         builder.OwnsOne(x => x.CategoryList, cfg =>
         {
@@ -53,6 +52,11 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
             cfg.Property(x => x.FirstName).HasColumnName("first_name").IsRequired();
             cfg.Property(x => x.LastName).HasColumnName("last_name").IsRequired();
             cfg.Property(x => x.Patronymic).HasColumnName("patronymic").IsRequired(false);
+        });
+
+        builder.OwnsOne(x => x.CityOfBirth, cfg =>
+        {
+            cfg.Property(x => x.Name).HasColumnName("city_of_birth").IsRequired();
         });
 
         builder.OwnsOne(x => x.Number, cfg =>
@@ -77,7 +81,7 @@ public class StatusConfiguration : IEntityTypeConfiguration<Status>
         
         builder.HasKey(x => x.Id);
         
-        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever().IsRequired();
         builder.Property(x => x.Name).HasColumnName("name").IsRequired();
     }
 }
