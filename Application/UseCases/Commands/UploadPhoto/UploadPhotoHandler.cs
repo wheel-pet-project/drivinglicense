@@ -1,6 +1,7 @@
 using Application.Ports.Postgres;
 using Application.Ports.S3;
 using Domain.PhotoAggregate;
+using Domain.SharedKernel.Errors;
 using FluentResults;
 using MediatR;
 
@@ -17,7 +18,7 @@ public class UploadPhotoHandler(
         var photo = Photo.Create(request.DrivingLicenseId, request.FrontPhotoBytes, request.BackPhotoBytes);
 
         var isSuccess = await s3Storage.SavePhotos(photo);
-        if (isSuccess is false) return Result.Fail("Failed to upload photo");
+        if (isSuccess is false) return Result.Fail(new ObjectStorageUnavailable("Failed to upload photo"));
         
         await photoRepository.Add(photo);
         await unitOfWork.Commit();

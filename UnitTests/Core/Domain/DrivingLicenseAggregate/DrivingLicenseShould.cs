@@ -20,7 +20,7 @@ public class DrivingLicenseShould
     private readonly DateOnly _dateOfBirth = new(1990, 1, 1);
     private readonly DateOnly _dateOfIssue = new(2020, 1, 1);
     private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create(input: "1234");
-    private readonly DateOnly _dateOfExpiry = new DateOnly(2030, 1, 1);
+    private readonly DateOnly _dateOfExpiry = new(2030, 1, 1);
     
     
     [Fact]
@@ -176,6 +176,22 @@ public class DrivingLicenseShould
 
         // Assert
         Assert.Equal(Status.PendingProcessing, license.Status);
+    }
+    
+    [Fact]
+    public void ThrowDomainRulesViolationExceptionIfMarkAsPendingProcessingInvokeWithInvalidStatus()
+    {
+        // Arrange
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+        license.MarkAsPendingProcessing();
+        license.Approve();
+
+        // Act
+        void Act() => license.MarkAsPendingProcessing();
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
     }
     
     [Fact]

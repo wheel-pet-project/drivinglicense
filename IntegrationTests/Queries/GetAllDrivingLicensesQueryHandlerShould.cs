@@ -40,7 +40,7 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Act
         var response = await handler.Handle(
-                new GetAllDrivingLicensesQuery(1, 2), TestContext.Current.CancellationToken);
+            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(response);
@@ -62,7 +62,7 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Act
         var response = await handler.Handle(
-            new GetAllDrivingLicensesQuery(1, 2), TestContext.Current.CancellationToken);
+            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2), TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(response);
@@ -89,7 +89,7 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Act
         var response = await handler.Handle(
-            new GetAllDrivingLicensesQuery(1, 2, Status.PendingProcessing), 
+            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2, Status.PendingProcessing), 
             TestContext.Current.CancellationToken);
 
         // Assert

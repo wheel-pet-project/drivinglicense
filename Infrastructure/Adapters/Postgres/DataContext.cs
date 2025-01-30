@@ -100,6 +100,7 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photo>
         
         builder.Ignore(x => x.FrontPhotoBytes);
         builder.Ignore(x => x.BackPhotoBytes);
+        builder.Ignore(x => x.DomainEvents);
     }
 }
 

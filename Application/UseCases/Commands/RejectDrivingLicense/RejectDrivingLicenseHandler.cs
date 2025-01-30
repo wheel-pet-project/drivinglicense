@@ -1,4 +1,5 @@
 using Application.Ports.Postgres;
+using Domain.SharedKernel.Errors;
 using FluentResults;
 using MediatR;
 
@@ -12,7 +13,7 @@ public class RejectDrivingLicenseHandler(
     public async Task<Result> Handle(RejectDrivingLicenseRequest request, CancellationToken cancellationToken)
     {
         var license = await drivingLicenseRepository.GetById(request.DrivingLicenseId);
-        if (license is null) return Result.Fail("Driving license not found");
+        if (license is null) return Result.Fail(new NotFound("Driving license not found"));
         
         license.Reject();
         
