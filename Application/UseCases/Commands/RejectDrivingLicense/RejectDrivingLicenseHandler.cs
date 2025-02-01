@@ -8,11 +8,11 @@ namespace Application.UseCases.Commands.RejectDrivingLicense;
 public class RejectDrivingLicenseHandler(
     IDrivingLicenseRepository drivingLicenseRepository,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<RejectDrivingLicenseRequest, Result>
+    : IRequestHandler<RejectDrivingLicenseCommand, Result>
 {
-    public async Task<Result> Handle(RejectDrivingLicenseRequest request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RejectDrivingLicenseCommand command, CancellationToken cancellationToken)
     {
-        var license = await drivingLicenseRepository.GetById(request.DrivingLicenseId);
+        var license = await drivingLicenseRepository.GetById(command.DrivingLicenseId);
         if (license is null) return Result.Fail(new NotFound("Driving license not found"));
         
         license.Reject();

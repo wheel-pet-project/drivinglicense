@@ -1,6 +1,7 @@
 using Domain.DrivingLicenceAggregate;
 using Domain.PhotoAggregate;
 using Infrastructure.Adapters.Postgres.Outbox;
+using Infrastructure.Adapters.S3;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,6 +14,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Photo> Photos { get; set; }
     
     public DbSet<OutboxEvent> Outbox { get; set; }
+    
+    public DbSet<S3BucketModel> S3Buckets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,6 +23,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.ApplyConfiguration(new StatusConfiguration());
         modelBuilder.ApplyConfiguration(new PhotoConfiguration());
         modelBuilder.ApplyConfiguration(new OutboxEventConfiguration());
+        modelBuilder.ApplyConfiguration(new S3ModelConfiguration());
         
 
         modelBuilder.Entity<Status>().HasData(Status.All());
@@ -118,5 +122,18 @@ public class OutboxEventConfiguration : IEntityTypeConfiguration<OutboxEvent>
         builder.Property(x => x.Content).HasColumnName("content").IsRequired();
         builder.Property(x => x.OccurredOnUtc).HasColumnName("occurred_on_utc").IsRequired();
         builder.Property(x => x.ProcessedOnUtc).HasColumnName("processed_on_utc").IsRequired(false);
+    }
+}
+
+public class S3ModelConfiguration : IEntityTypeConfiguration<S3BucketModel>
+{
+    public void Configure(EntityTypeBuilder<S3BucketModel> builder)
+    {
+        builder.ToTable("photos_s3_buckets");
+        
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.FrontPhotoStorageId).HasColumnName("front_photo_storage_id").IsRequired();
+        builder.Property(x => x.BackPhotoStorageId).HasColumnName("back_photo_storage_id").IsRequired();
+        builder.Property(x => x.Bucket).HasColumnName("bucket").IsRequired();
     }
 }

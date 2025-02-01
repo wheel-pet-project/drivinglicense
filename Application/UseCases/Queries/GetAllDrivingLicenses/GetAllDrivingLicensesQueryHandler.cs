@@ -14,8 +14,8 @@ public class GetAllDrivingLicensesQueryHandler(DbDataSource dataSource)
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
-            commandText: request.FilterStatus is null ? _sql : _sqlWithStatusFilter,
-            parameters: request.FilterStatus is null
+            commandText: request.FilteringStatus is null ? _sql : _sqlWithStatusFilter,
+            parameters: request.FilteringStatus is null
                 ? new
                 {
                     Offset = (request.Page - 1) * request.PageSize, 
@@ -23,7 +23,7 @@ public class GetAllDrivingLicensesQueryHandler(DbDataSource dataSource)
                 }
                 : new
                 {
-                    StatusId = request.FilterStatus.Id, 
+                    StatusId = request.FilteringStatus.Id, 
                     Offset = (request.Page - 1) * request.PageSize,
                     Limit = request.PageSize
                 }, 

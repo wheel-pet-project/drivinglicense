@@ -10,7 +10,7 @@ public class Program
         
         services.AddGrpc();
 
-        services.RegisterPostgresDataContext(builder.Configuration);
+        services.RegisterPostgresDataContext();
         
         var app = builder.Build();
         

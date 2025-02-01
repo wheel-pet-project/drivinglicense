@@ -37,7 +37,7 @@ public class Photo : Aggregate
     public void AddPhotoAddedDomainEvent() => AddDomainEvent(new PhotoAddedDomainEvent(DrivingLicenseId));
     
     public static Photo Create(
-        Guid drivingLicenseId, 
+        Guid drivingLicenseId,
         byte[] frontPhotoBytes, 
         byte[] backPhotoBytes)
     {

@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Proto.DrivingLicenseV1";
+
+package DrivingLicense.v1;
+
+enum Status{
+  APPROVED_UNSPECIFIED = 0;
+  PENDING_PHOTOS_ADDING = 1;
+  PENDING_PROCESSING = 2;
+  REJECTED = 3;
+  EXPIRED = 4;
+}
+
+service DrivingLicense {
+  rpc GetLicenseById (GetLicenseByIdRequest) returns (GetLicenseByIdResponse);
+  rpc GetAllLicensesById (GetAllLicensesRequest) returns (GetAllLicensesResponse);
+  rpc UploadLicense (UploadLicenseRequest) returns (UploadLicenseResponse);
+  rpc UploadPhotos (UploadPhotosRequest) returns (UploadPhotosResponse);
+  rpc ApproveLicense (ApproveLicenseRequest) returns (ApproveLicenseResponse);
+  rpc RejectLicense (RejectLicenseRequest) returns (RejectLicenseResponse);
+}
+
+//
+// Queries
+//
+
+// Get driving license by id query
+message GetLicenseByIdRequest {
+  string cor_id = 1;
+  string id = 2;
+}
+message GetLicenseByIdResponse {
+  string id = 1;
+  string acc_id = 2;
+  Status status = 3;
+  repeated string categories = 4;
+  string number = 5;
+  string name = 6;
+  string city_of_birth = 7;
+  google.protobuf.Timestamp date_of_birth = 8;
+  string code_of_issue = 9;
+  google.protobuf.Timestamp date_of_issue = 10;
+  google.protobuf.Timestamp date_of_expiry = 11;
+}
+
+
+// Get driving license list query
+
+message GetAllLicensesRequest{
+  string cor_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  optional Status filtering_status = 4;
+}
+message GetAllLicensesResponse{
+  message LicenseShortView{
+    string id = 1;
+    string account_id = 2;
+    string name = 3;
+    Status status = 4;
+  }
+  repeated LicenseShortView licenses = 1;
+}
+
+//
+// Commands
+//
+
+// Upload license command
+message UploadLicenseRequest{
+  string cor_id = 1;
+  string acc_id = 2;
+  repeated string categories = 4;
+  string number = 5;
+  string first_name = 6;
+  string last_name = 7;
+  optional string patronymic = 8;
+  string city_of_birth = 9;
+  google.protobuf.Timestamp date_of_birth = 10;
+  string code_of_issue = 11;
+  google.protobuf.Timestamp date_of_issue = 12;
+  google.protobuf.Timestamp date_of_expiry = 13;
+}
+message UploadLicenseResponse{
+  string id = 1;
+}
+
+
+// Upload license's photos command
+message UploadPhotosRequest{
+  string cor_id = 1;
+  string license_id = 2;
+  bytes front_photo = 3;
+  bytes back_photo = 4;
+}
+message UploadPhotosResponse{}
+
+
+// Approve license command
+message ApproveLicenseRequest{
+  string cor_id = 1;
+  string license_id = 2;
+}
+message ApproveLicenseResponse{}
+
+
+// Reject license command
+message RejectLicenseRequest{
+  string cor_id = 1;
+  string license_id = 2;
+}
+message RejectLicenseResponse{}

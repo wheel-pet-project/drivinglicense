@@ -9,19 +9,19 @@ namespace Application.UseCases.Commands.UploadDrivingLicense;
 public class UploadDrivingLicenseHandler(
     IDrivingLicenseRepository drivingLicenseRepository, 
     IUnitOfWork unitOfWork) 
-    : IRequestHandler<UploadDrivingLicenseRequest, Result<UploadDrivingLicenseResponse>>
+    : IRequestHandler<UploadDrivingLicenseCommand, Result<UploadDrivingLicenseResponse>>
 {
-    public async Task<Result<UploadDrivingLicenseResponse>> Handle(UploadDrivingLicenseRequest request, 
+    public async Task<Result<UploadDrivingLicenseResponse>> Handle(UploadDrivingLicenseCommand command, 
         CancellationToken cancellationToken)
     {
-        var name = Name.Create(request.FirstName, request.LastName, request.Patronymic);
-        var categoryList = CategoryList.Create(request.CategoryList);
-        var licenseNumber = DrivingLicenseNumber.Create(request.Number);
-        var cityOfBirth = City.Create(request.CityOfBirth);
-        var codeOfIssue = CodeOfIssue.Create(request.CodeOfIssue);
+        var name = Name.Create(command.FirstName, command.LastName, command.Patronymic);
+        var categoryList = CategoryList.Create(command.CategoryList);
+        var licenseNumber = DrivingLicenseNumber.Create(command.Number);
+        var cityOfBirth = City.Create(command.CityOfBirth);
+        var codeOfIssue = CodeOfIssue.Create(command.CodeOfIssue);
         
-        var license = DrivingLicense.Create(request.AccountId, categoryList, licenseNumber, name, cityOfBirth,
-            request.DateOfBirth, request.DateOfIssue, codeOfIssue, request.DateOfExpiry);
+        var license = DrivingLicense.Create(command.AccountId, categoryList, licenseNumber, name, cityOfBirth,
+            command.DateOfBirth, command.DateOfIssue, codeOfIssue, command.DateOfExpiry);
         
         await drivingLicenseRepository.Add(license);
         await unitOfWork.Commit();

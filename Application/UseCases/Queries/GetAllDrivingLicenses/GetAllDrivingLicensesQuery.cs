@@ -7,5 +7,5 @@ public record GetAllDrivingLicensesQuery(
     Guid CorrelationId,
     int Page, 
     int PageSize, 
-    Status? FilterStatus = null) 
+    Status? FilteringStatus = null) 
     : BaseRequest(CorrelationId), IRequest<GetAllDrivingLicensesQueryResponse>;

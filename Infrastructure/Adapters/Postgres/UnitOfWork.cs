@@ -10,9 +10,16 @@ public class UnitOfWork(DataContext context) : IUnitOfWork, IDisposable
     public async Task<bool> Commit()
     {
         await SaveDomainEventsInOutbox();
-        
-        await context.SaveChangesAsync();
-        return true;
+
+        try
+        {
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
     
     public void Dispose()
