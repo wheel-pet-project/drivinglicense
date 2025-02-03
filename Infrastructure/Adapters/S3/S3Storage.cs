@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Amazon.S3;
@@ -8,7 +9,6 @@ using Infrastructure.Adapters.Postgres;
 using Infrastructure.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Refit;
 
 namespace Infrastructure.Adapters.S3;
 
@@ -27,7 +27,7 @@ public class S3Storage(
         
         try
         {
-            var frontPhotoPutRequest = new PutObjectRequest()
+            var frontPhotoPutRequest = new PutObjectRequest
             {
                 BucketName = currentBucket,
                 Key = photo.FrontPhotoStorageId.ToString(),
@@ -43,43 +43,44 @@ public class S3Storage(
             };
             var s3BucketModel = new S3BucketModel
             {
-                Id = Guid.NewGuid(),
-                Bucket = currentBucket,
-                FrontPhotoStorageId = photo.FrontPhotoStorageId,
-                BackPhotoStorageId = photo.BackPhotoStorageId
+                PhotoId = photo.Id,
+                Bucket = currentBucket
             };
 
             await context.S3Buckets.AddAsync(s3BucketModel);
-            
+
             var frontPhotoUploadTask = s3Client.PutObjectAsync(frontPhotoPutRequest);
             var backPhotoUploadTask = s3Client.PutObjectAsync(backPhotoPutRequest);
             var bucketSaveToPostgresTask = context.SaveChangesAsync();
-            
+
             await Task.WhenAll(frontPhotoUploadTask, backPhotoUploadTask, bucketSaveToPostgresTask);
             return true;
         }
-        catch (AmazonS3Exception)
+        catch (AmazonS3Exception ex)
         {
-            logger.LogError("Could not upload photos to S3 storage");
+            logger.LogError("Could not upload photos to S3 storage, exception : {ex}", ex);
             return false;
         }
     }
 
-    public async Task<(byte[] frontPhotoBytes, byte[] backPhotoBytes)?> GetPhotos(Guid frontPhotoId, Guid backPhotoId)
+    public async Task<(byte[] frontPhotoBytes, byte[] backPhotoBytes)?> GetPhotos(
+        Guid photoId,
+        Guid frontPhotoStorageId,
+        Guid backPhotoStorageId)
     {
-        var s3Bucket = context.S3Buckets.FirstOrDefault(b => b.Id == frontPhotoId);
-        if (s3Bucket == null) return await new Task<(byte[] frontPhotoBytes, byte[] backPhotoBytes)?>(null);
-        
+        var s3Bucket = context.S3Buckets.FirstOrDefault(b => b.PhotoId == photoId);
+        if (s3Bucket == null) return null;
         var currentBucket = s3Bucket.Bucket;
-        var frontPhotoGetRequest = new GetObjectRequest()
+        
+        var frontPhotoGetRequest = new GetObjectRequest
         {
             BucketName = currentBucket,
-            Key = frontPhotoId.ToString(),
+            Key = frontPhotoStorageId.ToString(),
         };
         var backPhotoGetRequest = new GetObjectRequest
         {
             BucketName = currentBucket,
-            Key = backPhotoId.ToString(),
+            Key = backPhotoStorageId.ToString(),
         };
         
         var frontPhotoGettingTask = s3Client.GetObjectAsync(frontPhotoGetRequest);
@@ -87,20 +88,25 @@ public class S3Storage(
         
         var getObjectResponses = await Task.WhenAll(frontPhotoGettingTask, backPhotoGettingTask);
 
-        var frontPhotoResult = getObjectResponses.First(x => x.Key == frontPhotoId.ToString());
-        var backPhotoResult = getObjectResponses.First(x => x.Key == backPhotoId.ToString());
+        var frontPhotoResult = getObjectResponses.First(x => x.Key == frontPhotoStorageId.ToString());
+        var backPhotoResult = getObjectResponses.First(x => x.Key == backPhotoStorageId.ToString());
+        
+        if (frontPhotoResult.HttpStatusCode != HttpStatusCode.OK || 
+            backPhotoResult.HttpStatusCode != HttpStatusCode.OK) 
+            return null;
+        
         var frontPhotoLength = frontPhotoResult.ContentLength > int.MaxValue
             ? int.MaxValue
             : (int)frontPhotoResult.ContentLength;
         var backPhotoLength = backPhotoResult.ContentLength > int.MaxValue
             ? int.MaxValue
             : (int)backPhotoResult.ContentLength;
-        
         var frontPhoto = new byte[frontPhotoLength];
         var backPhoto = new byte[backPhotoLength];
-        await frontPhotoResult.ResponseStream.ReadAsync(frontPhoto.AsMemory(0, frontPhotoLength));
-        await backPhotoResult.ResponseStream.ReadAsync(backPhoto.AsMemory(0, backPhotoLength));
-        
+    
+        await frontPhotoResult.ResponseStream.ReadExactlyAsync(frontPhoto.AsMemory(0, frontPhotoLength));
+        await backPhotoResult.ResponseStream.ReadExactlyAsync(backPhoto.AsMemory(0, backPhotoLength));
+
         return (frontPhoto, backPhoto);
     }
 }

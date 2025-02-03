@@ -95,13 +95,14 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photo>
     public void Configure(EntityTypeBuilder<Photo> builder)
     {
         builder.ToTable("photo");
-        
+
         builder.HasKey(x => x.Id);
-        
+        builder.HasOne<S3BucketModel>().WithOne().HasForeignKey<S3BucketModel>(x => x.PhotoId).IsRequired(false);
+
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.FrontPhotoStorageId).HasColumnName("front_photo_storage_id").IsRequired();
         builder.Property(x => x.BackPhotoStorageId).HasColumnName("back_photo_storage_id").IsRequired();
-        
+
         builder.Ignore(x => x.FrontPhotoBytes);
         builder.Ignore(x => x.BackPhotoBytes);
         builder.Ignore(x => x.DomainEvents);
@@ -130,10 +131,10 @@ public class S3ModelConfiguration : IEntityTypeConfiguration<S3BucketModel>
     public void Configure(EntityTypeBuilder<S3BucketModel> builder)
     {
         builder.ToTable("photos_s3_buckets");
+
+        builder.HasKey(x => x.PhotoId);
         
-        builder.Property(x => x.Id).HasColumnName("id");
-        builder.Property(x => x.FrontPhotoStorageId).HasColumnName("front_photo_storage_id").IsRequired();
-        builder.Property(x => x.BackPhotoStorageId).HasColumnName("back_photo_storage_id").IsRequired();
+        builder.Property(x => x.PhotoId).HasColumnName("photo_id").IsRequired();
         builder.Property(x => x.Bucket).HasColumnName("bucket").IsRequired();
     }
 }

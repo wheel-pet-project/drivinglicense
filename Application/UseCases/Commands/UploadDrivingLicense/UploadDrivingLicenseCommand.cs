@@ -1,4 +1,3 @@
-using Domain.DrivingLicenceAggregate;
 using FluentResults;
 using MediatR;
 

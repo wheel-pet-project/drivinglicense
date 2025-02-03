@@ -1,4 +1,3 @@
-using CSharpFunctionalExtensions;
 using Domain.PhotoAggregate.DomainEvents;
 using Domain.SharedKernel;
 using Domain.SharedKernel.Exceptions.ArgumentException;
