@@ -1,32 +1,40 @@
-using System.Data.Common;
+using Application.Ports.S3;
 using Application.UseCases.Queries.DapperMappingExtensions;
 using Dapper;
 using Domain.DrivingLicenceAggregate;
 using FluentResults;
 using MediatR;
+using Npgsql;
 
 namespace Application.UseCases.Queries.GetByIdDrivingLicense;
 
-public class GetByIdDrivingLicenseQueryHandler(DbDataSource dataSource)
+public class GetByIdDrivingLicenseQueryHandler(
+    NpgsqlDataSource dataSource,
+    IS3Storage s3Storage)
     : IRequestHandler<GetByIdDrivingLicenseQuery, Result<GetByIdDrivingLicenseQueryResponse>>
 {
     public async Task<Result<GetByIdDrivingLicenseQueryResponse>> Handle(GetByIdDrivingLicenseQuery request, CancellationToken cancellationToken)
     {
+        SqlMapper.AddTypeHandler(new DateOnlyMapper());
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
         
-        SqlMapper.AddTypeHandler(new DateOnlyMapper());
-        
-        var command = new CommandDefinition(_sql, new { Id = request.Id }, cancellationToken: cancellationToken);
-
+        var command = new CommandDefinition(_getLicenseSql, new { request.Id }, cancellationToken: cancellationToken);
         var dapperModel = await connection.QuerySingleOrDefaultAsync<DapperDrivingLicenseModel>(command);
         if (dapperModel is null) return Result.Fail("Driving license not found");
 
+        var nameParts = new List<string>
+        {
+            dapperModel.FirstName,
+            dapperModel.LastName
+        };
+        if (dapperModel.Patronymic != null) nameParts.Add(dapperModel.Patronymic);
+        
         var responseModel = new GetByIdDrivingLicenseQueryResponse(new DrivingLicenseView
             {
                 Id = dapperModel.Id,
                 AccountId = dapperModel.AccountId,
                 CategoryList = dapperModel.CategoryList.Select(x => x[0]).ToArray(),
-                Name = string.Join(' ', dapperModel.FirstName, dapperModel.LastName, dapperModel.Patronymic),
+                Name = string.Join(' ', nameParts),
                 Number = dapperModel.Number,
                 CityOfBirth = dapperModel.CityOfBirth,
                 DateOfBirth = dapperModel.DateOfBirth,
@@ -36,9 +44,29 @@ public class GetByIdDrivingLicenseQueryHandler(DbDataSource dataSource)
                 Status = Status.FromId(dapperModel.StatusId)
             });
         
+        var photoIdsModel = await connection.QuerySingleOrDefaultAsync<DapperPhotoIdsModel>(
+            _getPhotoIdsSql, new { LicenseId = request.Id });
+        if (photoIdsModel is null) return Result.Ok(responseModel);
+
+        var getPhotosResult =
+            await s3Storage.GetPhotos(photoIdsModel.PhotoId, photoIdsModel.FrontPhotoId, photoIdsModel.BackPhotoId);
+        if (getPhotosResult is null) return Result.Fail("Photos for license not found");
+        
+        var (frontPhoto, backPhoto) = getPhotosResult.Value;
+        responseModel.DrivingLicenseView.AddPhotos(frontPhoto, backPhoto);
+        
         return Result.Ok(responseModel);
     }
 
+    private class DapperPhotoIdsModel
+    {
+        public Guid PhotoId { get; private set; }
+        
+        public Guid FrontPhotoId { get; private set; }
+        
+        public Guid BackPhotoId { get; private set; }
+    }
+    
     private class DapperDrivingLicenseModel
     {
         public Guid Id { get; private set; }
@@ -55,7 +83,7 @@ public class GetByIdDrivingLicenseQueryHandler(DbDataSource dataSource)
         
         public string LastName { get; private set; } = null!;
         
-        public string Patronymic { get; private set; } = null!;
+        public string? Patronymic { get; private set; } = null!;
     
         public string CityOfBirth { get; private set; } = null!;
 
@@ -67,8 +95,15 @@ public class GetByIdDrivingLicenseQueryHandler(DbDataSource dataSource)
     
         public DateOnly DateOfExpiry { get; private set; }
     }
+
+    private readonly string _getPhotoIdsSql =
+        """
+        SELECT id AS PhotoId, front_photo_storage_id AS FrontPhotoId, back_photo_storage_id AS BackPhotoId
+        FROM photo
+        WHERE driving_license_id = @LicenseId
+        """;
     
-    private readonly string _sql =
+    private readonly string _getLicenseSql =
         """
         SELECT id AS Id, account_id AS AccountId, status_id AS StatusId, first_name AS FirstName, last_name AS LastName, 
                patronymic AS Patronymic, categories AS CategoryList, number AS Number, city_of_birth AS CityOfBirth, 

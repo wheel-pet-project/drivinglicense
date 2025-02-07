@@ -21,7 +21,8 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
         dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
         codeOfIssue: CodeOfIssue.Create(input: "1234"), 
-        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1));
+        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1), 
+        TimeProvider.System);
     
     [Fact]
     public async Task Add()
@@ -49,7 +50,8 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
             CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create(input: "1234 567891"), 
             Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
             new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
-            CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1));
+            CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1), 
+            TimeProvider.System);
         
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
@@ -118,7 +120,8 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
             CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create(input: "1234 567891"), 
             Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
             new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
-            CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1));
+            CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1), 
+            TimeProvider.System);
         expectedLicense.MarkAsPendingProcessing();
         
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();

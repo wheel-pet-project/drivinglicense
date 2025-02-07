@@ -16,7 +16,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<OutboxEvent> Outbox { get; set; }
     
     public DbSet<S3BucketModel> S3Buckets { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new DrivingLicenseConfiguration());
@@ -44,7 +44,12 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
         builder.Property(x => x.DateOfIssue).HasColumnName("date_of_issue").IsRequired();
         builder.Property(x => x.DateOfExpiry).HasColumnName("date_of_expiry").IsRequired();
 
-        builder.HasOne(x => x.Status).WithMany().HasForeignKey("status_id").IsRequired();
+        builder.HasOne(x => x.Status)
+            .WithMany()
+            .HasForeignKey("status_id")
+            .HasConstraintName("fk_status_id")
+            .IsRequired();
+        
 
         builder.OwnsOne(x => x.CategoryList, cfg =>
         {
@@ -97,9 +102,15 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photo>
         builder.ToTable("photo");
 
         builder.HasKey(x => x.Id);
-        builder.HasOne<S3BucketModel>().WithOne().HasForeignKey<S3BucketModel>(x => x.PhotoId).IsRequired(false);
+        builder.Property(x => x.Id).ValueGeneratedNever();
+        builder.HasOne<S3BucketModel>()
+            .WithOne()
+            .HasForeignKey<S3BucketModel>(x => x.PhotoId)
+            .HasConstraintName("fk_photos_s3_buckets_id")
+            .IsRequired(false);
 
         builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.DrivingLicenseId).HasColumnName("driving_license_id").IsRequired();
         builder.Property(x => x.FrontPhotoStorageId).HasColumnName("front_photo_storage_id").IsRequired();
         builder.Property(x => x.BackPhotoStorageId).HasColumnName("back_photo_storage_id").IsRequired();
 
@@ -132,7 +143,7 @@ public class S3ModelConfiguration : IEntityTypeConfiguration<S3BucketModel>
     {
         builder.ToTable("photos_s3_buckets");
 
-        builder.HasKey(x => x.PhotoId);
+        builder.HasKey(x => x.Id);
         
         builder.Property(x => x.PhotoId).HasColumnName("photo_id").IsRequired();
         builder.Property(x => x.Bucket).HasColumnName("bucket").IsRequired();

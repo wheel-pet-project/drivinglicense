@@ -9,7 +9,6 @@ public class Mapper
     public DomainStatus ProtoStatusToDomainStatus(Status? protoStatus) =>
         (protoStatus switch
         {
-            null => null,
             Status.PendingPhotosAdding => DomainStatus.PendingPhotosAdding,
             Status.PendingProcessing => DomainStatus.PendingProcessing,
             Status.ApprovedUnspecified => DomainStatus.Approved,

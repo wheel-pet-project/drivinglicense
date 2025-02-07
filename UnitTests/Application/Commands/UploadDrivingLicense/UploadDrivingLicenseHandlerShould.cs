@@ -32,6 +32,7 @@ public class UploadDrivingLicenseHandlerShould
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-        public UploadDrivingLicenseHandler Build() => new(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
+        public UploadDrivingLicenseHandler Build() => new(_drivingLicenseRepositoryMock.Object, TimeProvider.System,
+            _unitOfWorkMock.Object);
     }
 }

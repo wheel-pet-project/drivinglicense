@@ -82,7 +82,7 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
         private readonly Mock<IMediator> _mediatorMock = new();
         private DataContext _context = null!;
         
-        public OutboxBackgroundJob Build() => new OutboxBackgroundJob(_context, _mediatorMock.Object);
+        public OutboxBackgroundJob Build() => new(_context, _mediatorMock.Object);
         
         public void ConfigureContext(DataContext context) => _context = context;
 

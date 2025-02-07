@@ -21,7 +21,7 @@ public class DrivingLicenseShould
     private readonly DateOnly _dateOfIssue = new(2020, 1, 1);
     private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create(input: "1234");
     private readonly DateOnly _dateOfExpiry = new(2030, 1, 1);
-    
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
     
     [Fact]
     public void CreateInstanceWithCorrectValues()
@@ -30,7 +30,7 @@ public class DrivingLicenseShould
 
         // Act
         var actual = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.NotNull(actual);
@@ -54,7 +54,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(emptyAccountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -67,7 +67,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, null, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -80,7 +80,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, null, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -93,7 +93,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, _number, null, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -106,7 +106,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, null, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -119,7 +119,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, default, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -132,7 +132,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            default, _codeOfIssue, _dateOfExpiry);
+            default, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -145,7 +145,7 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, null, _dateOfExpiry);
+            _dateOfIssue, null, _dateOfExpiry, _timeProvider);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -158,7 +158,20 @@ public class DrivingLicenseShould
 
         // Act
         void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, default);
+            _dateOfIssue, _codeOfIssue, default, _timeProvider);
+
+        // Assert
+        Assert.Throws<ValueIsRequiredException>(Act);
+    }
+
+    [Fact]
+    public void ThrowValueIsRequiredExceptionIfTimeProviderIsNull()
+    {
+        // Arrange
+
+        // Act
+        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, null);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -169,7 +182,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Act
         license.MarkAsPendingProcessing();
@@ -183,7 +196,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
         license.Approve();
 
@@ -199,7 +212,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
 
         // Act
@@ -214,7 +227,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
 
         // Act
@@ -230,7 +243,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         
         // Act
         void Act() => license.Approve();
@@ -244,7 +257,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
 
         // Act
@@ -259,7 +272,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Act
         void Act() => license.Reject();
@@ -273,7 +286,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
         license.Approve();
 
@@ -289,7 +302,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
         license.Approve();
 
@@ -306,7 +319,7 @@ public class DrivingLicenseShould
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry);
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Act
         void Act() => license.Expire();

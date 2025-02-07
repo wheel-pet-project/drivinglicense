@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Cryptography;
-using System.Text;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Ports.S3;
@@ -30,19 +29,24 @@ public class S3Storage(
             var frontPhotoPutRequest = new PutObjectRequest
             {
                 BucketName = currentBucket,
-                Key = photo.FrontPhotoStorageId.ToString(),
-                ContentBody = Encoding.UTF8.GetString(photo.FrontPhotoBytes!),
-                MD5Digest = MD5.HashData(photo.FrontPhotoBytes!).ToString()
+                Key = $"{currentBucket}/{photo.FrontPhotoStorageId}.jpg",
+                ContentType = "image/jpeg",
+                InputStream = new MemoryStream(photo.FrontPhotoBytes!),
+                ChecksumSHA256 = Convert.ToBase64String(SHA256.HashData(photo.FrontPhotoBytes!)),
+                ServerSideEncryptionCustomerProvidedKeyMD5 = Convert.ToBase64String(MD5.HashData(photo.FrontPhotoBytes!)),
             };
             var backPhotoPutRequest = new PutObjectRequest
             {
                 BucketName = currentBucket,
-                Key = photo.BackPhotoStorageId.ToString(),
-                ContentBody = Encoding.UTF8.GetString(photo.BackPhotoBytes!),
-                MD5Digest = MD5.HashData(photo.BackPhotoBytes!).ToString()
+                Key = $"{currentBucket}/{photo.BackPhotoStorageId}.jpg",
+                ContentType = "image/jpeg",
+                InputStream = new MemoryStream(photo.BackPhotoBytes!),
+                ChecksumSHA256 = Convert.ToBase64String(SHA256.HashData(photo.BackPhotoBytes!)),
+                ServerSideEncryptionCustomerProvidedKeyMD5 = Convert.ToBase64String(MD5.HashData(photo.BackPhotoBytes!)),
             };
             var s3BucketModel = new S3BucketModel
             {
+                Id = Guid.NewGuid(),
                 PhotoId = photo.Id,
                 Bucket = currentBucket
             };
@@ -51,9 +55,8 @@ public class S3Storage(
 
             var frontPhotoUploadTask = s3Client.PutObjectAsync(frontPhotoPutRequest);
             var backPhotoUploadTask = s3Client.PutObjectAsync(backPhotoPutRequest);
-            var bucketSaveToPostgresTask = context.SaveChangesAsync();
-
-            await Task.WhenAll(frontPhotoUploadTask, backPhotoUploadTask, bucketSaveToPostgresTask);
+            
+            await Task.WhenAll(frontPhotoUploadTask, backPhotoUploadTask);
             return true;
         }
         catch (AmazonS3Exception ex)
@@ -72,15 +75,18 @@ public class S3Storage(
         if (s3Bucket == null) return null;
         var currentBucket = s3Bucket.Bucket;
         
+        var frontPhotoKey = $"{currentBucket}/{frontPhotoStorageId}.jpg";
+        var backPhotoKey = $"{currentBucket}/{backPhotoStorageId}.jpg";
+        
         var frontPhotoGetRequest = new GetObjectRequest
         {
             BucketName = currentBucket,
-            Key = frontPhotoStorageId.ToString(),
+            Key = frontPhotoKey
         };
         var backPhotoGetRequest = new GetObjectRequest
         {
             BucketName = currentBucket,
-            Key = backPhotoStorageId.ToString(),
+            Key = backPhotoKey
         };
         
         var frontPhotoGettingTask = s3Client.GetObjectAsync(frontPhotoGetRequest);
@@ -88,8 +94,8 @@ public class S3Storage(
         
         var getObjectResponses = await Task.WhenAll(frontPhotoGettingTask, backPhotoGettingTask);
 
-        var frontPhotoResult = getObjectResponses.First(x => x.Key == frontPhotoStorageId.ToString());
-        var backPhotoResult = getObjectResponses.First(x => x.Key == backPhotoStorageId.ToString());
+        var frontPhotoResult = getObjectResponses.First(x => x.Key == frontPhotoKey);
+        var backPhotoResult = getObjectResponses.First(x => x.Key == backPhotoKey);
         
         if (frontPhotoResult.HttpStatusCode != HttpStatusCode.OK || 
             backPhotoResult.HttpStatusCode != HttpStatusCode.OK) 

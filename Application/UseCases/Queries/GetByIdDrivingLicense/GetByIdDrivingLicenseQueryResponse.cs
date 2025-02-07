@@ -10,8 +10,8 @@ public class GetByIdDrivingLicenseQueryResponse
     {
         DrivingLicenseView = view;
     }
-    public DrivingLicenseView DrivingLicenseView { get; private set; }
     
+    public DrivingLicenseView DrivingLicenseView { get; private set; }
 }
 
 public class DrivingLicenseView
@@ -37,4 +37,16 @@ public class DrivingLicenseView
     public required string CodeOfIssue { get; init; } = null!;
     
     public required DateOnly DateOfExpiry { get; init; }
+
+    public byte[]? FrontPhotoBytes { get; private set; } = null!;
+    
+    public byte[]? BackPhotoBytes { get; private set; } = null!;
+
+    public void AddPhotos(byte[]? frontPhoto, byte[]? backPhoto)
+    {
+        if (frontPhoto is null || backPhoto is null) return;
+        
+        if (frontPhoto.Length > 0) FrontPhotoBytes = frontPhoto;
+        if (backPhoto.Length > 0) BackPhotoBytes = backPhoto;
+    }
 }

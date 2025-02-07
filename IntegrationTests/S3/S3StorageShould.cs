@@ -2,7 +2,9 @@ using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Ports.S3;
+using Domain.DrivingLicenceAggregate;
 using Domain.PhotoAggregate;
+using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.S3;
 using Infrastructure.Options;
@@ -17,21 +19,38 @@ namespace IntegrationTests.S3;
 [TestSubject(typeof(S3Storage))]
 public class S3StorageShould : IntegrationTestBase
 {
-    private readonly Photo _photo = Photo.Create(Guid.NewGuid(), [1, 2, 3], [4, 5, 6]);
+    private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
+        accountId: Guid.NewGuid(), 
+        categoryList: CategoryList.Create([CategoryList.BCategory]),
+        number: DrivingLicenseNumber.Create(input: "1234 567891"), 
+        name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
+        cityOfBirth: City.Create("Москва"),
+        dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
+        dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
+        codeOfIssue: CodeOfIssue.Create(input: "1234"), 
+        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1), 
+        TimeProvider.System);
+    private readonly byte[] photoBytes = [1, 2, 3];
     
     [Fact]
     public async Task AddPhotosBucketNameToPostgres()
     {
         // Arrange
-        Context.Photos.Add(_photo);
+        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        
+        await AddDrivingLicense(_drivingLicense);
+        
+        Context.Photos.Add(photo);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
+        var uow = new Infrastructure.Adapters.Postgres.UnitOfWork(Context);
         var storageBuilder = new StorageBuilder();
         storageBuilder.ConfigureContext(Context);
         var storage = storageBuilder.Build();
 
         // Act
-        await storage.SavePhotos(_photo);
+        await storage.SavePhotos(photo);
+        await uow.Commit();
 
         // Assert
         var photosBucket = await Context.S3Buckets.FirstAsync(TestContext.Current.CancellationToken);
@@ -43,7 +62,11 @@ public class S3StorageShould : IntegrationTestBase
     public async Task ReturnSuccessForSave()
     {
         // Arrange
-        Context.Photos.Add(_photo);
+        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        
+        await AddDrivingLicense(_drivingLicense);
+        
+        Context.Photos.Add(photo);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
         var storageBuilder = new StorageBuilder();
@@ -51,7 +74,7 @@ public class S3StorageShould : IntegrationTestBase
         var storage = storageBuilder.Build();
 
         // Act
-        var actual = await storage.SavePhotos(_photo);
+        var actual = await storage.SavePhotos(photo);
 
         // Assert
         Assert.True(actual);
@@ -65,8 +88,15 @@ public class S3StorageShould : IntegrationTestBase
         byte[] frontPhotoBytesExpected = [1, 2, 3];
         byte[] backPhotoBytesExpected = [4, 5, 6];
         
-        await Context.Photos.AddAsync(_photo, TestContext.Current.CancellationToken);
-        await Context.S3Buckets.AddAsync(new S3BucketModel { Bucket = bucketName, PhotoId = _photo.Id },
+        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        
+        await AddDrivingLicense(_drivingLicense);
+        
+        await Context.Photos.AddAsync(photo, TestContext.Current.CancellationToken);
+        await Context.S3Buckets.AddAsync(new S3BucketModel { 
+                Id = Guid.NewGuid(), 
+                Bucket = bucketName, 
+                PhotoId = photo.Id },
             TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
@@ -74,13 +104,13 @@ public class S3StorageShould : IntegrationTestBase
         var storageBuilder = new StorageBuilder();
         storageBuilder.ConfigureContext(Context);
         storageBuilder.ConfigureAmazonS3(bucketName: bucketName,
-            getObjectForFrontPhotoShouldReturn: (frontPhotoStorageId: _photo.FrontPhotoStorageId,
+            getObjectForFrontPhotoShouldReturn: (frontPhotoStorageId: photo.FrontPhotoStorageId,
                 frontPhotoBytesExpected),
-            getObjectForBackPhotoShouldReturn: (backPhotoStorageId: _photo.BackPhotoStorageId, backPhotoBytesExpected));
+            getObjectForBackPhotoShouldReturn: (backPhotoStorageId: photo.BackPhotoStorageId, backPhotoBytesExpected));
         var storage = storageBuilder.Build();
 
         // Act
-        var actual = await storage.GetPhotos(_photo.Id, _photo.FrontPhotoStorageId, _photo.BackPhotoStorageId);
+        var actual = await storage.GetPhotos(photo.Id, photo.FrontPhotoStorageId, photo.BackPhotoStorageId);
 
         // Assert
         Assert.Equal(frontPhotoBytesExpected, actual!.Value.frontPhotoBytes);
@@ -93,24 +123,40 @@ public class S3StorageShould : IntegrationTestBase
         // Arrange
         const string bucketName = "test_bucket";
         
-        await Context.Photos.AddAsync(_photo, TestContext.Current.CancellationToken);
-        await Context.S3Buckets.AddAsync(new S3BucketModel { Bucket = bucketName, PhotoId = _photo.Id },
+        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        
+        await AddDrivingLicense(_drivingLicense);
+        
+        await Context.Photos.AddAsync(photo, TestContext.Current.CancellationToken);
+        await Context.S3Buckets.AddAsync(new S3BucketModel { 
+                Id = Guid.NewGuid(), 
+                Bucket = bucketName, 
+                PhotoId = photo.Id },
             TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
         var storageBuilder = new StorageBuilder();
         storageBuilder.ConfigureContext(Context);
         storageBuilder.ConfigureAmazonS3(bucketName: bucketName,
-            getObjectForFrontPhotoShouldReturn: (frontPhotoStorageId: _photo.FrontPhotoStorageId, []),
-            getObjectForBackPhotoShouldReturn: (backPhotoStorageId: _photo.BackPhotoStorageId, []),
+            getObjectForFrontPhotoShouldReturn: (frontPhotoStorageId: photo.FrontPhotoStorageId, []),
+            getObjectForBackPhotoShouldReturn: (backPhotoStorageId: photo.BackPhotoStorageId, []),
             statusCode: HttpStatusCode.NotFound);
         var storage = storageBuilder.Build();
 
         // Act
-        var actual = await storage.GetPhotos(_photo.Id, _photo.FrontPhotoStorageId, _photo.BackPhotoStorageId);
+        var actual = await storage.GetPhotos(photo.Id, photo.FrontPhotoStorageId, photo.BackPhotoStorageId);
 
         // Assert
         Assert.Null(actual);
+    }
+    
+    private async Task AddDrivingLicense(DrivingLicense drivingLicense)
+    {
+        Context.Attach(drivingLicense.Status);
+        Context.Attach(drivingLicense.CategoryList);
+        
+        await Context.AddAsync(drivingLicense);
+        await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
     
     private class StorageBuilder
@@ -138,7 +184,7 @@ public class S3StorageShould : IntegrationTestBase
         {
             var frontPhotoResponse = new GetObjectResponse
             {
-                Key = getObjectForFrontPhotoShouldReturn.frontPhotoStorageId.ToString(),
+                Key = $"{bucketName}/{getObjectForFrontPhotoShouldReturn.frontPhotoStorageId}.jpg",
                 BucketName = bucketName,
                 ResponseStream = new MemoryStream(getObjectForFrontPhotoShouldReturn.frontPhotoBytes),
                 ContentLength = getObjectForFrontPhotoShouldReturn.frontPhotoBytes.Length,
@@ -146,7 +192,7 @@ public class S3StorageShould : IntegrationTestBase
             };
             var backPhotoResponse = new GetObjectResponse
             {
-                Key = getObjectForBackPhotoShouldReturn.backPhotoStorageId.ToString(),
+                Key = $"{bucketName}/{getObjectForBackPhotoShouldReturn.backPhotoStorageId}.jpg",
                 BucketName = bucketName,
                 ResponseStream = new MemoryStream(getObjectForBackPhotoShouldReturn.backPhotoBytes),
                 ContentLength = getObjectForBackPhotoShouldReturn.backPhotoBytes.Length,
@@ -154,7 +200,7 @@ public class S3StorageShould : IntegrationTestBase
             };
             _s3Mock.Setup(x => x.GetObjectAsync(
                     It.Is<GetObjectRequest>(r =>
-                        r.Key == getObjectForFrontPhotoShouldReturn.frontPhotoStorageId.ToString() &&
+                        r.Key == $"{bucketName}/{getObjectForFrontPhotoShouldReturn.frontPhotoStorageId}.jpg" &&
                         r.BucketName == bucketName),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(frontPhotoResponse);
@@ -162,7 +208,7 @@ public class S3StorageShould : IntegrationTestBase
             _s3Mock.Setup(x =>
                     x.GetObjectAsync(
                         It.Is<GetObjectRequest>(r =>
-                            r.Key == getObjectForBackPhotoShouldReturn.backPhotoStorageId.ToString() &&
+                            r.Key == $"{bucketName}/{getObjectForBackPhotoShouldReturn.backPhotoStorageId}.jpg" &&
                             r.BucketName == bucketName),
                         It.IsAny<CancellationToken>()))
                 .ReturnsAsync(backPhotoResponse);

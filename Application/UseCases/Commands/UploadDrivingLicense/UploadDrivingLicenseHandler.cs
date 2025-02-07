@@ -8,6 +8,7 @@ namespace Application.UseCases.Commands.UploadDrivingLicense;
 
 public class UploadDrivingLicenseHandler(
     IDrivingLicenseRepository drivingLicenseRepository, 
+    TimeProvider timeProvider,
     IUnitOfWork unitOfWork) 
     : IRequestHandler<UploadDrivingLicenseCommand, Result<UploadDrivingLicenseResponse>>
 {
@@ -21,7 +22,7 @@ public class UploadDrivingLicenseHandler(
         var codeOfIssue = CodeOfIssue.Create(command.CodeOfIssue);
         
         var license = DrivingLicense.Create(command.AccountId, categoryList, licenseNumber, name, cityOfBirth,
-            command.DateOfBirth, command.DateOfIssue, codeOfIssue, command.DateOfExpiry);
+            command.DateOfBirth, command.DateOfIssue, codeOfIssue, command.DateOfExpiry, timeProvider);
         
         await drivingLicenseRepository.Add(license);
         await unitOfWork.Commit();

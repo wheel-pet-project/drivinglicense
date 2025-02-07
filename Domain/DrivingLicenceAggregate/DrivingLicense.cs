@@ -100,7 +100,8 @@ public sealed class DrivingLicense : Aggregate
         DateOnly dateOfBirth,
         DateOnly dateOfIssue,
         CodeOfIssue codeOfIssue,
-        DateOnly dateOfExpiry)
+        DateOnly dateOfExpiry,
+        TimeProvider timeProvider)
     {
         if (accountId == Guid.Empty) 
             throw new ValueIsRequiredException($"{nameof(accountId)} cannot be empty");
@@ -120,8 +121,10 @@ public sealed class DrivingLicense : Aggregate
             throw new ValueIsRequiredException($"{nameof(codeOfIssue)} cannot be null");
         if (dateOfExpiry == default) 
             throw new ValueIsRequiredException($"{nameof(dateOfExpiry)} cannot be default value");
-
-        if (dateOfBirth > dateOfIssue || dateOfExpiry < DateOnly.FromDateTime(DateTime.UtcNow))
+        if (timeProvider == null)
+            throw new ValueIsRequiredException($"{nameof(timeProvider)} cannot be null");
+        
+        if (dateOfBirth > dateOfIssue || dateOfExpiry <= DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime))
             throw new ValueOutOfRangeException("invalid date(-s) in driving licence");
 
         return new DrivingLicense(accountId, categoryList, number, name, cityOfBirth, dateOfBirth, dateOfIssue, 

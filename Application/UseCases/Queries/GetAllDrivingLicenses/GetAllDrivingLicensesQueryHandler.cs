@@ -1,27 +1,21 @@
-using System.Data.Common;
 using Dapper;
 using Domain.DrivingLicenceAggregate;
+using FluentResults;
 using MediatR;
+using Npgsql;
 
 namespace Application.UseCases.Queries.GetAllDrivingLicenses;
 
-public class GetAllDrivingLicensesQueryHandler(DbDataSource dataSource) 
-    : IRequestHandler<GetAllDrivingLicensesQuery, GetAllDrivingLicensesQueryResponse>
+public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource) 
+    : IRequestHandler<GetAllDrivingLicensesQuery, Result<GetAllDrivingLicensesQueryResponse>>
 {
-    public async Task<GetAllDrivingLicensesQueryResponse> Handle(GetAllDrivingLicensesQuery request, 
+    public async Task<Result<GetAllDrivingLicensesQueryResponse>> Handle(GetAllDrivingLicensesQuery request, 
         CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
 
-        var command = new CommandDefinition(
-            commandText: request.FilteringStatus is null ? _sql : _sqlWithStatusFilter,
-            parameters: request.FilteringStatus is null
-                ? new
-                {
-                    Offset = (request.Page - 1) * request.PageSize, 
-                    Limit = request.PageSize
-                }
-                : new
+        var command = new CommandDefinition(_sql,
+            new
                 {
                     StatusId = request.FilteringStatus.Id, 
                     Offset = (request.Page - 1) * request.PageSize,
@@ -57,18 +51,9 @@ public class GetAllDrivingLicensesQueryHandler(DbDataSource dataSource)
         
         public string Patronymic { get; private set; } = null!;
     }
+    
 
     private readonly string _sql =
-        """
-        SELECT id AS Id, account_id AS AccountId, status_id AS StatusId, first_name AS FirstName, 
-               last_name AS LastName, patronymic AS Patronymic
-        FROM driving_license
-        ORDER BY number
-        OFFSET @Offset
-        LIMIT @Limit
-        """;
-
-    private readonly string _sqlWithStatusFilter =
         """
         SELECT id AS Id, account_id AS AccountId, status_id AS StatusId, first_name AS FirstName, 
                last_name AS LastName, patronymic AS Patronymic

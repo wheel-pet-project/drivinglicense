@@ -44,6 +44,8 @@ message GetLicenseByIdResponse {
   string code_of_issue = 9;
   google.protobuf.Timestamp date_of_issue = 10;
   google.protobuf.Timestamp date_of_expiry = 11;
+  optional bytes front_photo = 12;
+  optional bytes back_photo = 13;
 }
 
 
@@ -53,7 +55,7 @@ message GetAllLicensesRequest{
   string cor_id = 1;
   int32 page = 2;
   int32 page_size = 3;
-  optional Status filtering_status = 4;
+  Status filtering_status = 4;
 }
 message GetAllLicensesResponse{
   message LicenseShortView{

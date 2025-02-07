@@ -1,4 +1,6 @@
 
+using Api.Adapters.Grpc;
+
 namespace Api;
 
 public class Program
@@ -8,13 +10,27 @@ public class Program
         var builder = WebApplication.CreateBuilder();
         var services = builder.Services;
         
-        services.AddGrpc();
+        services.AddGrpc(options => options.Interceptors.Add<ExceptionHandlerInterceptor>());
 
-        services.RegisterPostgresDataContext();
+        services
+            .RegisterPostgresDataContext()
+            .RegisterUnitOfWork()
+            .RegisterS3Storage()
+            .RegisterOutboxAndActualityObserverBackgroundJobs()
+            .RegisterMediatrAndPipelines()
+            .RegisterMapper()
+            .RegisterRepositories()
+            .RegisterSerilog()
+            .RegisterMassTransit()
+            .RegisterTelemetry()
+            .RegisterHealthCheckV1()
+            .RegisterTimeProvider();
         
         var app = builder.Build();
-        
 
+        app.MapGrpcService<DrivingLicenseV1>();
+        app.MapGrpcHealthChecksService();
+        
         app.Run();
     }
 }

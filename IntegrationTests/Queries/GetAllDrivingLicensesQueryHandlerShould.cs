@@ -1,8 +1,8 @@
-using System.Data.Common;
 using Application.UseCases.Queries.GetAllDrivingLicenses;
 using Domain.DrivingLicenceAggregate;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
+using Npgsql;
 using Xunit;
 
 namespace IntegrationTests.Queries;
@@ -15,43 +15,15 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
         DrivingLicense.Create(Guid.NewGuid(), CategoryList.Create([CategoryList.BCategory]),
             DrivingLicenseNumber.Create("1234 567891"), Name.Create("Иван", "Иванов", "Иванович"), 
             City.Create("Москва"), new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
-            CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1)),
+            CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1), 
+            TimeProvider.System),
         DrivingLicense.Create(Guid.NewGuid(), CategoryList.Create([CategoryList.BCategory]),
             DrivingLicenseNumber.Create("1234 567892"), Name.Create("Иван", "Иванов", "Иванович"), City.Create("Москва"),
             new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
-            CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1))
+            CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1), 
+            TimeProvider.System)
     ];
-
-    [Fact]
-    public async Task ReturnDrivingLicenseList()
-    {
-        // Arrange
-        Context.Attach(_drivingLicenses[0].Status);
-        Context.Attach(_drivingLicenses[1].Status);
-        Context.Attach(_drivingLicenses[0].CategoryList);
-        Context.Attach(_drivingLicenses[1].CategoryList);
-        
-        await Context.AddRangeAsync(_drivingLicenses, TestContext.Current.CancellationToken);
-        await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-        
-        var queryHandlerBuilder = new QueryHandlerBuilder();
-        queryHandlerBuilder.ConfigureDataSource(DataSource);
-        var handler = queryHandlerBuilder.Build();
-
-        // Act
-        var response = await handler.Handle(
-            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2), TestContext.Current.CancellationToken);
-
-        // Assert
-        Assert.NotNull(response);
-        Assert.NotEmpty(response.DrivingLicenses);
-        Assert.Equal(_drivingLicenses.Count, response.DrivingLicenses.Count);
-        Assert.NotNull(response.DrivingLicenses[0].Status);
-        Assert.NotNull(response.DrivingLicenses[0].Name);
-        Assert.NotEqual(Guid.Empty, response.DrivingLicenses[0].Id);
-        Assert.NotEqual(Guid.Empty, response.DrivingLicenses[0].AccountId);
-    }
-
+    
     [Fact]
     public async Task ReturnEmptyListIfLicenseNotFound()
     {
@@ -62,11 +34,12 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Act
         var response = await handler.Handle(
-            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2), TestContext.Current.CancellationToken);
+            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2, Status.Approved),
+            TestContext.Current.CancellationToken);
         
         // Assert
         Assert.NotNull(response);
-        Assert.Empty(response.DrivingLicenses);
+        Assert.Empty(response.Value.DrivingLicenses);
     }
 
     [Fact]
@@ -94,17 +67,17 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Assert
         Assert.NotNull(response);
-        Assert.NotEmpty(response.DrivingLicenses);
-        Assert.Single(response.DrivingLicenses);
-        Assert.Equivalent(_drivingLicenses[0].Status, response.DrivingLicenses[0].Status);
+        Assert.NotEmpty(response.Value.DrivingLicenses);
+        Assert.Single(response.Value.DrivingLicenses);
+        Assert.Equivalent(_drivingLicenses[0].Status, response.Value.DrivingLicenses[0].Status);
     }
     
     private class QueryHandlerBuilder
     {
-        private DbDataSource _dataSource = null!;
+        private NpgsqlDataSource _dataSource = null!;
         
-        public GetAllDrivingLicensesQueryHandler Build() => new GetAllDrivingLicensesQueryHandler(_dataSource);
+        public GetAllDrivingLicensesQueryHandler Build() => new(_dataSource);
         
-        public void ConfigureDataSource(DbDataSource dataSource) => _dataSource = dataSource;
+        public void ConfigureDataSource(NpgsqlDataSource dataSource) => _dataSource = dataSource;
     }
 }

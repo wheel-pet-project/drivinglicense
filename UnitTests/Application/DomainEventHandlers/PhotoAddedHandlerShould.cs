@@ -17,8 +17,9 @@ public class PhotoAddedHandlerShould
         CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create("1234 567891"),
         Name.Create("Иван", "Иванов", "Иванович"), City.Create("Москва"),
         new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
-        CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1));
-    private readonly PhotoAddedDomainEvent _domainEvent = new PhotoAddedDomainEvent(Guid.NewGuid());
+        CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
+        TimeProvider.System);
+    private readonly PhotoAddedDomainEvent _domainEvent = new(Guid.NewGuid());
     
     [Fact]
     public async Task MutateLicenseStatus()
@@ -70,8 +71,7 @@ public class PhotoAddedHandlerShould
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-        public PhotoAddedHandler Build() =>
-            new PhotoAddedHandler(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
+        public PhotoAddedHandler Build() => new(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
 
         public void ConfigureDrivingLicenseRepository(DrivingLicense getByIdShouldReturn) =>
             _drivingLicenseRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(getByIdShouldReturn);

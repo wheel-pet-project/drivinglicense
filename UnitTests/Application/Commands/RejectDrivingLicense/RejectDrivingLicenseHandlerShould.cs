@@ -16,7 +16,8 @@ public class RejectDrivingLicenseHandlerShould
         CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create("1234 567891"),
         Name.Create("Иван", "Иванов", "Иванович"), City.Create("Москва"),
         new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
-        CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1));
+        CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
+        TimeProvider.System);
     private readonly RejectDrivingLicenseCommand _command = new(Guid.NewGuid(), Guid.NewGuid());
     
     [Fact]

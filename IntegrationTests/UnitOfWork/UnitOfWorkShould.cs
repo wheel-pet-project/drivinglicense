@@ -29,7 +29,8 @@ public class UnitOfWorkShould : IntegrationTestBase
         dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
         dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
         codeOfIssue: CodeOfIssue.Create(input: "1234"), 
-        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1));
+        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1), 
+        TimeProvider.System);
     
     [Fact]
     public async Task SaveDomainEvent()

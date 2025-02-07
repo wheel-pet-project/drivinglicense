@@ -18,6 +18,7 @@ public class OutboxBackgroundJob(
     {
         var outboxEvents = await context.Outbox
             .Where(x => x.ProcessedOnUtc == null)
+            .OrderBy(x => x.OccurredOnUtc)
             .Take(50)
             .ToListAsync();
         
@@ -37,6 +38,7 @@ public class OutboxBackgroundJob(
                 }
                 
                 context.Outbox.UpdateRange(outboxEvents);
+                await context.SaveChangesAsync(jobExecutionContext.CancellationToken);
                 await transaction.CommitAsync();
             }
             catch

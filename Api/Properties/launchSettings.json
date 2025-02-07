@@ -7,12 +7,7 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:6200",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "POSTGRES_HOST": "localhost",
-        "POSTGRES_PORT": "5430",
-        "POSTGRES_DB": "drivinglicense_db",
-        "POSTGRES_USER": "postgres",
-        "POSTGRES_PASSWORD": "password"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "https": {
@@ -21,12 +16,7 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:6201;http://localhost:6200",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "POSTGRES_HOST": "localhost",
-        "POSTGRES_PORT": "5430",
-        "POSTGRES_DB": "drivinglicense_db",
-        "POSTGRES_USER": "postgres",
-        "POSTGRES_PASSWORD": "password"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

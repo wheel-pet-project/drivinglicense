@@ -6,6 +6,7 @@ using Application.UseCases.Queries.GetAllDrivingLicenses;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
 using Domain.SharedKernel.Errors;
 using FluentResults;
+using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -29,25 +30,32 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         if (result.IsFailed) 
             return ParseErrorToRpcException<GetLicenseByIdResponse>(result.Errors);
         
+        var resultView = result.Value.DrivingLicenseView;
         var response = new GetLicenseByIdResponse
         {
-            Id = result.Value.DrivingLicenseView.Id.ToString(),
-            AccId = result.Value.DrivingLicenseView.AccountId.ToString(),
-            Status = mapper.DomainStatusToProtoStatus(result.Value.DrivingLicenseView.Status),
-            Name = result.Value.DrivingLicenseView.Name,
-            Number = result.Value.DrivingLicenseView.Number,
-            CityOfBirth = result.Value.DrivingLicenseView.CityOfBirth,
+            Id = resultView.Id.ToString(),
+            AccId = resultView.AccountId.ToString(),
+            Status = mapper.DomainStatusToProtoStatus(resultView.Status),
+            Name = resultView.Name,
+            Number = resultView.Number,
+            CityOfBirth = resultView.CityOfBirth,
             DateOfBirth = Timestamp.FromDateTime(
-                result.Value.DrivingLicenseView.DateOfBirth.ToDateTime(new TimeOnly())),
-            CodeOfIssue = result.Value.DrivingLicenseView.CodeOfIssue,
+                resultView.DateOfBirth.ToDateTime(new TimeOnly(), DateTimeKind.Utc)),
+            CodeOfIssue = resultView.CodeOfIssue,
             DateOfIssue = Timestamp.FromDateTime(
-                result.Value.DrivingLicenseView.DateOfIssue.ToDateTime(new TimeOnly())),
+                resultView.DateOfIssue.ToDateTime(new TimeOnly(), DateTimeKind.Utc)),
             DateOfExpiry = Timestamp.FromDateTime(
-                result.Value.DrivingLicenseView.DateOfExpiry.ToDateTime(new TimeOnly())),
+                resultView.DateOfExpiry.ToDateTime(new TimeOnly(), DateTimeKind.Utc))
         };
+
+        if (resultView is { FrontPhotoBytes: not null, BackPhotoBytes: not null })
+        {
+            response.FrontPhoto = await ByteString.FromStreamAsync(new MemoryStream(resultView.FrontPhotoBytes));
+            response.BackPhoto = await ByteString.FromStreamAsync(new MemoryStream(resultView.BackPhotoBytes));
+        }
             
         var categories = new RepeatedField<string>
-            { result.Value.DrivingLicenseView.CategoryList.Select(x => new string(x, 1)).AsEnumerable() };
+            { resultView.CategoryList.Select(x => new string(x, 1)).AsEnumerable() };
         response.Categories.AddRange(categories);
             
         return response;
@@ -65,14 +73,17 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         var result = await mediator.Send(getAllDrivingLicensesQuery, context.CancellationToken);
 
         var response = new GetAllLicensesResponse();
-        response.Licenses.AddRange(result.DrivingLicenses.Select(x => new GetAllLicensesResponse.Types.LicenseShortView
+        if (result.Value.DrivingLicenses.Count > 0)
         {
-            Id = x.Id.ToString(),
-            AccountId = x.AccountId.ToString(), 
-            Name = x.Name,
-            Status = mapper.DomainStatusToProtoStatus(x.Status),
-        }));
-        
+            response.Licenses.AddRange(result.Value.DrivingLicenses.Select(x =>
+                new GetAllLicensesResponse.Types.LicenseShortView
+                {
+                    Id = x.Id.ToString(),
+                    AccountId = x.AccountId.ToString(),
+                    Name = x.Name,
+                    Status = mapper.DomainStatusToProtoStatus(x.Status),
+                }));
+        }
         return response;
     }
 
@@ -86,7 +97,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
             Number: request.Number, 
             FirstName: request.FirstName, 
             LastName: request.LastName, 
-            Patronymic: request.Patronymic, 
+            Patronymic: request.Patronymic == string.Empty ? null : request.Patronymic, 
             CityOfBirth: request.CityOfBirth,
             DateOfBirth: DateOnly.FromDateTime(request.DateOfBirth.ToDateTime()),
             DateOfIssue: DateOnly.FromDateTime(request.DateOfIssue.ToDateTime()), 
@@ -96,7 +107,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         var result = await mediator.Send(uploadDrivingLicenseCommand, context.CancellationToken);
         
         return result.IsSuccess 
-            ? new UploadLicenseResponse()
+            ? new UploadLicenseResponse { Id = result.Value.DrivingLicenseId.ToString() }
             : ParseErrorToRpcException<UploadLicenseResponse>(result.Errors);
     }
 
