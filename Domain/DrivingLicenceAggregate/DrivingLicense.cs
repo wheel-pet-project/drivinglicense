@@ -36,25 +36,15 @@ public sealed class DrivingLicense : Aggregate
     
     
     public Guid Id { get; private set; }
-    
     public Guid AccountId { get; private set; }
-
     public Status Status { get; private set; } = null!;
-
     public CategoryList CategoryList { get; private set; } = null!;
-
     public DrivingLicenseNumber Number { get; private set; } = null!;
-    
     public Name Name { get; private set; } = null!;
-    
     public City CityOfBirth { get; private set; } = null!;
-
     public DateOnly DateOfBirth { get; private set; }
-    
     public DateOnly DateOfIssue { get; private set; }
-    
     public CodeOfIssue CodeOfIssue { get; private set; } = null!;
-    
     public DateOnly DateOfExpiry { get; private set; }
     
     public void MarkAsPendingProcessing()

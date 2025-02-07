@@ -74,10 +74,9 @@ public class PhotoShould
     public void AddDomainEvent()
     {
         // Arrange
-        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
 
         // Act
-        photo.AddPhotoAddedDomainEvent();
+        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
 
         // Assert
         Assert.NotEmpty(photo.DomainEvents);

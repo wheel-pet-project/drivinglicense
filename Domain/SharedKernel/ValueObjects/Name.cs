@@ -16,9 +16,7 @@ public class Name : ValueObject
     
     
     public string FirstName { get; private set; } = null!;
-    
     public string LastName { get; private set; } = null!;
-    
     public string? Patronymic { get; private set; }
 
     public static Name Create(string firstName, string lastName, string? patronymic = null)

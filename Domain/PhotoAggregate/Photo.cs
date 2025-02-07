@@ -22,18 +22,11 @@ public class Photo : Aggregate
     }
     
     public Guid Id { get; private set; }
-    
     public Guid DrivingLicenseId { get; private set; }
-
     public Guid FrontPhotoStorageId { get; private set; }
-    
     public Guid BackPhotoStorageId { get; private set; }
-    
     public byte[]? FrontPhotoBytes { get; private set; }
-    
     public byte[]? BackPhotoBytes { get; private set; }
-
-    public void AddPhotoAddedDomainEvent() => AddDomainEvent(new PhotoAddedDomainEvent(DrivingLicenseId));
     
     public static Photo Create(
         Guid drivingLicenseId,
@@ -47,6 +40,11 @@ public class Photo : Aggregate
         if (backPhotoBytes is null || backPhotoBytes.Length == 0)
             throw new ValueIsRequiredException($"{nameof(backPhotoBytes)} cannot be null or empty");
 
-        return new Photo(drivingLicenseId, frontPhotoBytes, backPhotoBytes);
+        var newPhoto =  new Photo(drivingLicenseId, frontPhotoBytes, backPhotoBytes);
+        newPhoto.AddPhotoAddedDomainEvent();
+        
+        return newPhoto;
     }
+    
+    private void AddPhotoAddedDomainEvent() => AddDomainEvent(new PhotoAddedDomainEvent(DrivingLicenseId));
 }

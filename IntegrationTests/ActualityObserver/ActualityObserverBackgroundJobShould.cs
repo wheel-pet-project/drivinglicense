@@ -1,6 +1,7 @@
 using Domain.DrivingLicenceAggregate;
 using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres.ActualityObserver;
+using JetBrains.Annotations;
 using MediatR;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
@@ -11,7 +12,8 @@ using IMediator = MediatR.IMediator;
 
 namespace IntegrationTests.ActualityObserver;
 
-public class ActualityObserverShould : IntegrationTestBase
+[TestSubject(typeof(ActualityObserverBackgroundJob))]
+public class ActualityObserverBackgroundJobShould : IntegrationTestBase
 {
     [Fact]
     public async Task CallPublish()

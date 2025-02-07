@@ -20,8 +20,6 @@ public class UploadPhotosHandler(
         var isSuccess = await s3Storage.SavePhotos(photo);
         if (isSuccess is false) return Result.Fail(new ObjectStorageUnavailable("Failed to upload photo"));
         
-        photo.AddPhotoAddedDomainEvent();
-        
         await photoRepository.Add(photo);
         await unitOfWork.Commit();
         

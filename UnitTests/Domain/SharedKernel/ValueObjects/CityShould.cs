@@ -52,7 +52,7 @@ public class CityShould
     }
 
     [Fact]
-    public void ToUpperFirstLetter()
+    public void UpperFirstLetter()
     {
         // Arrange
         var cityName = " москва ";
@@ -63,5 +63,33 @@ public class CityShould
         // Assert
         Assert.NotNull(city);
         Assert.Equal("Москва", city.Name);
+    }
+    
+    [Fact]
+    public void EqualOperatorReturnTrueForEqualCities()
+    {
+        // Arrange
+        var city1 = City.Create("Москва");
+        var city2 = City.Create("Москва");
+
+        // Act
+        var actual = city1 == city2;
+        
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void EqualOperatorReturnFalseForDifferentCities()
+    {
+        // Arrange
+        var city1 = City.Create("Paris");
+        var city2 = City.Create("Москва");
+
+        // Act
+        var actual = city1 == city2;
+        
+        // Assert
+        Assert.False(actual);
     }
 }
