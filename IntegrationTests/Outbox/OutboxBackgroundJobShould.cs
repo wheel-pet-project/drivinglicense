@@ -14,8 +14,6 @@ namespace IntegrationTests.Outbox;
 [TestSubject(typeof(OutboxBackgroundJob))]
 public class OutboxBackgroundJobShould : IntegrationTestBase
 {
-    private readonly JsonSerializerSettings
-        _jsonSerializerSettings = new() { TypeNameHandling = TypeNameHandling.All, };
     private readonly IReadOnlyList<OutboxEvent> _outboxEvents = new List<OutboxEvent>
     {
         new()

@@ -7,7 +7,7 @@ namespace Api.Adapters.Mapper;
 public class Mapper
 {
     public DomainStatus ProtoStatusToDomainStatus(Status? protoStatus) =>
-        (protoStatus switch
+        protoStatus switch
         {
             Status.PendingPhotosAdding => DomainStatus.PendingPhotosAdding,
             Status.PendingProcessing => DomainStatus.PendingProcessing,
@@ -15,7 +15,7 @@ public class Mapper
             Status.Rejected => DomainStatus.Rejected,
             Status.Expired => DomainStatus.Expired,
             _ => throw new ValueOutOfRangeException($"{nameof(protoStatus)} is unknown status")
-        })!;
+        };
 
     public Status DomainStatusToProtoStatus(DomainStatus domainStatus) =>
         domainStatus switch

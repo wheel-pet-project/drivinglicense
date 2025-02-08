@@ -30,13 +30,13 @@ public class S3StorageShould : IntegrationTestBase
         codeOfIssue: CodeOfIssue.Create(input: "1234"), 
         dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1), 
         TimeProvider.System);
-    private readonly byte[] photoBytes = [1, 2, 3];
+    private readonly byte[] _photoBytes = [1, 2, 3];
     
     [Fact]
     public async Task AddPhotosBucketNameToPostgres()
     {
         // Arrange
-        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        var photo = Photo.Create(_drivingLicense.Id, _photoBytes, _photoBytes);
         
         await AddDrivingLicense(_drivingLicense);
         
@@ -62,7 +62,7 @@ public class S3StorageShould : IntegrationTestBase
     public async Task ReturnSuccessForSave()
     {
         // Arrange
-        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        var photo = Photo.Create(_drivingLicense.Id, _photoBytes, _photoBytes);
         
         await AddDrivingLicense(_drivingLicense);
         
@@ -88,7 +88,7 @@ public class S3StorageShould : IntegrationTestBase
         byte[] frontPhotoBytesExpected = [1, 2, 3];
         byte[] backPhotoBytesExpected = [4, 5, 6];
         
-        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        var photo = Photo.Create(_drivingLicense.Id, _photoBytes, _photoBytes);
         
         await AddDrivingLicense(_drivingLicense);
         
@@ -123,7 +123,7 @@ public class S3StorageShould : IntegrationTestBase
         // Arrange
         const string bucketName = "test_bucket";
         
-        var photo = Photo.Create(_drivingLicense.Id, photoBytes, photoBytes);
+        var photo = Photo.Create(_drivingLicense.Id, _photoBytes, _photoBytes);
         
         await AddDrivingLicense(_drivingLicense);
         
