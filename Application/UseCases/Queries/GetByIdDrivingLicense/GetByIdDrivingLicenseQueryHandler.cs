@@ -21,20 +21,15 @@ public class GetByIdDrivingLicenseQueryHandler(
         var command = new CommandDefinition(_getLicenseSql, new { request.Id }, cancellationToken: cancellationToken);
         var dapperModel = await connection.QuerySingleOrDefaultAsync<DapperDrivingLicenseModel>(command);
         if (dapperModel is null) return Result.Fail("Driving license not found");
-
-        var nameParts = new List<string>
-        {
-            dapperModel.FirstName,
-            dapperModel.LastName
-        };
-        if (dapperModel.Patronymic != null) nameParts.Add(dapperModel.Patronymic);
         
         var responseModel = new GetByIdDrivingLicenseQueryResponse(new DrivingLicenseView
             {
                 Id = dapperModel.Id,
                 AccountId = dapperModel.AccountId,
                 CategoryList = dapperModel.CategoryList.Select(x => x[0]).ToArray(),
-                Name = string.Join(' ', nameParts),
+                Name = string.Join(' ', new List<string>(dapperModel.Patronymic is null 
+                    ? [dapperModel.FirstName, dapperModel.LastName] 
+                    : [dapperModel.FirstName, dapperModel.LastName, dapperModel.Patronymic])),
                 Number = dapperModel.Number,
                 CityOfBirth = dapperModel.CityOfBirth,
                 DateOfBirth = dapperModel.DateOfBirth,
@@ -45,11 +40,14 @@ public class GetByIdDrivingLicenseQueryHandler(
             });
         
         var photoIdsModel = await connection.QuerySingleOrDefaultAsync<DapperPhotoIdsModel>(
-            _getPhotoIdsSql, new { LicenseId = request.Id });
+            _getPhotoIdsSql, 
+            new { LicenseId = request.Id });
         if (photoIdsModel is null) return Result.Ok(responseModel);
 
-        var getPhotosResult =
-            await s3Storage.GetPhotos(photoIdsModel.PhotoId, photoIdsModel.FrontPhotoId, photoIdsModel.BackPhotoId);
+        var getPhotosResult = await s3Storage.GetPhotos(
+            photoIdsModel.PhotoId, 
+            photoIdsModel.FrontPhotoId, 
+            photoIdsModel.BackPhotoId);
         if (getPhotosResult is null) return Result.Fail("Photos for license not found");
         
         var (frontPhoto, backPhoto) = getPhotosResult.Value;
@@ -60,40 +58,40 @@ public class GetByIdDrivingLicenseQueryHandler(
 
     private class DapperPhotoIdsModel
     {
-        public Guid PhotoId { get; private set; }
+        public required Guid PhotoId { get; init; }
         
-        public Guid FrontPhotoId { get; private set; }
+        public required Guid FrontPhotoId { get; init; }
         
-        public Guid BackPhotoId { get; private set; }
+        public required Guid BackPhotoId { get; init; }
     }
     
     private class DapperDrivingLicenseModel
     {
-        public Guid Id { get; private set; }
+        public required Guid Id { get; init; }
     
-        public Guid AccountId { get; private set; }
+        public required Guid AccountId { get; init; }
 
-        public int StatusId { get; private set; }
+        public required int StatusId { get; init; }
 
-        public string[] CategoryList { get; private set; } = null!;
+        public required string[] CategoryList { get; init; } 
 
-        public string Number { get; private set; } = null!;
+        public required string Number { get; init; } 
     
-        public string FirstName { get; private set; } = null!;
+        public required string FirstName { get; init; } 
         
-        public string LastName { get; private set; } = null!;
+        public required string LastName { get; init; } 
         
-        public string? Patronymic { get; private set; } = null!;
+        public required string? Patronymic { get; init; }
     
-        public string CityOfBirth { get; private set; } = null!;
+        public required string CityOfBirth { get; init; } 
 
-        public DateOnly DateOfBirth { get; private set; }
+        public required DateOnly DateOfBirth { get; init; }
     
-        public DateOnly DateOfIssue { get; private set; }
+        public required DateOnly DateOfIssue { get; init; }
     
-        public string CodeOfIssue { get; private set; } = null!;
+        public required string CodeOfIssue { get; init; } 
     
-        public DateOnly DateOfExpiry { get; private set; }
+        public required DateOnly DateOfExpiry { get; init; }
     }
 
     private readonly string _getPhotoIdsSql =

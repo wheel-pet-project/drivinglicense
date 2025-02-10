@@ -30,7 +30,9 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
         {
             Id = x.Id,
             AccountId = x.AccountId,
-            Name = string.Join(' ', x.FirstName, x.LastName, x.Patronymic),
+            Name = string.Join(' ', new List<string>(x.Patronymic is null 
+                ? [x.FirstName, x.LastName] 
+                : [x.FirstName, x.LastName, x.Patronymic])),
             Status = Status.FromId(x.StatusId)
         }).ToList();
 
@@ -39,17 +41,17 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
     
     private class DapperDrivingLicenseShortModel
     {
-        public Guid Id { get; private set; }
+        public required Guid Id { get; init; }
         
-        public Guid AccountId { get; private set; }
+        public required Guid AccountId { get; init; }
         
-        public int StatusId { get; private set; }
+        public required int StatusId { get; init; }
         
-        public string FirstName { get; private set; } = null!;
+        public required string FirstName { get; init; }
         
-        public string LastName { get; private set; } = null!;
+        public required string LastName { get; init; }
         
-        public string Patronymic { get; private set; } = null!;
+        public required string? Patronymic { get; init; }
     }
     
 

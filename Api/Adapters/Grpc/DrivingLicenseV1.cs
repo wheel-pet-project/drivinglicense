@@ -22,8 +22,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var getDrivingLicenseByIdQuery = new GetByIdDrivingLicenseQuery(
-            CorrelationId: Guid.Parse(request.CorId.AsSpan()), 
-            Id: Guid.Parse(request.Id.AsSpan()));
+            CorrelationId: Guid.Parse(request.CorId), 
+            Id: Guid.Parse(request.Id));
         
         var result = await mediator.Send(getDrivingLicenseByIdQuery, context.CancellationToken);
         
@@ -65,7 +65,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var getAllDrivingLicensesQuery = new GetAllDrivingLicensesQuery(
-            CorrelationId: Guid.Parse(request.CorId.AsSpan()),
+            CorrelationId: Guid.Parse(request.CorId),
             Page: request.Page, 
             PageSize: request.PageSize,
             FilteringStatus: mapper.ProtoStatusToDomainStatus(request.FilteringStatus));
@@ -91,8 +91,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var uploadDrivingLicenseCommand = new UploadDrivingLicenseCommand(
-            CorrelationId: Guid.Parse(request.CorId.AsSpan()),
-            AccountId: Guid.Parse(request.AccId.AsSpan()), 
+            CorrelationId: Guid.Parse(request.CorId),
+            AccountId: Guid.Parse(request.AccId), 
             CategoryList: [..request.Categories.Select(char.Parse)],
             Number: request.Number, 
             FirstName: request.FirstName, 
@@ -115,8 +115,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var uploadPhotosCommand = new UploadPhotosCommand(
-            CorrelationId: Guid.Parse(request.CorId.AsSpan()),
-            DrivingLicenseId: Guid.Parse(request.LicenseId.AsSpan()), 
+            CorrelationId: Guid.Parse(request.CorId),
+            DrivingLicenseId: Guid.Parse(request.LicenseId), 
             FrontPhotoBytes: request.FrontPhoto.ToByteArray(), 
             BackPhotoBytes: request.BackPhoto.ToByteArray());
         
@@ -131,8 +131,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var approveDrivingLicenseCommand = new ApproveDrivingLicenseCommand(
-            CorrelationId: Guid.Parse(request.CorId.AsSpan()),
-            DrivingLicenseId: Guid.Parse(request.LicenseId.AsSpan()));
+            CorrelationId: Guid.Parse(request.CorId),
+            DrivingLicenseId: Guid.Parse(request.LicenseId));
         
         var result = await mediator.Send(approveDrivingLicenseCommand, context.CancellationToken);
         
@@ -145,8 +145,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var rejectDrivingLicenseCommand = new RejectDrivingLicenseCommand(
-            CorrelationId: Guid.Parse(request.CorId.AsSpan()), 
-            DrivingLicenseId: Guid.Parse(request.LicenseId.AsSpan()));
+            CorrelationId: Guid.Parse(request.CorId), 
+            DrivingLicenseId: Guid.Parse(request.LicenseId));
         
         var result = await mediator.Send(rejectDrivingLicenseCommand, context.CancellationToken);
         

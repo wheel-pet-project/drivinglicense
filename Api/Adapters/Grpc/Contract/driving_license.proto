@@ -50,7 +50,6 @@ message GetLicenseByIdResponse {
 
 
 // Get driving license list query
-
 message GetAllLicensesRequest{
   string cor_id = 1;
   int32 page = 2;
