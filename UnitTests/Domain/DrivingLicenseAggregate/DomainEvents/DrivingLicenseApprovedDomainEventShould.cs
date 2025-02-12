@@ -32,7 +32,10 @@ public class DrivingLicenseApprovedDomainEventShould
         var accountId = Guid.Empty;
 
         // Act
-        void Act() => new DrivingLicenseApprovedDomainEvent(accountId, [..categoryList.Categories]);
+        void Act()
+        {
+            new DrivingLicenseApprovedDomainEvent(accountId, [..categoryList.Categories]);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -45,7 +48,10 @@ public class DrivingLicenseApprovedDomainEventShould
         var accountId = Guid.NewGuid();
 
         // Act
-        void Act() => new DrivingLicenseApprovedDomainEvent(accountId, null);
+        void Act()
+        {
+            new DrivingLicenseApprovedDomainEvent(accountId, null);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);

@@ -7,7 +7,9 @@ namespace Infrastructure.Adapters.Postgres.Repositories;
 
 public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepository
 {
-    public async Task<List<DrivingLicense>> GetAll(int page, int pageSize, 
+    public async Task<List<DrivingLicense>> GetAll(
+        int page,
+        int pageSize,
         Expression<Func<DrivingLicense, bool>>? predicate = null)
     {
         var queryable = context.DrivingLicenses
@@ -25,7 +27,10 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
                 .Take(pageSize)
                 .ToListAsync());
 
-        int GetSkipCount(int p, int pSize) => (p - 1) * pSize;
+        int GetSkipCount(int p, int pSize)
+        {
+            return (p - 1) * pSize;
+        }
     }
 
     public async Task<DrivingLicense?> GetById(Guid id)
@@ -40,7 +45,7 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
     {
         context.Attach(drivingLicense.Status);
         context.Attach(drivingLicense.CategoryList);
-        
+
         context.Update(drivingLicense);
     }
 
@@ -48,7 +53,7 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
     {
         context.Attach(drivingLicense.Status);
         context.Attach(drivingLicense.CategoryList);
-        
+
         await context.AddAsync(drivingLicense);
     }
 }

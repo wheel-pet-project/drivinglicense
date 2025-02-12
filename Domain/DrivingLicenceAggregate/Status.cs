@@ -10,8 +10,10 @@ public sealed class Status : Entity<int>
     public static readonly Status Approved = new(3, nameof(Approved).ToLowerInvariant());
     public static readonly Status Rejected = new(4, nameof(Rejected).ToLowerInvariant());
     public static readonly Status Expired = new(5, nameof(Expired).ToLowerInvariant());
-    
-    private Status(){}
+
+    private Status()
+    {
+    }
 
     private Status(int id, string name) : this()
     {
@@ -21,22 +23,25 @@ public sealed class Status : Entity<int>
 
 
     public string Name { get; private set; } = null!;
-    
-    public static IEnumerable<Status> All() =>
-    [
-        PendingPhotosAdding,
-        PendingProcessing, 
-        Approved, 
-        Rejected,
-        Expired
-    ];
+
+    public static IEnumerable<Status> All()
+    {
+        return
+        [
+            PendingPhotosAdding,
+            PendingProcessing,
+            Approved,
+            Rejected,
+            Expired
+        ];
+    }
 
     public bool CanBeChangedToThisStatus(Status potentialStatus)
     {
         if (potentialStatus is null) throw new ValueIsRequiredException($"{nameof(potentialStatus)} cannot be null");
         if (!All().Contains(potentialStatus))
             throw new ValueOutOfRangeException($"{nameof(potentialStatus)} cannot be unsupported");
-        
+
         return potentialStatus switch
         {
             _ when this == potentialStatus => false,
@@ -62,16 +67,19 @@ public sealed class Status : Entity<int>
         return status;
     }
 
-    public static bool operator == (Status? a, Status? b)
+    public static bool operator ==(Status? a, Status? b)
     {
         if (a is null && b is null)
             return true;
-        
+
         if (a is null || b is null)
             return false;
-        
+
         return a.Id == b.Id;
     }
 
-    public static bool operator != (Status a, Status b) => !(a == b);
+    public static bool operator !=(Status a, Status b)
+    {
+        return !(a == b);
+    }
 }

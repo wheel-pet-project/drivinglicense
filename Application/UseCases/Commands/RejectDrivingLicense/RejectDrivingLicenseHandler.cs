@@ -14,12 +14,12 @@ public class RejectDrivingLicenseHandler(
     {
         var license = await drivingLicenseRepository.GetById(command.DrivingLicenseId);
         if (license is null) return Result.Fail(new NotFound("Driving license not found"));
-        
+
         license.Reject();
-        
+
         drivingLicenseRepository.Update(license);
         await unitOfWork.Commit();
-        
+
         return Result.Ok();
     }
 }

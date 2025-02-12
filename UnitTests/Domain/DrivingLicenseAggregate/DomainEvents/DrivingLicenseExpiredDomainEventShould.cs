@@ -28,7 +28,10 @@ public class DrivingLicenseExpiredDomainEventShould
         var accountId = Guid.Empty;
 
         // Act
-        void Act() => new DrivingLicenseExpiredDomainEvent(accountId);
+        void Act()
+        {
+            new DrivingLicenseExpiredDomainEvent(accountId);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);

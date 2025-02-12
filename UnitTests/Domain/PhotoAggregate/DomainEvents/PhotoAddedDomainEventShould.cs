@@ -5,7 +5,7 @@ using Xunit;
 
 namespace UnitTests.Domain.PhotoAggregate.DomainEvents;
 
-[TestSubject(typeof(PhotoAddedDomainEvent))]
+[TestSubject(typeof(PhotosAddedDomainEvent))]
 public class PhotoAddedDomainEventShould
 {
     [Fact]
@@ -15,19 +15,22 @@ public class PhotoAddedDomainEventShould
         var id = Guid.NewGuid();
 
         // Act
-        var domainEvent = new PhotoAddedDomainEvent(id);
+        var domainEvent = new PhotosAddedDomainEvent(id);
 
         // Assert
         Assert.Equal(id, domainEvent.DrivingLicenseId);
     }
-    
+
     [Fact]
     public void ThrowValueIsRequiredExceptionWhenDrivingLicenseIdIsEmpty()
     {
         // Arrange
 
         // Act
-        void Act() => new PhotoAddedDomainEvent(Guid.Empty);
+        void Act()
+        {
+            new PhotosAddedDomainEvent(Guid.Empty);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);

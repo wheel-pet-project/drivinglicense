@@ -5,5 +5,5 @@ namespace Application.UseCases.Commands.RejectDrivingLicense;
 
 public record RejectDrivingLicenseCommand(
     Guid CorrelationId,
-    Guid DrivingLicenseId) 
+    Guid DrivingLicenseId)
     : BaseRequest(CorrelationId), IRequest<Result>;

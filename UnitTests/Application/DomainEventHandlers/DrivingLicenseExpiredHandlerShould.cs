@@ -11,6 +11,7 @@ namespace UnitTests.Application.DomainEventHandlers;
 public class DrivingLicenseExpiredHandlerShould
 {
     private readonly DrivingLicenseExpiredDomainEvent _domainEvent = new(Guid.NewGuid());
+
     [Fact]
     public async Task PublishCallMessageBus()
     {

@@ -6,19 +6,19 @@ using MediatR;
 namespace Application.DomainEventHandlers;
 
 public class PhotoAddedHandler(
-    IDrivingLicenseRepository drivingLicenseRepository, 
-    IUnitOfWork unitOfWork) 
-    : INotificationHandler<PhotoAddedDomainEvent>
+    IDrivingLicenseRepository drivingLicenseRepository,
+    IUnitOfWork unitOfWork)
+    : INotificationHandler<PhotosAddedDomainEvent>
 {
-    public async Task Handle(PhotoAddedDomainEvent domainEvent, CancellationToken cancellationToken)
+    public async Task Handle(PhotosAddedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         var license = await drivingLicenseRepository.GetById(domainEvent.DrivingLicenseId);
         if (license is null)
             throw new DataConsistencyViolationException(
-                $"{nameof(PhotoAddedDomainEvent)} contains {nameof(domainEvent.DrivingLicenseId)} for not existing license");
-        
+                $"{nameof(PhotosAddedDomainEvent)} contains {nameof(domainEvent.DrivingLicenseId)} for not existing license");
+
         license.MarkAsPendingProcessing();
-        
+
         drivingLicenseRepository.Update(license);
         await unitOfWork.Commit();
     }

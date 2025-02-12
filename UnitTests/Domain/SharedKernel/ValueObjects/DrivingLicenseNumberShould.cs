@@ -30,7 +30,7 @@ public class DrivingLicenseNumberShould
 
         // Act
         var actual = DrivingLicenseNumber.Create(input);
-        
+
         // Assert
         Assert.Equal("1255102030", actual.Value);
     }
@@ -43,7 +43,7 @@ public class DrivingLicenseNumberShould
 
         // Act
         var actual = DrivingLicenseNumber.Create(input);
-        
+
         // Assert
         Assert.Equal("1255102030", actual.Value);
     }
@@ -56,27 +56,33 @@ public class DrivingLicenseNumberShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicenseNumber.Create(invalidCode);
+        void Act()
+        {
+            DrivingLicenseNumber.Create(invalidCode);
+        }
 
         // Assert
         Assert.Throws<ValueOutOfRangeException>(Act);
     }
 
     [Theory]
-    [InlineData("1244 12_412")]    //
+    [InlineData("1244 12_412")] //
     [InlineData("  a 244 121412")] // (length after trim == 10)
-    [InlineData("1244 1#1412")]    //
+    [InlineData("1244 1#1412")] //
     public void ThrowValueIsInvalidExceptionIfNumberContainAnySymbolOtherThanDigit(string invalidCode)
     {
         // Arrange
 
         // Act
-        void Act() => DrivingLicenseNumber.Create(invalidCode);
-        
+        void Act()
+        {
+            DrivingLicenseNumber.Create(invalidCode);
+        }
+
         // Assert
         Assert.Throws<ValueIsInvalidException>(Act);
     }
-    
+
     [Fact]
     public void EqualOperatorReturnTrueForEqualNumbers()
     {
@@ -86,7 +92,7 @@ public class DrivingLicenseNumberShould
 
         // Act
         var actual = number1 == number2;
-        
+
         // Assert
         Assert.True(actual);
     }
@@ -100,7 +106,7 @@ public class DrivingLicenseNumberShould
 
         // Act
         var actual = number1 == number2;
-        
+
         // Assert
         Assert.False(actual);
     }

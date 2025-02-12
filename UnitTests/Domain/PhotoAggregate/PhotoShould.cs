@@ -5,27 +5,25 @@ using Xunit;
 
 namespace UnitTests.Domain.PhotoAggregate;
 
-[TestSubject(typeof(Photo))]
+[TestSubject(typeof(Photos))]
 public class PhotoShould
 {
-    private readonly byte[] _photoBytes = [1, 2, 3];
-
+    private readonly string _frontPhotoKey = "front";
+    private readonly string _backPhotoKey = "back";
     private readonly Guid _drivingLicenseId = Guid.NewGuid();
-    
+
     [Fact]
     public void CreateInstanceWithCorrectValues()
     {
         // Arrange
 
         // Act
-        var actual = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
+        var actual = Photos.Create(_drivingLicenseId, _frontPhotoKey, _backPhotoKey);
 
         // Assert
-        Assert.NotEqual(Guid.Empty, actual.FrontPhotoStorageId);
-        Assert.NotEqual(Guid.Empty, actual.BackPhotoStorageId);
         Assert.NotEqual(Guid.Empty, actual.Id);
-        Assert.Equal(_photoBytes, actual.FrontPhotoBytes);
-        Assert.Equal(_photoBytes, actual.BackPhotoBytes);
+        Assert.Equal(_frontPhotoKey, actual.FrontPhotoStorageKeyWithBucket);
+        Assert.Equal(_backPhotoKey, actual.BackPhotoStorageKeyWithBucket);
     }
 
     [Fact]
@@ -34,37 +32,46 @@ public class PhotoShould
         // Arrange
 
         // Act
-        void Act() => Photo.Create(Guid.Empty, _photoBytes, _photoBytes);
+        void Act()
+        {
+            Photos.Create(Guid.Empty, _frontPhotoKey, _backPhotoKey);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
 
     [Theory]
-    [InlineData(new byte[] { })]
+    [InlineData("")]
+    [InlineData(" ")]
     [InlineData(null)]
-    public void ThrowValueIsRequiredExceptionIfFrontPhotoBytesIsNullOrEmpty(byte[] invalidFrontPhotoBytes)
+    public void ThrowValueIsRequiredExceptionIfFrontPhotoStorageKeyIsNullOrEmpty(string? invalidPhotoKey)
     {
         // Arrange
 
         // Act
-        void Act() => Photo.Create(_drivingLicenseId, invalidFrontPhotoBytes, 
-            _photoBytes);
+        void Act()
+        {
+            Photos.Create(_drivingLicenseId, invalidPhotoKey!, _backPhotoKey);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Theory]
-    [InlineData(new byte[] { })]
+    [InlineData("")]
+    [InlineData(" ")]
     [InlineData(null)]
-    public void ThrowValueIsRequiredExceptionIfBackPhotoBytesIsNullOrEmpty(byte[] invalidBackPhotoBytes)
+    public void ThrowValueIsRequiredExceptionIfBackPhotoBytesIsNullOrEmpty(string? invalidPhotoKey)
     {
         // Arrange
 
         // Act
-        void Act() => Photo.Create(_drivingLicenseId, _photoBytes, 
-            invalidBackPhotoBytes);
+        void Act()
+        {
+            Photos.Create(_drivingLicenseId, _frontPhotoKey, invalidPhotoKey!);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -76,7 +83,7 @@ public class PhotoShould
         // Arrange
 
         // Act
-        var photo = Photo.Create(_drivingLicenseId, _photoBytes, _photoBytes);
+        var photo = Photos.Create(_drivingLicenseId, _frontPhotoKey, _backPhotoKey);
 
         // Assert
         Assert.NotEmpty(photo.DomainEvents);

@@ -44,7 +44,10 @@ public class CodeOfIssueShould
         // Arrange
 
         // Act
-        void Act() => CodeOfIssue.Create(invalidCode);
+        void Act()
+        {
+            CodeOfIssue.Create(invalidCode);
+        }
 
         // Assert
         Assert.Throws<ValueOutOfRangeException>(Act);
@@ -59,12 +62,15 @@ public class CodeOfIssueShould
         // Arrange
 
         // Act
-        void Act() => CodeOfIssue.Create(invalidCode);
-        
+        void Act()
+        {
+            CodeOfIssue.Create(invalidCode);
+        }
+
         // Assert
         Assert.Throws<ValueIsInvalidException>(Act);
     }
-    
+
     [Fact]
     public void EqualOperatorReturnTrueForEqualCodes()
     {
@@ -75,7 +81,7 @@ public class CodeOfIssueShould
 
         // Act
         var actual = codeOfIssue1 == codeOfIssue2;
-        
+
         // Assert
         Assert.True(actual);
     }
@@ -89,7 +95,7 @@ public class CodeOfIssueShould
 
         // Act
         var actual = codeOfIssue1 == codeOfIssue2;
-        
+
         // Assert
         Assert.False(actual);
     }

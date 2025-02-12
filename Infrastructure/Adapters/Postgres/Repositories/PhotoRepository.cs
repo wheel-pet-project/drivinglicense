@@ -6,17 +6,17 @@ namespace Infrastructure.Adapters.Postgres.Repositories;
 
 public class PhotoRepository(DataContext context) : IPhotoRepository
 {
-    public async Task<Photo?> GetById(Guid id)
+    public async Task<Photos?> GetById(Guid id)
     {
         return await context.Photos.FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task Add(Photo photo)
+    public async Task Add(Photos photo)
     {
         await context.Photos.AddAsync(photo);
     }
 
-    public void Delete(Photo photo)
+    public void Delete(Photos photo)
     {
         context.Photos.Remove(photo);
     }

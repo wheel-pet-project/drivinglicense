@@ -7,19 +7,19 @@ namespace Application.UseCases.Commands.ApproveDrivingLicense;
 
 public class ApproveDrivingLicenseHandler(
     IDrivingLicenseRepository drivingLicenseRepository,
-    IUnitOfWork unitOfWork) 
+    IUnitOfWork unitOfWork)
     : IRequestHandler<ApproveDrivingLicenseCommand, Result>
 {
     public async Task<Result> Handle(ApproveDrivingLicenseCommand command, CancellationToken cancellationToken)
     {
         var license = await drivingLicenseRepository.GetById(command.DrivingLicenseId);
         if (license is null) return Result.Fail(new NotFound("Driving license not found"));
-        
+
         license.Approve();
-        
+
         drivingLicenseRepository.Update(license);
         await unitOfWork.Commit();
-        
+
         return Result.Ok();
     }
 }

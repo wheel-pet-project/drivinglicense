@@ -37,7 +37,7 @@ public class NameShould
 
         // Act
         var actual = name1 == name2;
-        
+
         // Assert
         Assert.True(actual);
     }
@@ -54,29 +54,32 @@ public class NameShould
 
         // Act
         var actual = name1 == name2;
-        
+
         // Assert
         Assert.False(actual);
     }
 
     [Theory]
-    [InlineData("", "Иванов", "Иванович")]   //
+    [InlineData("", "Иванов", "Иванович")] //
     [InlineData("  ", "Иванов", "Иванович")] // invalid first name
     [InlineData(null, "Иванов", "Иванович")] // 
-    
-    [InlineData("Иван", "", "Иванович")]     //
-    [InlineData("Иван", "  ", "Иванович")]   // invalid last name
-    [InlineData("Иван", null, "Иванович")]   // 
-    
-    [InlineData("Иван", "Иванов", "")]       // empty patronymic
-    [InlineData("Иван", "Иванов", "  ")]     // 
-    public void ThrowValueIsRequiredExceptionIfSomeNamePartIsInvalid(string? firstName, string? lastName, 
+    [InlineData("Иван", "", "Иванович")] //
+    [InlineData("Иван", "  ", "Иванович")] // invalid last name
+    [InlineData("Иван", null, "Иванович")] // 
+    [InlineData("Иван", "Иванов", "")] // empty patronymic
+    [InlineData("Иван", "Иванов", "  ")] // 
+    public void ThrowValueIsRequiredExceptionIfSomeNamePartIsInvalid(
+        string? firstName,
+        string? lastName,
         string? patronymic)
     {
         // Arrange
 
         // Act
-        void Act() => Name.Create(firstName, lastName, patronymic);
+        void Act()
+        {
+            Name.Create(firstName, lastName, patronymic);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);

@@ -19,14 +19,15 @@ public class PhotoAddedHandlerShould
         new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
         CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
         TimeProvider.System);
-    private readonly PhotoAddedDomainEvent _domainEvent = new(Guid.NewGuid());
-    
+
+    private readonly PhotosAddedDomainEvent _domainEvent = new(Guid.NewGuid());
+
     [Fact]
     public async Task MutateLicenseStatus()
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
-        handlerBuilder.ConfigureDrivingLicenseRepository(getByIdShouldReturn: _drivingLicense);
+        handlerBuilder.ConfigureDrivingLicenseRepository(_drivingLicense);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -41,12 +42,12 @@ public class PhotoAddedHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
-        handlerBuilder.ConfigureDrivingLicenseRepository(getByIdShouldReturn: _drivingLicense);
+        handlerBuilder.ConfigureDrivingLicenseRepository(_drivingLicense);
         var handler = handlerBuilder.Build();
 
         // Act
         await handler.Handle(_domainEvent, TestContext.Current.CancellationToken);
-        
+
         // Assert
         handlerBuilder.VerifyUnitOfWorkCall();
     }
@@ -56,26 +57,37 @@ public class PhotoAddedHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
-        handlerBuilder.ConfigureDrivingLicenseRepository(getByIdShouldReturn: null!);
+        handlerBuilder.ConfigureDrivingLicenseRepository(null!);
         var handler = handlerBuilder.Build();
 
         // Act
-        async Task Act() => await handler.Handle(_domainEvent, TestContext.Current.CancellationToken);
+        async Task Act()
+        {
+            await handler.Handle(_domainEvent, TestContext.Current.CancellationToken);
+        }
 
         // Assert
         await Assert.ThrowsAsync<DataConsistencyViolationException>(Act);
     }
-    
+
     private class HandlerBuilder
     {
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-        public PhotoAddedHandler Build() => new(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
+        public PhotoAddedHandler Build()
+        {
+            return new PhotoAddedHandler(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
+        }
 
-        public void ConfigureDrivingLicenseRepository(DrivingLicense getByIdShouldReturn) =>
+        public void ConfigureDrivingLicenseRepository(DrivingLicense getByIdShouldReturn)
+        {
             _drivingLicenseRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(getByIdShouldReturn);
-        
-        public void VerifyUnitOfWorkCall() => _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        public void VerifyUnitOfWorkCall()
+        {
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
     }
 }

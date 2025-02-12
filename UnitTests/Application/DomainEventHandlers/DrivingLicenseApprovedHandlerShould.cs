@@ -12,6 +12,7 @@ namespace UnitTests.Application.DomainEventHandlers;
 public class DrivingLicenseApprovedHandlerShould
 {
     private readonly DrivingLicenseApprovedDomainEvent _domainEvent = new(Guid.NewGuid(), [CategoryList.BCategory]);
+
     [Fact]
     public async Task PublishCallMessageBus()
     {

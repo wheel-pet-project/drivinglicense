@@ -12,17 +12,17 @@ namespace Infrastructure.Adapters.Postgres.ActualityObserver;
 public class ActualityObserverBackgroundJob(
     NpgsqlDataSource dataSource,
     TimeProvider timeProvider,
-    IMediator mediator) 
+    IMediator mediator)
     : IJob
 {
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
         var command = new CommandDefinition(_sql, new { Today = timeProvider.GetUtcNow().UtcDateTime });
-        
+
         var licenseIdEnumerable = await connection.QueryAsync<Guid>(command);
         var licenseIdList = licenseIdEnumerable.AsList();
-        
+
         if (licenseIdList.Count > 0)
             foreach (var licenseId in licenseIdList)
                 await mediator.Publish(new DrivingLicenseExpiredDomainEvent(licenseId),

@@ -3,10 +3,10 @@ using Domain.PhotoAggregate;
 namespace Application.Ports.Postgres;
 
 public interface IPhotoRepository
-{ 
-    Task<Photo?> GetById(Guid id);
-    
-    Task Add(Photo photo);
+{
+    Task<Photos?> GetById(Guid id);
 
-    void Delete(Photo photo);
+    Task Add(Photos drivingLicensePhotos);
+
+    void Delete(Photos drivingLicensePhotos);
 }

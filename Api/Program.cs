@@ -1,4 +1,3 @@
-
 using Api.Adapters.Grpc;
 
 namespace Api;
@@ -9,7 +8,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder();
         var services = builder.Services;
-        
+
         services.AddGrpc(options => options.Interceptors.Add<ExceptionHandlerInterceptor>());
 
         services
@@ -22,15 +21,16 @@ public class Program
             .RegisterRepositories()
             .RegisterSerilog()
             .RegisterMassTransit()
+            .RegisterImageValidators()
             .RegisterTelemetry()
             .RegisterHealthCheckV1()
             .RegisterTimeProvider();
-        
+
         var app = builder.Build();
 
         app.MapGrpcService<DrivingLicenseV1>();
         app.MapGrpcHealthChecksService();
-        
+
         app.Run();
     }
 }

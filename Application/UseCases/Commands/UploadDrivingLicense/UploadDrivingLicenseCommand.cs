@@ -15,5 +15,5 @@ public record UploadDrivingLicenseCommand(
     DateOnly DateOfBirth,
     DateOnly DateOfIssue,
     string CodeOfIssue,
-    DateOnly DateOfExpiry) 
+    DateOnly DateOfExpiry)
     : BaseRequest(CorrelationId), IRequest<Result<UploadDrivingLicenseResponse>>;

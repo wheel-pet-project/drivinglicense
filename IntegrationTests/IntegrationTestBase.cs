@@ -18,7 +18,7 @@ public class IntegrationTestBase : IAsyncLifetime
 
     protected DataContext Context = null!;
     protected NpgsqlDataSource DataSource = null!;
-        
+
 
     public async ValueTask InitializeAsync()
     {
@@ -27,12 +27,14 @@ public class IntegrationTestBase : IAsyncLifetime
         var options = new DbContextOptionsBuilder<DataContext>().UseNpgsql(_postgreSqlContainer.GetConnectionString(),
             npgsqlOptions => npgsqlOptions.MigrationsAssembly(typeof(DataContext).Assembly));
         Context = new DataContext(options.Options);
-        
+
         await Context.Database.MigrateAsync();
 
         DataSource = new NpgsqlDataSourceBuilder(_postgreSqlContainer.GetConnectionString()).Build();
     }
 
-    public async ValueTask DisposeAsync() => 
+    public async ValueTask DisposeAsync()
+    {
         await _postgreSqlContainer.DisposeAsync();
+    }
 }

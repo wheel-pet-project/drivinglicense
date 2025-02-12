@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace Api;
 
-public class ExceptionHandlerInterceptor(ILogger<ExceptionHandlerInterceptor> logger) 
+public class ExceptionHandlerInterceptor(ILogger<ExceptionHandlerInterceptor> logger)
     : Interceptor
 {
     public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(

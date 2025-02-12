@@ -1,10 +1,10 @@
-using Domain.PhotoAggregate;
+using FluentResults;
 
 namespace Application.Ports.S3;
 
 public interface IS3Storage
 {
-    Task<bool> SavePhotos(Photo photo);
-
-    Task<(byte[] frontPhotoBytes, byte[] backPhotoBytes)?> GetPhotos(Guid photoId, Guid frontPhotoId, Guid backPhotoId);
+    Task<Result<(string frontPhotoKeyWithBucket, string backPhotoKeyWithBucket)>> SavePhotos(
+        List<byte> frontPhotoBytes,
+        List<byte> backPhotoBytes);
 }

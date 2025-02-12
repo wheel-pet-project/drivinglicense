@@ -8,7 +8,9 @@ namespace Domain.DrivingLicenceAggregate;
 
 public sealed class DrivingLicense : Aggregate
 {
-    private DrivingLicense(){}
+    private DrivingLicense()
+    {
+    }
 
     private DrivingLicense(
         Guid accountId,
@@ -33,8 +35,8 @@ public sealed class DrivingLicense : Aggregate
         CodeOfIssue = codeOfIssue;
         DateOfExpiry = dateOfExpiry;
     }
-    
-    
+
+
     public Guid Id { get; private set; }
     public Guid AccountId { get; private set; }
     public Status Status { get; private set; } = null!;
@@ -46,20 +48,20 @@ public sealed class DrivingLicense : Aggregate
     public DateOnly DateOfIssue { get; private set; }
     public CodeOfIssue CodeOfIssue { get; private set; } = null!;
     public DateOnly DateOfExpiry { get; private set; }
-    
+
     public void MarkAsPendingProcessing()
     {
         if (!Status.CanBeChangedToThisStatus(Status.PendingProcessing))
             throw new DomainRulesViolationException($"{nameof(Status.Rejected)} status can't be settled");
-        
+
         Status = Status.PendingProcessing;
     }
-    
+
     public void Approve()
     {
         if (!Status.CanBeChangedToThisStatus(Status.Approved))
             throw new DomainRulesViolationException($"{nameof(Status.Approved)} status can't be settled");
-        
+
         Status = Status.Approved;
         AddDomainEvent(new DrivingLicenseApprovedDomainEvent(AccountId, [..CategoryList.Categories]));
     }
@@ -68,7 +70,7 @@ public sealed class DrivingLicense : Aggregate
     {
         if (!Status.CanBeChangedToThisStatus(Status.Rejected))
             throw new DomainRulesViolationException($"{nameof(Status.Rejected)} status can't be settled");
-        
+
         Status = Status.Rejected;
     }
 
@@ -76,11 +78,11 @@ public sealed class DrivingLicense : Aggregate
     {
         if (!Status.CanBeChangedToThisStatus(Status.Expired))
             throw new DomainRulesViolationException($"{nameof(Status.Expired)} status can't be settled");
-        
+
         Status = Status.Expired;
         AddDomainEvent(new DrivingLicenseExpiredDomainEvent(AccountId));
     }
-    
+
     public static DrivingLicense Create(
         Guid accountId,
         CategoryList categoryList,
@@ -93,31 +95,31 @@ public sealed class DrivingLicense : Aggregate
         DateOnly dateOfExpiry,
         TimeProvider timeProvider)
     {
-        if (accountId == Guid.Empty) 
+        if (accountId == Guid.Empty)
             throw new ValueIsRequiredException($"{nameof(accountId)} cannot be empty");
-        if (categoryList == null) 
+        if (categoryList == null)
             throw new ValueIsRequiredException($"{nameof(categoryList)} cannot be null");
-        if (number is null) 
+        if (number is null)
             throw new ValueIsRequiredException($"{nameof(number)} cannot be null");
-        if (name is null) 
+        if (name is null)
             throw new ValueIsRequiredException($"{nameof(name)} cannot be  null");
-        if (cityOfBirth is null) 
+        if (cityOfBirth is null)
             throw new ValueIsRequiredException($"{nameof(cityOfBirth)} cannot null");
-        if (dateOfBirth == default) 
+        if (dateOfBirth == default)
             throw new ValueIsRequiredException($"{nameof(dateOfBirth)} cannot be default value");
-        if (dateOfIssue == default) 
+        if (dateOfIssue == default)
             throw new ValueIsRequiredException($"{nameof(dateOfIssue)} cannot be default value");
-        if (codeOfIssue is null) 
+        if (codeOfIssue is null)
             throw new ValueIsRequiredException($"{nameof(codeOfIssue)} cannot be null");
-        if (dateOfExpiry == default) 
+        if (dateOfExpiry == default)
             throw new ValueIsRequiredException($"{nameof(dateOfExpiry)} cannot be default value");
         if (timeProvider == null)
             throw new ValueIsRequiredException($"{nameof(timeProvider)} cannot be null");
-        
+
         if (dateOfBirth > dateOfIssue || dateOfExpiry <= DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime))
             throw new ValueOutOfRangeException("invalid date(-s) in driving licence");
 
-        return new DrivingLicense(accountId, categoryList, number, name, cityOfBirth, dateOfBirth, dateOfIssue, 
+        return new DrivingLicense(accountId, categoryList, number, name, cityOfBirth, dateOfBirth, dateOfIssue,
             codeOfIssue, dateOfExpiry);
     }
 }

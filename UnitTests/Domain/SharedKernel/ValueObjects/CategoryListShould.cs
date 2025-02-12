@@ -29,7 +29,10 @@ public class CategoryListShould
         var unsupportedCategory = 'Y';
 
         // Act
-        void Act() => CategoryList.Create([unsupportedCategory]);
+        void Act()
+        {
+            CategoryList.Create([unsupportedCategory]);
+        }
 
         // Assert
         Assert.Throws<ValueOutOfRangeException>(Act);

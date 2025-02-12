@@ -21,8 +21,8 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
             EventId = Guid.NewGuid(),
             Type = typeof(DrivingLicenseApprovedDomainEvent).ToString(),
             Content = JsonConvert.SerializeObject(
-                new DrivingLicenseApprovedDomainEvent(Guid.NewGuid(), [CategoryList.BCategory]), 
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, }),
+                new DrivingLicenseApprovedDomainEvent(Guid.NewGuid(), [CategoryList.BCategory]),
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),
             OccurredOnUtc = DateTime.UtcNow
         },
         new()
@@ -30,19 +30,19 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
             EventId = Guid.NewGuid(),
             Type = typeof(DrivingLicenseExpiredDomainEvent).ToString(),
             Content = JsonConvert.SerializeObject(
-                new DrivingLicenseExpiredDomainEvent(Guid.NewGuid()), 
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All, }),
+                new DrivingLicenseExpiredDomainEvent(Guid.NewGuid()),
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),
             OccurredOnUtc = DateTime.UtcNow
-        },
+        }
     }.AsReadOnly();
-    
+
     [Fact]
     public async Task MarkAsProcessedOutboxEvents()
     {
         // Arrange
         await Context.Outbox.AddRangeAsync(_outboxEvents, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-        
+
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
         var jobBuilder = new JobBuilder();
         jobBuilder.ConfigureContext(Context);
@@ -62,7 +62,7 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
         // Arrange
         await Context.Outbox.AddRangeAsync(_outboxEvents, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-        
+
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
         var jobBuilder = new JobBuilder();
         jobBuilder.ConfigureContext(Context);
@@ -74,15 +74,21 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
         // Assert
         jobBuilder.VerifyMediatorPublishCall();
     }
-    
+
     private class JobBuilder
     {
         private readonly Mock<IMediator> _mediatorMock = new();
         private DataContext _context = null!;
-        
-        public OutboxBackgroundJob Build() => new(_context, _mediatorMock.Object);
-        
-        public void ConfigureContext(DataContext context) => _context = context;
+
+        public OutboxBackgroundJob Build()
+        {
+            return new OutboxBackgroundJob(_context, _mediatorMock.Object);
+        }
+
+        public void ConfigureContext(DataContext context)
+        {
+            _context = context;
+        }
 
         public void VerifyMediatorPublishCall()
         {

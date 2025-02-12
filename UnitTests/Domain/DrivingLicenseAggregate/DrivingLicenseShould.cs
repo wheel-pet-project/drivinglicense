@@ -12,17 +12,19 @@ namespace UnitTests.Domain.DrivingLicenseAggregate;
 public class DrivingLicenseShould
 {
     private readonly Guid _accountId = Guid.NewGuid();
+
     private readonly DrivingLicenseNumber _number =
-        DrivingLicenseNumber.Create(input: "1234 567891");
-    private readonly Name _name = Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович");
+        DrivingLicenseNumber.Create("1234 567891");
+
+    private readonly Name _name = Name.Create("Иван", "Иванов", "Иванович");
     private readonly CategoryList _categories = CategoryList.Create([CategoryList.BCategory]);
     private readonly City _cityOfBirth = City.Create("Москва");
     private readonly DateOnly _dateOfBirth = new(1990, 1, 1);
     private readonly DateOnly _dateOfIssue = new(2020, 1, 1);
-    private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create(input: "1234");
+    private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create("1234");
     private readonly DateOnly _dateOfExpiry = new(2030, 1, 1);
     private readonly TimeProvider _timeProvider = TimeProvider.System;
-    
+
     [Fact]
     public void CreateInstanceWithCorrectValues()
     {
@@ -53,21 +55,27 @@ public class DrivingLicenseShould
         var emptyAccountId = Guid.Empty;
 
         // Act
-        void Act() => DrivingLicense.Create(emptyAccountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(emptyAccountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Fact]
     public void ThrowValueIsRequiredExceptionIfCategoriesIsNull()
     {
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, null, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, null, _number, _name, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -79,8 +87,11 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, null, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, null, _name, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -92,8 +103,11 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, null, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, null, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -105,8 +119,11 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, null, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, _name, null, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -118,21 +135,27 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, default, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, default,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Fact]
     public void ThrowValueIsRequiredExceptionIfDateOfIssueIsDefault()
     {
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            default, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+                default, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -144,8 +167,11 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, null, _dateOfExpiry, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, null, _dateOfExpiry, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -157,8 +183,11 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, default, _timeProvider);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, default, _timeProvider);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -170,8 +199,11 @@ public class DrivingLicenseShould
         // Arrange
 
         // Act
-        void Act() => DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth, 
-            _dateOfIssue, _codeOfIssue, _dateOfExpiry, null);
+        void Act()
+        {
+            DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+                _dateOfIssue, _codeOfIssue, _dateOfExpiry, null);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -190,7 +222,7 @@ public class DrivingLicenseShould
         // Assert
         Assert.Equal(Status.PendingProcessing, license.Status);
     }
-    
+
     [Fact]
     public void ThrowDomainRulesViolationExceptionIfMarkAsPendingProcessingInvokeWithInvalidStatus()
     {
@@ -201,12 +233,15 @@ public class DrivingLicenseShould
         license.Approve();
 
         // Act
-        void Act() => license.MarkAsPendingProcessing();
+        void Act()
+        {
+            license.MarkAsPendingProcessing();
+        }
 
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
     }
-    
+
     [Fact]
     public void SetApproveStatus()
     {
@@ -244,9 +279,12 @@ public class DrivingLicenseShould
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
-        
+
         // Act
-        void Act() => license.Approve();
+        void Act()
+        {
+            license.Approve();
+        }
 
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
@@ -266,7 +304,7 @@ public class DrivingLicenseShould
         // Assert
         Assert.Equal(Status.Rejected, license.Status);
     }
-    
+
     [Fact]
     public void ThrowDomainRulesViolationExceptionIfRejectInvokeWithApprovedLicense()
     {
@@ -275,7 +313,10 @@ public class DrivingLicenseShould
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Act
-        void Act() => license.Reject();
+        void Act()
+        {
+            license.Reject();
+        }
 
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
@@ -313,7 +354,7 @@ public class DrivingLicenseShould
         Assert.NotNull(license.DomainEvents[1]);
         Assert.IsType<DrivingLicenseExpiredDomainEvent>(license.DomainEvents[1]);
     }
-    
+
     [Fact]
     public void ThrowDomainRulesViolationExceptionIfExpireInvokeWithInvalidStatus()
     {
@@ -322,7 +363,10 @@ public class DrivingLicenseShould
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Act
-        void Act() => license.Expire();
+        void Act()
+        {
+            license.Expire();
+        }
 
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);

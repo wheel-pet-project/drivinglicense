@@ -29,9 +29,12 @@ public class CityShould
     public void ThrowValueIsRequiredExceptionIfNameIsInvalid(string invalidName)
     {
         // Arrange
-        
+
         // Act
-        void Act() => City.Create(invalidName);
+        void Act()
+        {
+            City.Create(invalidName);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -64,7 +67,7 @@ public class CityShould
         Assert.NotNull(city);
         Assert.Equal("Москва", city.Name);
     }
-    
+
     [Fact]
     public void EqualOperatorReturnTrueForEqualCities()
     {
@@ -74,7 +77,7 @@ public class CityShould
 
         // Act
         var actual = city1 == city2;
-        
+
         // Assert
         Assert.True(actual);
     }
@@ -88,7 +91,7 @@ public class CityShould
 
         // Act
         var actual = city1 == city2;
-        
+
         // Assert
         Assert.False(actual);
     }

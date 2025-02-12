@@ -13,17 +13,17 @@ namespace IntegrationTests.Repositories;
 public class DrivingLicenseRepositoryShould : IntegrationTestBase
 {
     private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
-        accountId: Guid.NewGuid(), 
-        categoryList: CategoryList.Create([CategoryList.BCategory]),
-        number: DrivingLicenseNumber.Create(input: "1234 567891"), 
-        name: Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), 
-        cityOfBirth: City.Create("Москва"),
-        dateOfBirth: new DateOnly(year: 1990, month: 1, day: 1), 
-        dateOfIssue: new DateOnly(year: 2020, month: 1, day: 1), 
-        codeOfIssue: CodeOfIssue.Create(input: "1234"), 
-        dateOfExpiry: new DateOnly(year: 2030, month: 1, day: 1), 
+        Guid.NewGuid(),
+        CategoryList.Create([CategoryList.BCategory]),
+        DrivingLicenseNumber.Create("1234 567891"),
+        Name.Create("Иван", "Иванов", "Иванович"),
+        City.Create("Москва"),
+        new DateOnly(1990, 1, 1),
+        new DateOnly(2020, 1, 1),
+        CodeOfIssue.Create("1234"),
+        new DateOnly(2030, 1, 1),
         TimeProvider.System);
-    
+
     [Fact]
     public async Task Add()
     {
@@ -46,13 +46,13 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
     public async Task Update()
     {
         // Arrange
-        var licenseForUpdate = DrivingLicense.Create(Guid.NewGuid(), 
-            CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create(input: "1234 567891"), 
-            Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
-            new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
-            CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1), 
+        var licenseForUpdate = DrivingLicense.Create(Guid.NewGuid(),
+            CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create("1234 567891"),
+            Name.Create("Иван", "Иванов", "Иванович"), City.Create("Москва"),
+            new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
+            CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
             TimeProvider.System);
-        
+
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
         var (repositoryForArrange, uowForArrange) = repositoryAndUowBuilder.Build();
@@ -60,7 +60,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         await uowForArrange.Commit();
 
         var (repository, uow) = repositoryAndUowBuilder.Build();
-        
+
         // Act
         licenseForUpdate.MarkAsPendingProcessing();
         repository.Update(licenseForUpdate);
@@ -83,7 +83,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         await uowForArrange.Commit();
 
         var (repository, _) = repositoryAndUowBuilder.Build();
-        
+
         // Act
         var licenseFromDb = await repository.GetById(_drivingLicense.Id);
 
@@ -103,7 +103,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         await uowForArrange.Commit();
 
         var (repository, _) = repositoryAndUowBuilder.Build();
-        
+
         // Act
         var licenseFromDb = await repository.GetAll(1, 1);
 
@@ -116,14 +116,14 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
     public async Task GetAllWithFilter()
     {
         // Arrange
-        var expectedLicense = DrivingLicense.Create(Guid.NewGuid(), 
-            CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create(input: "1234 567891"), 
-            Name.Create(firstName: "Иван", lastName: "Иванов", patronymic: "Иванович"), City.Create("Москва"),
-            new DateOnly(year: 1990, month: 1, day: 1), new DateOnly(year: 2020, month: 1, day: 1), 
-            CodeOfIssue.Create(input: "1234"), new DateOnly(year: 2030, month: 1, day: 1), 
+        var expectedLicense = DrivingLicense.Create(Guid.NewGuid(),
+            CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create("1234 567891"),
+            Name.Create("Иван", "Иванов", "Иванович"), City.Create("Москва"),
+            new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
+            CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
             TimeProvider.System);
         expectedLicense.MarkAsPendingProcessing();
-        
+
         var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
         repositoryAndUowBuilder.ConfigureContext(Context);
         var (repositoryForArrange, uowForArrange) = repositoryAndUowBuilder.Build();
@@ -132,7 +132,7 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         await uowForArrange.Commit();
 
         var (repository, _) = repositoryAndUowBuilder.Build();
-        
+
         // Act
         var licenseFromDb = await repository.GetAll(1, 1, x => x.Status == Status.PendingProcessing);
 
@@ -140,14 +140,19 @@ public class DrivingLicenseRepositoryShould : IntegrationTestBase
         Assert.NotNull(licenseFromDb);
         Assert.Equal(expectedLicense, licenseFromDb[0]);
     }
-    
+
     private class RepositoryAndUnitOfWorkBuilder
     {
         private DataContext _context = null!;
-        
-        public (IDrivingLicenseRepository repostory, IUnitOfWork uow) Build() => 
-            (new DrivingLicenseRepository(_context), new Infrastructure.Adapters.Postgres.UnitOfWork(_context));
 
-        public void ConfigureContext(DataContext context) => _context = context;
+        public (IDrivingLicenseRepository repostory, IUnitOfWork uow) Build()
+        {
+            return (new DrivingLicenseRepository(_context), new Infrastructure.Adapters.Postgres.UnitOfWork(_context));
+        }
+
+        public void ConfigureContext(DataContext context)
+        {
+            _context = context;
+        }
     }
 }

@@ -18,15 +18,16 @@ public class ApproveDrivingLicenseHandlerShould
         new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
         CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
         TimeProvider.System);
+
     private readonly ApproveDrivingLicenseCommand _command = new(Guid.NewGuid(), Guid.NewGuid());
-    
+
     [Fact]
     public async Task ReturnOk()
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
         _drivingLicense.MarkAsPendingProcessing();
-        handlerBuilder.ConfigureDrivingLicenseRepository(getByIdShouldReturn: _drivingLicense);
+        handlerBuilder.ConfigureDrivingLicenseRepository(_drivingLicense);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -41,7 +42,7 @@ public class ApproveDrivingLicenseHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
-        handlerBuilder.ConfigureDrivingLicenseRepository(getByIdShouldReturn: null);
+        handlerBuilder.ConfigureDrivingLicenseRepository(null);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -57,9 +58,14 @@ public class ApproveDrivingLicenseHandlerShould
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-        public ApproveDrivingLicenseHandler Build() => new(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
+        public ApproveDrivingLicenseHandler Build()
+        {
+            return new ApproveDrivingLicenseHandler(_drivingLicenseRepositoryMock.Object, _unitOfWorkMock.Object);
+        }
 
-        public void ConfigureDrivingLicenseRepository(DrivingLicense? getByIdShouldReturn) => 
+        public void ConfigureDrivingLicenseRepository(DrivingLicense? getByIdShouldReturn)
+        {
             _drivingLicenseRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(getByIdShouldReturn);
+        }
     }
 }

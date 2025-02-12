@@ -21,7 +21,7 @@ public class UnitOfWork(DataContext context) : IUnitOfWork, IDisposable
             return false;
         }
     }
-    
+
     public void Dispose()
     {
         GC.SuppressFinalize(this);
@@ -44,11 +44,11 @@ public class UnitOfWork(DataContext context) : IUnitOfWork, IDisposable
                 EventId = domainEvent.EventId,
                 OccurredOnUtc = DateTime.UtcNow,
                 Type = domainEvent.GetType().Name,
-                Content = JsonConvert.SerializeObject(domainEvent, 
+                Content = JsonConvert.SerializeObject(domainEvent,
                     new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All })
             })
             .ToList();
-        
+
         await context.Outbox.AddRangeAsync(outboxEvents);
     }
 }

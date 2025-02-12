@@ -18,18 +18,19 @@ namespace Api.Adapters.Grpc;
 
 public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : DrivingLicense.DrivingLicenseBase
 {
-    public override async Task<GetLicenseByIdResponse> GetLicenseById(GetLicenseByIdRequest request, 
+    public override async Task<GetLicenseByIdResponse> GetLicenseById(
+        GetLicenseByIdRequest request,
         ServerCallContext context)
     {
         var getDrivingLicenseByIdQuery = new GetByIdDrivingLicenseQuery(
-            CorrelationId: Guid.Parse(request.CorId), 
-            Id: Guid.Parse(request.Id));
-        
+            Guid.Parse(request.CorId),
+            Guid.Parse(request.Id));
+
         var result = await mediator.Send(getDrivingLicenseByIdQuery, context.CancellationToken);
-        
-        if (result.IsFailed) 
+
+        if (result.IsFailed)
             return ParseErrorToRpcException<GetLicenseByIdResponse>(result.Errors);
-        
+
         var resultView = result.Value.DrivingLicenseView;
         var response = new GetLicenseByIdResponse
         {
@@ -48,121 +49,125 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
                 resultView.DateOfExpiry.ToDateTime(new TimeOnly(), DateTimeKind.Utc))
         };
 
-        if (resultView is { FrontPhotoBytes: not null, BackPhotoBytes: not null })
-        {
-            response.FrontPhoto = await ByteString.FromStreamAsync(new MemoryStream(resultView.FrontPhotoBytes));
-            response.BackPhoto = await ByteString.FromStreamAsync(new MemoryStream(resultView.BackPhotoBytes));
-        }
-            
+        
         var categories = new RepeatedField<string>
             { resultView.CategoryList.Select(x => new string(x, 1)).AsEnumerable() };
         response.Categories.AddRange(categories);
-            
+        
+        if (resultView is { FrontPhotoS3Url: not null, BackPhotoS3Url: not null })
+        {
+            response.FrontPhotoS3Url = resultView.FrontPhotoS3Url;
+            response.BackPhotoS3Url = resultView.BackPhotoS3Url;
+        }
+
         return response;
     }
 
-    public override async Task<GetAllLicensesResponse> GetAllLicensesById(GetAllLicensesRequest request, 
+    public override async Task<GetAllLicensesResponse> GetAllLicensesById(
+        GetAllLicensesRequest request,
         ServerCallContext context)
     {
         var getAllDrivingLicensesQuery = new GetAllDrivingLicensesQuery(
-            CorrelationId: Guid.Parse(request.CorId),
-            Page: request.Page, 
-            PageSize: request.PageSize,
-            FilteringStatus: mapper.ProtoStatusToDomainStatus(request.FilteringStatus));
+            Guid.Parse(request.CorId),
+            request.Page,
+            request.PageSize,
+            mapper.ProtoStatusToDomainStatus(request.FilteringStatus));
 
         var result = await mediator.Send(getAllDrivingLicensesQuery, context.CancellationToken);
 
         var response = new GetAllLicensesResponse();
         if (result.Value.DrivingLicenses.Count > 0)
-        {
             response.Licenses.AddRange(result.Value.DrivingLicenses.Select(x =>
                 new GetAllLicensesResponse.Types.LicenseShortView
                 {
                     Id = x.Id.ToString(),
                     AccountId = x.AccountId.ToString(),
                     Name = x.Name,
-                    Status = mapper.DomainStatusToProtoStatus(x.Status),
+                    Status = mapper.DomainStatusToProtoStatus(x.Status)
                 }));
-        }
         return response;
     }
 
-    public override async Task<UploadLicenseResponse> UploadLicense(UploadLicenseRequest request, 
+    public override async Task<UploadLicenseResponse> UploadLicense(
+        UploadLicenseRequest request,
         ServerCallContext context)
     {
         var uploadDrivingLicenseCommand = new UploadDrivingLicenseCommand(
-            CorrelationId: Guid.Parse(request.CorId),
-            AccountId: Guid.Parse(request.AccId), 
-            CategoryList: [..request.Categories.Select(char.Parse)],
-            Number: request.Number, 
-            FirstName: request.FirstName, 
-            LastName: request.LastName, 
-            Patronymic: request.Patronymic == string.Empty ? null : request.Patronymic, 
-            CityOfBirth: request.CityOfBirth,
-            DateOfBirth: DateOnly.FromDateTime(request.DateOfBirth.ToDateTime()),
-            DateOfIssue: DateOnly.FromDateTime(request.DateOfIssue.ToDateTime()), 
-            CodeOfIssue: request.CodeOfIssue,
-            DateOfExpiry: DateOnly.FromDateTime(request.DateOfExpiry.ToDateTime()));
-        
+            Guid.Parse(request.CorId),
+            Guid.Parse(request.AccId),
+            [..request.Categories.Select(char.Parse)],
+            request.Number,
+            request.FirstName,
+            request.LastName,
+            request.Patronymic == string.Empty ? null : request.Patronymic,
+            request.CityOfBirth,
+            DateOnly.FromDateTime(request.DateOfBirth.ToDateTime()),
+            DateOnly.FromDateTime(request.DateOfIssue.ToDateTime()),
+            request.CodeOfIssue,
+            DateOnly.FromDateTime(request.DateOfExpiry.ToDateTime()));
+
         var result = await mediator.Send(uploadDrivingLicenseCommand, context.CancellationToken);
-        
-        return result.IsSuccess 
+
+        return result.IsSuccess
             ? new UploadLicenseResponse { Id = result.Value.DrivingLicenseId.ToString() }
             : ParseErrorToRpcException<UploadLicenseResponse>(result.Errors);
     }
 
-    public override async Task<UploadPhotosResponse> UploadPhotos(UploadPhotosRequest request, 
+    public override async Task<UploadPhotosResponse> UploadPhotos(
+        UploadPhotosRequest request,
         ServerCallContext context)
     {
         var uploadPhotosCommand = new UploadPhotosCommand(
-            CorrelationId: Guid.Parse(request.CorId),
-            DrivingLicenseId: Guid.Parse(request.LicenseId), 
-            FrontPhotoBytes: request.FrontPhoto.ToByteArray(), 
-            BackPhotoBytes: request.BackPhoto.ToByteArray());
-        
+            Guid.Parse(request.CorId),
+            Guid.Parse(request.LicenseId),
+            request.FrontPhoto.ToList(),
+            request.FrontPhoto.ToList());
+
         var result = await mediator.Send(uploadPhotosCommand, context.CancellationToken);
-        
+
         return result.IsSuccess
             ? new UploadPhotosResponse()
             : ParseErrorToRpcException<UploadPhotosResponse>(result.Errors);
     }
 
-    public override async Task<ApproveLicenseResponse> ApproveLicense(ApproveLicenseRequest request, 
+    public override async Task<ApproveLicenseResponse> ApproveLicense(
+        ApproveLicenseRequest request,
         ServerCallContext context)
     {
         var approveDrivingLicenseCommand = new ApproveDrivingLicenseCommand(
-            CorrelationId: Guid.Parse(request.CorId),
-            DrivingLicenseId: Guid.Parse(request.LicenseId));
-        
+            Guid.Parse(request.CorId),
+            Guid.Parse(request.LicenseId));
+
         var result = await mediator.Send(approveDrivingLicenseCommand, context.CancellationToken);
-        
+
         return result.IsSuccess
             ? new ApproveLicenseResponse()
             : ParseErrorToRpcException<ApproveLicenseResponse>(result.Errors);
     }
 
-    public override async Task<RejectLicenseResponse> RejectLicense(RejectLicenseRequest request, 
+    public override async Task<RejectLicenseResponse> RejectLicense(
+        RejectLicenseRequest request,
         ServerCallContext context)
     {
         var rejectDrivingLicenseCommand = new RejectDrivingLicenseCommand(
-            CorrelationId: Guid.Parse(request.CorId), 
-            DrivingLicenseId: Guid.Parse(request.LicenseId));
-        
+            Guid.Parse(request.CorId),
+            Guid.Parse(request.LicenseId));
+
         var result = await mediator.Send(rejectDrivingLicenseCommand, context.CancellationToken);
-        
+
         return result.IsSuccess
             ? new RejectLicenseResponse()
             : ParseErrorToRpcException<RejectLicenseResponse>(result.Errors);
     }
-    
+
     private T ParseErrorToRpcException<T>(List<IError> errors)
     {
         if (errors.Exists(x => x is NotFound))
             throw new RpcException(new Status(StatusCode.NotFound, string.Join(' ', errors.Select(x => x.Message))));
-        
+
         if (errors.Exists(x => x is ObjectStorageUnavailable))
             throw new RpcException(new Status(StatusCode.Unavailable, string.Join(' ', errors.Select(x => x.Message))));
-        
+
         throw new RpcException(new Status(StatusCode.InvalidArgument, string.Join(' ', errors.Select(x => x.Message))));
     }
 }

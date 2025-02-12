@@ -23,16 +23,20 @@ public class UploadDrivingLicenseHandlerShould
 
         // Act
         var response = await handler.Handle(_command, TestContext.Current.CancellationToken);
-        
+
         // Assert
         Assert.True(response.IsSuccess);
     }
+
     private class HandlerBuilder
     {
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-        public UploadDrivingLicenseHandler Build() => new(_drivingLicenseRepositoryMock.Object, TimeProvider.System,
-            _unitOfWorkMock.Object);
+        public UploadDrivingLicenseHandler Build()
+        {
+            return new UploadDrivingLicenseHandler(_drivingLicenseRepositoryMock.Object, TimeProvider.System,
+                _unitOfWorkMock.Object);
+        }
     }
 }

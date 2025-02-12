@@ -6,8 +6,9 @@ namespace Api.Adapters.Mapper;
 
 public class Mapper
 {
-    public DomainStatus ProtoStatusToDomainStatus(Status? protoStatus) =>
-        protoStatus switch
+    public DomainStatus ProtoStatusToDomainStatus(Status? protoStatus)
+    {
+        return protoStatus switch
         {
             Status.PendingPhotosAdding => DomainStatus.PendingPhotosAdding,
             Status.PendingProcessing => DomainStatus.PendingProcessing,
@@ -16,9 +17,11 @@ public class Mapper
             Status.Expired => DomainStatus.Expired,
             _ => throw new ValueOutOfRangeException($"{nameof(protoStatus)} is unknown status")
         };
+    }
 
-    public Status DomainStatusToProtoStatus(DomainStatus domainStatus) =>
-        domainStatus switch
+    public Status DomainStatusToProtoStatus(DomainStatus domainStatus)
+    {
+        return domainStatus switch
         {
             _ when domainStatus == DomainStatus.PendingPhotosAdding => Status.PendingPhotosAdding,
             _ when domainStatus == DomainStatus.PendingProcessing => Status.PendingProcessing,
@@ -27,4 +30,5 @@ public class Mapper
             _ when domainStatus == DomainStatus.Expired => Status.Expired,
             _ => throw new ValueOutOfRangeException($"{nameof(domainStatus)} is unknown status")
         };
+    }
 }

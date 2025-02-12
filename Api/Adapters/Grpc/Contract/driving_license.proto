@@ -44,8 +44,8 @@ message GetLicenseByIdResponse {
   string code_of_issue = 9;
   google.protobuf.Timestamp date_of_issue = 10;
   google.protobuf.Timestamp date_of_expiry = 11;
-  optional bytes front_photo = 12;
-  optional bytes back_photo = 13;
+  optional string front_photo_s3_url = 12;
+  optional string back_photo_s3_url = 13;
 }
 
 
