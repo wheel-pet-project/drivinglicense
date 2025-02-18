@@ -46,8 +46,8 @@ public class GetByIdDrivingLicenseQueryHandler(
         if (photoKeysModel is null) return Result.Ok(responseModel);
         
         responseModel.DrivingLicenseView.AddPhotoUrls(
-            $"{yandexS3StorageHost}/{photoKeysModel.FrontPhotoStorageKeyWithBucket}",
-            $"{yandexS3StorageHost}/{photoKeysModel.BackPhotoStorageKeyWithBucket}");
+            $"{yandexS3StorageHost}/{photoKeysModel.FrontPhotoStorageBucketAndKey}",
+            $"{yandexS3StorageHost}/{photoKeysModel.BackPhotoStorageBucketAndKey}");
 
         return Result.Ok(responseModel);
     }
@@ -56,9 +56,9 @@ public class GetByIdDrivingLicenseQueryHandler(
     {
         public required Guid PhotoId { get; init; }
 
-        public required string FrontPhotoStorageKeyWithBucket { get; init; }
+        public required string FrontPhotoStorageBucketAndKey { get; init; }
 
-        public required string BackPhotoStorageKeyWithBucket { get; init; }
+        public required string BackPhotoStorageBucketAndKey { get; init; }
     }
 
     private class DapperDrivingLicenseModel
@@ -93,9 +93,9 @@ public class GetByIdDrivingLicenseQueryHandler(
     private readonly string _getPhotoIdsSql =
         """
         SELECT id AS PhotoId, 
-               front_photo_storage_key AS FrontPhotoStorageKeyWithBucket, 
-               back_photo_storage_key AS BackPhotoStorageKeyWithBucket
-        FROM photo
+               front_photo_storage_bucket_and_key AS FrontPhotoStorageBucketAndKey, 
+               back_photo_storage_bucket_and_key AS BackPhotoStorageBucketAndKey
+        FROM photos
         WHERE driving_license_id = @LicenseId
         """;
 

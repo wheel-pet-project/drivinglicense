@@ -7,6 +7,4 @@ public interface IPhotoRepository
     Task<Photos?> GetById(Guid id);
 
     Task Add(Photos drivingLicensePhotos);
-
-    void Delete(Photos drivingLicensePhotos);
 }

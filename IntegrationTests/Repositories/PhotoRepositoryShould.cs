@@ -52,31 +52,6 @@ public class PhotoRepositoryShould : IntegrationTestBase
     }
 
     [Fact]
-    public async Task Delete()
-    {
-        // Arrange
-        var photo = Photos.Create(_drivingLicense.Id, _frontPhotoKey, _backPhotoKey);
-
-        await AddDrivingLicense(_drivingLicense);
-
-        var repositoryAndUowBuilder = new RepositoryAndUnitOfWorkBuilder();
-        repositoryAndUowBuilder.ConfigureContext(Context);
-        var (repositoryForArrange, uowForArrange) = repositoryAndUowBuilder.Build();
-        await repositoryForArrange.Add(photo);
-        await uowForArrange.Commit();
-
-        var (repository, uow) = repositoryAndUowBuilder.Build();
-
-        // Act
-        repository.Delete(photo);
-        await uow.Commit();
-
-        // Assert
-        var photoFromDb = await Context.Photos.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
-        Assert.Null(photoFromDb);
-    }
-
-    [Fact]
     public async Task GetById()
     {
         // Arrange

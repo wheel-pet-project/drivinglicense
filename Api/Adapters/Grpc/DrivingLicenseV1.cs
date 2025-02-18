@@ -6,7 +6,6 @@ using Application.UseCases.Queries.GetAllDrivingLicenses;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
 using Domain.SharedKernel.Errors;
 using FluentResults;
-using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;

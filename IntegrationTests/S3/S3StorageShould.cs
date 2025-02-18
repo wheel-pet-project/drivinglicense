@@ -1,12 +1,7 @@
-using System.Net;
 using Amazon.S3;
-using Amazon.S3.Model;
 using Application.Ports.S3;
 using Domain.DrivingLicenceAggregate;
-using Domain.PhotoAggregate;
 using Domain.SharedKernel.ValueObjects;
-using FluentResults;
-using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.S3;
 using Infrastructure.Options;
 using JetBrains.Annotations;
@@ -38,8 +33,6 @@ public class S3StorageShould : IntegrationTestBase
     public async Task ReturnSuccessResult()
     {
         // Arrange
-        await AddDrivingLicense(_drivingLicense);
-
         var storageBuilder = new StorageBuilder();
         var storage = storageBuilder.Build();
 
@@ -49,16 +42,7 @@ public class S3StorageShould : IntegrationTestBase
         // Assert
         Assert.True(actual.IsSuccess);
     }
-
-    private async Task AddDrivingLicense(DrivingLicense drivingLicense)
-    {
-        Context.Attach(drivingLicense.Status);
-        Context.Attach(drivingLicense.CategoryList);
-
-        await Context.AddAsync(drivingLicense);
-        await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-    }
-
+    
     private class StorageBuilder
     {
         private readonly Mock<IAmazonS3> _s3Mock = new();

@@ -43,14 +43,14 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
         builder.HasOne(x => x.Status)
             .WithMany()
             .HasForeignKey("status_id")
-            .HasConstraintName("fk_status_id")
+            .HasConstraintName("FK_status_id")
             .IsRequired();
 
-        builder.HasOne<Photos>()
-            .WithOne()
-            .HasForeignKey<Photos>(x => x.DrivingLicenseId)
-            .HasConstraintName("fk_driving_license")
-            .IsRequired(false);
+        // builder.HasOne<Photos>(x => x.Id)
+        //     .WithMany()
+        //     .HasForeignKey(x => x.Id)
+        //     .HasConstraintName("FK_photos_id")
+        //     .IsRequired(false);
 
         builder.OwnsOne(x => x.CategoryList,
             cfg =>
@@ -97,14 +97,23 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photos>
 {
     public void Configure(EntityTypeBuilder<Photos> builder)
     {
-        builder.ToTable("photo");
+        builder.ToTable("photos");
 
         builder.HasKey(x => x.Id);
+        builder.HasOne<DrivingLicense>()
+            .WithMany()
+            .HasForeignKey(x => x.DrivingLicenseId)
+            .HasConstraintName("FK_driving_license_id")
+            .IsRequired(false);
 
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.DrivingLicenseId).HasColumnName("driving_license_id").IsRequired();
-        builder.Property(x => x.FrontPhotoStorageKeyWithBucket).HasColumnName("front_photo_storage_key").IsRequired();
-        builder.Property(x => x.BackPhotoStorageKeyWithBucket).HasColumnName("back_photo_storage_key").IsRequired();
+        builder.Property(x => x.FrontPhotoStorageBucketAndKey)
+            .HasColumnName("front_photo_storage_bucket_and_key")
+            .IsRequired();
+        builder.Property(x => x.BackPhotoStorageBucketWithKey)
+            .HasColumnName("back_photo_storage_bucket_and_key")
+            .IsRequired();
         
         builder.Ignore(x => x.DomainEvents);
     }

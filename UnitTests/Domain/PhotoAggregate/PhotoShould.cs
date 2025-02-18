@@ -22,8 +22,8 @@ public class PhotoShould
 
         // Assert
         Assert.NotEqual(Guid.Empty, actual.Id);
-        Assert.Equal(_frontPhotoKey, actual.FrontPhotoStorageKeyWithBucket);
-        Assert.Equal(_backPhotoKey, actual.BackPhotoStorageKeyWithBucket);
+        Assert.Equal(_frontPhotoKey, actual.FrontPhotoStorageBucketAndKey);
+        Assert.Equal(_backPhotoKey, actual.BackPhotoStorageBucketWithKey);
     }
 
     [Fact]

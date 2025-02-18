@@ -1,10 +1,8 @@
-using Application.Ports.S3;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
 using Domain.DrivingLicenceAggregate;
 using Domain.PhotoAggregate;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
-using Moq;
 using Npgsql;
 using Xunit;
 

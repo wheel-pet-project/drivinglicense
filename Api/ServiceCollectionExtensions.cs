@@ -1,7 +1,10 @@
 using System.Reflection;
+using Amazon.Runtime;
 using Amazon.S3;
+using Amazon.S3.Internal;
 using Api.Adapters.Mapper;
 using Api.PipelineBehaviours;
+using Application.DomainEventHandlers;
 using Application.Ports.ImageValidators;
 using Application.Ports.Kafka;
 using Application.Ports.Postgres;
@@ -12,6 +15,8 @@ using Application.UseCases.Commands.UploadDrivingLicense;
 using Application.UseCases.Commands.UploadPhotos;
 using Application.UseCases.Queries.GetAllDrivingLicenses;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
+using Domain.DrivingLicenceAggregate.DomainEvents;
+using Domain.PhotoAggregate.DomainEvents;
 using FluentResults;
 using From.DrivingLicenseKafkaEvents;
 using Infrastructure.Adapters.ImageValidators;
@@ -98,6 +103,11 @@ public static class ServiceCollectionExtensions
                 Environment.GetEnvironmentVariable("AWS_S3_SERVICE_URL") ?? "https://storage.yandexcloud.net"));
         services.AddTransient<IRequestHandler<GetAllDrivingLicensesQuery, Result<GetAllDrivingLicensesQueryResponse>>,
                 GetAllDrivingLicensesQueryHandler>();
+        
+        // Domain event handlers
+        services.AddTransient<INotificationHandler<PhotosAddedDomainEvent>, PhotoAddedHandler>();
+        services.AddTransient<INotificationHandler<DrivingLicenseApprovedDomainEvent>, DrivingLicenseApprovedHandler>();
+        services.AddTransient<INotificationHandler<DrivingLicenseExpiredDomainEvent>, DrivingLicenseExpiredHandler>();
 
         return services;
     }
@@ -113,7 +123,8 @@ public static class ServiceCollectionExtensions
                     ForcePathStyle = true,
                     ServiceURL = Environment.GetEnvironmentVariable("AWS_S3_SERVICE_URL") ??
                                  "https://storage.yandexcloud.net",
-                    AuthenticationRegion = "ru-central1"
+                    AuthenticationRegion = "ru-central1",
+                    RetryMode = RequestRetryMode.Standard
                 }));
         services.AddTransient<IS3Storage, S3Storage>();
 
@@ -197,7 +208,7 @@ public static class ServiceCollectionExtensions
             configure
                 .AddJob<ActualityObserverBackgroundJob>(j => j.WithIdentity(actualityObserverJobKey))
                 .AddTrigger(trigger => trigger.ForJob(actualityObserverJobKey)
-                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInHours(3).RepeatForever()));
+                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInSeconds(3).RepeatForever()));
         });
 
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);

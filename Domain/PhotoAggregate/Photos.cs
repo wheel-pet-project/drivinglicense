@@ -12,19 +12,19 @@ public class Photos : Aggregate
 
     private Photos(
         Guid drivingLicenseId,
-        string frontPhotoStorageKeyWithBucket,
-        string backPhotoStorageKeyWithBucket) : this()
+        string frontPhotoStorageBucketAndKey,
+        string backPhotoStorageBucketWithKey) : this()
     {
         Id = Guid.NewGuid();
         DrivingLicenseId = drivingLicenseId;
-        FrontPhotoStorageKeyWithBucket = frontPhotoStorageKeyWithBucket;
-        BackPhotoStorageKeyWithBucket = backPhotoStorageKeyWithBucket;
+        FrontPhotoStorageBucketAndKey = frontPhotoStorageBucketAndKey;
+        BackPhotoStorageBucketWithKey = backPhotoStorageBucketWithKey;
     }
 
     public Guid Id { get; private set; }
     public Guid DrivingLicenseId { get; private set; }
-    public string FrontPhotoStorageKeyWithBucket { get; private set; }
-    public string BackPhotoStorageKeyWithBucket { get; private set; }
+    public string FrontPhotoStorageBucketAndKey { get; private set; }
+    public string BackPhotoStorageBucketWithKey { get; private set; }
 
     public static Photos Create(
         Guid drivingLicenseId,

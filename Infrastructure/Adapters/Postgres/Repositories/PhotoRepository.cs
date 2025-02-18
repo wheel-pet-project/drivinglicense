@@ -15,9 +15,4 @@ public class PhotoRepository(DataContext context) : IPhotoRepository
     {
         await context.Photos.AddAsync(photo);
     }
-
-    public void Delete(Photos photo)
-    {
-        context.Photos.Remove(photo);
-    }
 }

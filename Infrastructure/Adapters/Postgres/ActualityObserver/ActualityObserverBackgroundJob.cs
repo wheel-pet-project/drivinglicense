@@ -1,7 +1,7 @@
-using Dapper;
-using Domain.DrivingLicenceAggregate.DomainEvents;
-using MediatR;
-using Npgsql;
+using Application.Ports.Postgres;
+using Domain.DrivingLicenceAggregate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Quartz;
 
 namespace Infrastructure.Adapters.Postgres.ActualityObserver;
@@ -10,29 +10,36 @@ namespace Infrastructure.Adapters.Postgres.ActualityObserver;
 /// Отслеживает истекшие водительские права
 /// </summary>
 public class ActualityObserverBackgroundJob(
-    NpgsqlDataSource dataSource,
+    DataContext context,
+    IUnitOfWork unitOfWork,
     TimeProvider timeProvider,
-    IMediator mediator)
+    ILogger<ActualityObserverBackgroundJob> logger)
     : IJob
 {
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
-        await using var connection = await dataSource.OpenConnectionAsync();
-        var command = new CommandDefinition(_sql, new { Today = timeProvider.GetUtcNow().UtcDateTime });
+        var expiredLicenses = context.DrivingLicenses
+            .Include(x => x.Status)
+            .Where(x => x.DateOfExpiry < DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime.Date) &&
+                        x.Status != Status.Expired)
+            .OrderBy(x => x.DateOfExpiry)
+            .ToList();
 
-        var licenseIdEnumerable = await connection.QueryAsync<Guid>(command);
-        var licenseIdList = licenseIdEnumerable.AsList();
-
-        if (licenseIdList.Count > 0)
-            foreach (var licenseId in licenseIdList)
-                await mediator.Publish(new DrivingLicenseExpiredDomainEvent(licenseId),
-                    jobExecutionContext.CancellationToken);
+        if (expiredLicenses.Count > 0)
+        {
+            try
+            {
+                foreach (var license in expiredLicenses) 
+                    license.Expire(timeProvider);
+                
+                context.AttachRange(expiredLicenses.Select(x => x.Status));
+                context.DrivingLicenses.UpdateRange(expiredLicenses);
+                await unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                logger.LogCritical("Failed to update expiry status for licenses, exception: {ex}", ex);    
+            }
+        }
     }
-
-    private readonly string _sql =
-        """
-        SELECT id AS Id
-        FROM driving_license
-        WHERE date_of_expiry <= '@Today'
-        """;
 }

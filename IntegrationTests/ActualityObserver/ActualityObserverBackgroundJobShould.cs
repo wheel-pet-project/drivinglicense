@@ -1,8 +1,11 @@
 using Domain.DrivingLicenceAggregate;
 using Domain.SharedKernel.ValueObjects;
+using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.ActualityObserver;
 using JetBrains.Annotations;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
 using Npgsql;
@@ -16,7 +19,7 @@ namespace IntegrationTests.ActualityObserver;
 public class ActualityObserverBackgroundJobShould : IntegrationTestBase
 {
     [Fact]
-    public async Task CallPublish()
+    public async Task AddExpiredDomainEventToOutbox()
     {
         // Arrange
         await AddExpiredDrivingLicense();
@@ -24,31 +27,33 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
 
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureDataSource(DataSource);
+        jobBuilder.ConfigureContext(Context);
         var job = jobBuilder.Build();
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        jobBuilder.VerifyCalls(1);
+        var domainEvent = await Context.Outbox.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
+        Assert.NotNull(domainEvent);
     }
 
     [Fact]
-    public async Task DontCallPublishIfNotFoundExpiredDrivingLicenses()
+    public async Task DontAddExpiredDomainEventToOutbox()
     {
         // Arrange
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
 
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureDataSource(DataSource);
+        jobBuilder.ConfigureContext(Context);
         var job = jobBuilder.Build();
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        jobBuilder.VerifyCalls(0);
+        var domainEvent = await Context.Outbox.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
+        Assert.Null(domainEvent);
     }
 
     private async Task AddExpiredDrivingLicense()
@@ -61,8 +66,11 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
             DrivingLicenseNumber.Create("1234 567891"), Name.Create("Иван", "Иванов", "Иванович"),
             City.Create("Москва"), new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
             CodeOfIssue.Create("1234"),
-            DateOnly.FromDateTime(DateTime.UtcNow),
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
             fakeTimeProvider);
+        
+        drivingLicense.MarkAsPendingProcessing();
+        drivingLicense.Approve();
 
         Context.Attach(drivingLicense.Status);
         Context.Attach(drivingLicense.CategoryList);
@@ -73,24 +81,21 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
 
     private class JobBuilder
     {
-        private NpgsqlDataSource _dataSource = null!;
-        private readonly Mock<TimeProvider> _timeProviderMock = new();
-        private readonly Mock<IMediator> _mediatorMock = new();
+        private readonly TimeProvider _timeProvider = TimeProvider.System;
+        private readonly Mock<ILogger<ActualityObserverBackgroundJob>> _logger = new();
+        
+        private DataContext _context = null!;
+        private Infrastructure.Adapters.Postgres.UnitOfWork _unitOfWork = null!;
 
         public ActualityObserverBackgroundJob Build()
         {
-            return new ActualityObserverBackgroundJob(_dataSource, _timeProviderMock.Object, _mediatorMock.Object);
+            return new ActualityObserverBackgroundJob(_context,
+                new Infrastructure.Adapters.Postgres.UnitOfWork(_context), _timeProvider, _logger.Object);
         }
 
-        public void ConfigureDataSource(NpgsqlDataSource dataSource)
+        public void ConfigureContext(DataContext context)
         {
-            _dataSource = dataSource;
-        }
-
-        public void VerifyCalls(int times)
-        {
-            _mediatorMock.Verify(x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()),
-                Times.Exactly(times));
+            _context = context;
         }
     }
 }

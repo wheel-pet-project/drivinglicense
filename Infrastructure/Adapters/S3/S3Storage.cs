@@ -18,7 +18,7 @@ public class S3Storage(
 {
     private readonly S3Options _s3Options = options.Value;
 
-    public async Task<Result<(string frontPhotoKeyWithBucket, string backPhotoKeyWithBucket)>> SavePhotos(
+    public async Task<Result<(string frontPhotoBucketAndKey, string backPhotoBucketAndKey)>> SavePhotos(
         List<byte> frontPhotoBytes, 
         List<byte> backPhotoBytes)
     {
@@ -53,17 +53,25 @@ public class S3Storage(
                 ChecksumSHA256 = Convert.ToBase64String(SHA256.HashData(backPhotoBytesArray))
             };
 
-            var frontPhotoUploadTask = s3Client.PutObjectAsync(frontPhotoPutRequest);
-            var backPhotoUploadTask = s3Client.PutObjectAsync(backPhotoPutRequest);
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var cancellationToken = tokenSource.Token;
+
+            var frontPhotoUploadTask = s3Client.PutObjectAsync(frontPhotoPutRequest, cancellationToken);
+            var backPhotoUploadTask = s3Client.PutObjectAsync(backPhotoPutRequest, cancellationToken);
 
             await Task.WhenAll(frontPhotoUploadTask, backPhotoUploadTask);
-            
+
             return Result.Ok(($"{currentBucket}/{frontPhotoKey}", $"{currentBucket}/{backPhotoKey}"));
         }
         catch (AmazonS3Exception ex)
         {
             logger.LogError("Could not upload photos to S3 storage, exception : {ex}", ex);
             return Result.Fail("Could not upload photos to S3 storage");
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogWarning("Time-out for uploading photos has expired, exception: {ex}", ex);
+            return Result.Fail("Time-out for uploading photos has expired.");
         }
     }
 }

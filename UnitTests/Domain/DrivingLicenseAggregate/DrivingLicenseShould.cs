@@ -4,6 +4,7 @@ using Domain.SharedKernel.Exceptions.ArgumentException;
 using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Time.Testing;
 using Xunit;
 
 namespace UnitTests.Domain.DrivingLicenseAggregate;
@@ -24,6 +25,7 @@ public class DrivingLicenseShould
     private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create("1234");
     private readonly DateOnly _dateOfExpiry = new(2030, 1, 1);
     private readonly TimeProvider _timeProvider = TimeProvider.System;
+    
 
     [Fact]
     public void CreateInstanceWithCorrectValues()
@@ -323,7 +325,7 @@ public class DrivingLicenseShould
     }
 
     [Fact]
-    public void SetExpiredStatus()
+    public void ThrowValueIsRequiredExceptionIfSettingExpireStatusWithTimeProviderIsNull()
     {
         // Arrange
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
@@ -332,7 +334,45 @@ public class DrivingLicenseShould
         license.Approve();
 
         // Act
-        license.Expire();
+        void Act() => license.Expire(null!);
+
+        // Assert
+        Assert.Throws<ValueIsRequiredException>(Act);
+    }
+
+    [Fact]
+    public void ThrowDomainRulesViolationExceptionIfSettingExpireStatusWithExpiryHasNotComeYet()
+    {
+        // Arrange
+        var fakeTimeProvider = new FakeTimeProvider();
+        fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(-1)));
+        
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        license.MarkAsPendingProcessing();
+        license.Approve();
+
+        // Act
+        void Act() => license.Expire(fakeTimeProvider);
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
+    }
+    
+    [Fact]
+    public void SetExpiredStatus()
+    {
+        // Arrange
+        var fakeTimeProvider = new FakeTimeProvider();
+        fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(1)));
+        
+        var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
+            _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
+        license.MarkAsPendingProcessing();
+        license.Approve();
+
+        // Act
+        license.Expire(fakeTimeProvider);
 
         // Assert
         Assert.Equal(Status.Expired, license.Status);
@@ -342,13 +382,16 @@ public class DrivingLicenseShould
     public void AddDomainEventIfLicenseExpired()
     {
         // Arrange
+        var fakeTimeProvider = new FakeTimeProvider();
+        fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(1)));
+        
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
         license.Approve();
 
         // Act
-        license.Expire();
+        license.Expire(fakeTimeProvider);
 
         // Assert
         Assert.NotNull(license.DomainEvents[1]);
@@ -359,13 +402,16 @@ public class DrivingLicenseShould
     public void ThrowDomainRulesViolationExceptionIfExpireInvokeWithInvalidStatus()
     {
         // Arrange
+        var fakeTimeProvider = new FakeTimeProvider();
+        fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(1)));
+        
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 
         // Act
         void Act()
         {
-            license.Expire();
+            license.Expire(fakeTimeProvider);
         }
 
         // Assert
