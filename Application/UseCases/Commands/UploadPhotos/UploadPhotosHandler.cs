@@ -32,8 +32,7 @@ public class UploadPhotosHandler(
         var photo = Photos.Create(command.DrivingLicenseId, keys.frontPhotoBucketAndKey, keys.backPhotoBucketAndKey);
 
         await photoRepository.Add(photo);
-        await unitOfWork.Commit();
-
-        return Result.Ok();
+        
+        return await unitOfWork.Commit();
     }
 }

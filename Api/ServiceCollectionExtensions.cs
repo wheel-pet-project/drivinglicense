@@ -43,7 +43,7 @@ namespace Api;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection RegisterPostgresDataContext(this IServiceCollection services)
+    public static IServiceCollection RegisterPostgresContextAndDataSource(this IServiceCollection services)
     {
         services.AddScoped<NpgsqlDataSource>(_ =>
         {

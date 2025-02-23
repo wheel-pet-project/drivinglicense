@@ -12,7 +12,7 @@ public class Program
         services.AddGrpc(options => options.Interceptors.Add<ExceptionHandlerInterceptor>());
 
         services
-            .RegisterPostgresDataContext()
+            .RegisterPostgresContextAndDataSource()
             .RegisterUnitOfWork()
             .RegisterS3Storage()
             .RegisterOutboxAndActualityObserverBackgroundJobs()

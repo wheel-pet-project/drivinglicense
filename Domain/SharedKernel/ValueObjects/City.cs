@@ -15,7 +15,7 @@ public class City : ValueObject
     }
 
 
-    public string Name { get; private set; }
+    public string Name { get; }
 
     public static City Create(string input)
     {

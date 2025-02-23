@@ -1,9 +1,11 @@
+using Amazon.Runtime.Internal.Util;
 using Domain.DrivingLicenceAggregate.DomainEvents;
 using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Outbox;
 using JetBrains.Annotations;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
 using Quartz;
@@ -78,11 +80,12 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
     private class JobBuilder
     {
         private readonly Mock<IMediator> _mediatorMock = new();
+        private readonly Mock<ILogger<OutboxBackgroundJob>> _logger = new();
         private DataContext _context = null!;
 
         public OutboxBackgroundJob Build()
         {
-            return new OutboxBackgroundJob(_context, _mediatorMock.Object);
+            return new OutboxBackgroundJob(_context, _mediatorMock.Object, _logger.Object);
         }
 
         public void ConfigureContext(DataContext context)

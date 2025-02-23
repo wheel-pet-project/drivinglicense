@@ -15,7 +15,7 @@ public class CodeOfIssue : ValueObject
     }
 
 
-    public string Value { get; private set; } = null!;
+    public string Value { get; } = null!;
 
     public static CodeOfIssue Create(string input)
     {

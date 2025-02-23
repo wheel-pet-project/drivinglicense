@@ -46,12 +46,6 @@ public class DrivingLicenseConfiguration : IEntityTypeConfiguration<DrivingLicen
             .HasConstraintName("FK_status_id")
             .IsRequired();
 
-        // builder.HasOne<Photos>(x => x.Id)
-        //     .WithMany()
-        //     .HasForeignKey(x => x.Id)
-        //     .HasConstraintName("FK_photos_id")
-        //     .IsRequired(false);
-
         builder.OwnsOne(x => x.CategoryList,
             cfg =>
             {

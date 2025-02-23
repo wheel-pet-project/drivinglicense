@@ -21,6 +21,7 @@ public class UploadPhotosHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
         handlerBuilder.ConfigureFormatValidator(true);
         handlerBuilder.ConfigureSizeValidator(true);
@@ -38,6 +39,7 @@ public class UploadPhotosHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(Result.Fail(new ObjectStorageUnavailable("error")));
         handlerBuilder.ConfigureFormatValidator(true);
         handlerBuilder.ConfigureSizeValidator(true);
@@ -56,6 +58,7 @@ public class UploadPhotosHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
         handlerBuilder.ConfigureFormatValidator(false);
         handlerBuilder.ConfigureSizeValidator(true);
@@ -73,6 +76,25 @@ public class UploadPhotosHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
+        handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
+        handlerBuilder.ConfigureFormatValidator(true);
+        handlerBuilder.ConfigureSizeValidator(false);
+        var handler = handlerBuilder.Build();
+
+        // Act
+        var response = await handler.Handle(_command, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.True(response.IsFailed);
+    }
+
+    [Fact]
+    public async Task ReturnFailIfCommitIsFailed()
+    {
+        // Arrange
+        var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Fail("error"));
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
         handlerBuilder.ConfigureFormatValidator(true);
         handlerBuilder.ConfigureSizeValidator(false);
@@ -98,6 +120,9 @@ public class UploadPhotosHandlerShould
             return new(_photoRepositoryMock.Object, _s3StorageMock.Object, _imageFormatValidatorMock.Object,
                 _imageSizeValidatorMock.Object, _unitOfWorkMock.Object);
         }
+
+        public void ConfigureUnitOfWork(Result commitShouldReturn) =>
+            _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(commitShouldReturn);
 
         public void ConfigureS3Storage(Result<(string frontPhotoKey, string backPhotoKey)> savePhotosShouldReturn)
         {

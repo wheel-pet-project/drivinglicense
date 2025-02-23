@@ -12,5 +12,5 @@ public record DrivingLicenseExpiredDomainEvent : DomainEvent
         AccountId = accountId;
     }
 
-    public Guid AccountId { get; private set; }
+    public Guid AccountId { get; }
 }

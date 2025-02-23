@@ -27,15 +27,13 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
         var modelsEnumerable = await connection.QueryAsync<DapperDrivingLicenseShortModel>(command);
         var modelList = modelsEnumerable.AsList();
 
-        var viewList = modelList.Select(x => new GetAllDrivingLicensesQueryResponse.DrivingLicenseShortView
-            {
-                Id = x.Id,
-                AccountId = x.AccountId,
-                Name = string.Join(' ', new List<string>(x.Patronymic is null
+        var viewList = modelList.Select(x => new GetAllDrivingLicensesQueryResponse.DrivingLicenseShortView(
+                x.Id,
+                x.AccountId,
+                string.Join(' ', new List<string>(x.Patronymic is null
                     ? [x.FirstName, x.LastName]
-                    : [x.FirstName, x.LastName, x.Patronymic])),
-                Status = Status.FromId(x.StatusId)
-            })
+                    : [x.FirstName, x.LastName, x.Patronymic])), 
+                Status.FromId(x.StatusId)))
             .ToList();
 
         return new GetAllDrivingLicensesQueryResponse(viewList);

@@ -1,30 +1,32 @@
 using Application.Ports.Postgres;
 using Domain.SharedKernel;
+using Domain.SharedKernel.Errors;
+using FluentResults;
 using Infrastructure.Adapters.Postgres.Outbox;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Adapters.Postgres;
 
-public class UnitOfWork(DataContext context) : IUnitOfWork, IDisposable
+public sealed class UnitOfWork(DataContext context) : IUnitOfWork, IDisposable
 {
-    public async Task<bool> Commit()
+    public async Task<Result> Commit()
     {
         await SaveDomainEventsInOutbox();
 
         try
         {
             await context.SaveChangesAsync();
-            return true;
+            return Result.Ok();
         }
         catch
         {
-            return false;
+            return Result.Fail(new CommitFail("Failed to commit changes"));
         }
     }
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
+        context.Dispose();
     }
 
     private async Task SaveDomainEventsInOutbox()

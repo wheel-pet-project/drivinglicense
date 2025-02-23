@@ -1,6 +1,7 @@
 using Application.Ports.Postgres;
 using Application.UseCases.Commands.UploadDrivingLicense;
 using Domain.SharedKernel.ValueObjects;
+using FluentResults;
 using JetBrains.Annotations;
 using Moq;
 using Xunit;
@@ -19,6 +20,7 @@ public class UploadDrivingLicenseHandlerShould
     {
         // Arrange
         var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         var handler = handlerBuilder.Build();
 
         // Act
@@ -28,6 +30,21 @@ public class UploadDrivingLicenseHandlerShould
         Assert.True(response.IsSuccess);
     }
 
+    [Fact]
+    public async Task ReturnFailIfCommitFailed()
+    {
+        // Arrange
+        var handlerBuilder = new HandlerBuilder();
+        handlerBuilder.ConfigureUnitOfWork(Result.Fail("error"));
+        var handler = handlerBuilder.Build();
+
+        // Act
+        var response = await handler.Handle(_command, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.True(response.IsFailed);
+    }
+    
     private class HandlerBuilder
     {
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
@@ -38,5 +55,8 @@ public class UploadDrivingLicenseHandlerShould
             return new UploadDrivingLicenseHandler(_drivingLicenseRepositoryMock.Object, TimeProvider.System,
                 _unitOfWorkMock.Object);
         }
+        
+        public void ConfigureUnitOfWork(Result commitShouldReturn) =>
+            _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(commitShouldReturn);
     }
 }

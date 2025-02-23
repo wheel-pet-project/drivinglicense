@@ -38,9 +38,9 @@ public class Photos : Aggregate
         if (string.IsNullOrWhiteSpace(backPhotoStorageKeyWithBucket))
             throw new ValueIsRequiredException($"{nameof(backPhotoStorageKeyWithBucket)} cannot be null or empty");
 
-        var newPhoto = new Photos(drivingLicenseId, frontPhotoStorageKeyWithBucket, backPhotoStorageKeyWithBucket);
-        newPhoto.AddDomainEvent(new PhotosAddedDomainEvent(drivingLicenseId));
+        var photo = new Photos(drivingLicenseId, frontPhotoStorageKeyWithBucket, backPhotoStorageKeyWithBucket);
+        photo.AddDomainEvent(new PhotosAddedDomainEvent(drivingLicenseId));
 
-        return newPhoto;
+        return photo;
     }
 }

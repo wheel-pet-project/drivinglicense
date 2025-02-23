@@ -13,14 +13,5 @@ public class GetAllDrivingLicensesQueryResponse
 
     public IReadOnlyList<DrivingLicenseShortView> DrivingLicenses => _drivingLicenses;
 
-    public class DrivingLicenseShortView
-    {
-        public required Guid Id { get; init; }
-
-        public required Guid AccountId { get; init; }
-
-        public required string Name { get; init; } = null!;
-
-        public required Status Status { get; init; } = null!;
-    }
+    public record DrivingLicenseShortView(Guid Id, Guid AccountId, string Name, Status Status);
 }

@@ -23,31 +23,31 @@ public class GetByIdDrivingLicenseQueryHandler(
         var dapperModel = await connection.QuerySingleOrDefaultAsync<DapperDrivingLicenseModel>(command);
         if (dapperModel is null) return Result.Fail("Driving license not found");
 
-        var responseModel = new GetByIdDrivingLicenseQueryResponse(new DrivingLicenseView
-        {
-            Id = dapperModel.Id,
-            AccountId = dapperModel.AccountId,
-            CategoryList = dapperModel.CategoryList.Select(x => x[0]).ToArray(),
-            Name = string.Join(' ', new List<string>(dapperModel.Patronymic is null
-                ? [dapperModel.FirstName, dapperModel.LastName]
-                : [dapperModel.FirstName, dapperModel.LastName, dapperModel.Patronymic])),
-            Number = dapperModel.Number,
-            CityOfBirth = dapperModel.CityOfBirth,
-            DateOfBirth = dapperModel.DateOfBirth,
-            CodeOfIssue = dapperModel.CodeOfIssue,
-            DateOfIssue = dapperModel.DateOfIssue,
-            DateOfExpiry = dapperModel.DateOfExpiry,
-            Status = Status.FromId(dapperModel.StatusId)
-        });
-
         var photoKeysModel = await connection.QuerySingleOrDefaultAsync<DapperPhotoIdsModel>(
             _getPhotoIdsSql,
             new { LicenseId = request.Id });
-        if (photoKeysModel is null) return Result.Ok(responseModel);
-        
-        responseModel.DrivingLicenseView.AddPhotoUrls(
-            $"{yandexS3StorageHost}/{photoKeysModel.FrontPhotoStorageBucketAndKey}",
-            $"{yandexS3StorageHost}/{photoKeysModel.BackPhotoStorageBucketAndKey}");
+
+        var responseModel = new GetByIdDrivingLicenseQueryResponse(
+            new GetByIdDrivingLicenseQueryResponse.DrivingLicenseView(
+                Id: dapperModel.Id,
+                AccountId: dapperModel.AccountId,
+                Status: Status.FromId(dapperModel.StatusId),
+                CategoryList: dapperModel.CategoryList.Select(x => x[0]).ToList(),
+                Number: dapperModel.Number,
+                Name: string.Join(' ', new List<string>(dapperModel.Patronymic is null
+                    ? [dapperModel.FirstName, dapperModel.LastName]
+                    : [dapperModel.FirstName, dapperModel.LastName, dapperModel.Patronymic])),
+                CityOfBirth: dapperModel.CityOfBirth,
+                DateOfBirth: dapperModel.DateOfBirth,
+                DateOfIssue: dapperModel.DateOfIssue,
+                CodeOfIssue: dapperModel.CodeOfIssue,
+                DateOfExpiry: dapperModel.DateOfExpiry,
+                FrontPhotoS3Url: photoKeysModel?.FrontPhotoStorageBucketAndKey is not null
+                    ? $"{yandexS3StorageHost}/{photoKeysModel?.FrontPhotoStorageBucketAndKey}"
+                    : null,
+                BackPhotoS3Url: photoKeysModel?.BackPhotoStorageBucketAndKey is not null
+                    ? $"{yandexS3StorageHost}/{photoKeysModel?.BackPhotoStorageBucketAndKey}"
+                    : null));
 
         return Result.Ok(responseModel);
     }

@@ -15,7 +15,7 @@ public record DrivingLicenseApprovedDomainEvent : DomainEvent
         Categories = categories;
     }
 
-    public Guid AccountId { get; private set; }
+    public Guid AccountId { get; }
 
-    public IReadOnlyList<char> Categories { get; private set; }
+    public IReadOnlyList<char> Categories { get; }
 }

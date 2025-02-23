@@ -3,6 +3,7 @@ using Application.UseCases.Commands.ApproveDrivingLicense;
 using Domain.DrivingLicenceAggregate;
 using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.ValueObjects;
+using FluentResults;
 using JetBrains.Annotations;
 using Moq;
 using Xunit;
@@ -28,6 +29,7 @@ public class ApproveDrivingLicenseHandlerShould
         var handlerBuilder = new HandlerBuilder();
         _drivingLicense.MarkAsPendingProcessing();
         handlerBuilder.ConfigureDrivingLicenseRepository(_drivingLicense);
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         var handler = handlerBuilder.Build();
 
         // Act
@@ -43,6 +45,7 @@ public class ApproveDrivingLicenseHandlerShould
         // Arrange
         var handlerBuilder = new HandlerBuilder();
         handlerBuilder.ConfigureDrivingLicenseRepository(null);
+        handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         var handler = handlerBuilder.Build();
 
         // Act
@@ -51,6 +54,23 @@ public class ApproveDrivingLicenseHandlerShould
         // Assert
         Assert.True(response.IsFailed);
         Assert.True(response.Errors[0].GetType() == typeof(NotFound));
+    }
+
+    [Fact]
+    public async Task ReturnFailIfCommitFailed()
+    {
+        // Arrange
+        var handlerBuilder = new HandlerBuilder();
+        _drivingLicense.MarkAsPendingProcessing();
+        handlerBuilder.ConfigureDrivingLicenseRepository(_drivingLicense);
+        handlerBuilder.ConfigureUnitOfWork(Result.Fail("error"));
+        var handler = handlerBuilder.Build();
+
+        // Act
+        var response = await handler.Handle(_command, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.True(response.IsFailed);
     }
 
     private class HandlerBuilder
@@ -67,5 +87,9 @@ public class ApproveDrivingLicenseHandlerShould
         {
             _drivingLicenseRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(getByIdShouldReturn);
         }
+        
+        
+        public void ConfigureUnitOfWork(Result commitShouldReturn) =>
+            _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(commitShouldReturn);
     }
 }

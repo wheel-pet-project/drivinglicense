@@ -40,21 +40,21 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
         // Assert
         var responseLicense = response.Value;
         Assert.NotNull(responseLicense);
-        Assert.Equal(_drivingLicense.Id, responseLicense.DrivingLicenseView.Id);
-        Assert.Equal(_drivingLicense.Status, responseLicense.DrivingLicenseView.Status);
-        Assert.Equal(_drivingLicense.AccountId, responseLicense.DrivingLicenseView.AccountId);
+        Assert.Equal(_drivingLicense.Id, responseLicense.DrivingLicense.Id);
+        Assert.Equal(_drivingLicense.Status, responseLicense.DrivingLicense.Status);
+        Assert.Equal(_drivingLicense.AccountId, responseLicense.DrivingLicense.AccountId);
         Assert.Equal(string.Join(' ', _drivingLicense.Name.FirstName, _drivingLicense.Name.LastName,
                 _drivingLicense.Name.Patronymic),
-            responseLicense.DrivingLicenseView.Name);
-        Assert.Equal(_drivingLicense.CategoryList.Categories, responseLicense.DrivingLicenseView.CategoryList);
-        Assert.Equal(_drivingLicense.Number.Value, responseLicense.DrivingLicenseView.Number);
-        Assert.Equal(_drivingLicense.CityOfBirth.Name, responseLicense.DrivingLicenseView.CityOfBirth);
-        Assert.Equal(_drivingLicense.DateOfBirth, responseLicense.DrivingLicenseView.DateOfBirth);
-        Assert.Equal(_drivingLicense.CodeOfIssue.Value, responseLicense.DrivingLicenseView.CodeOfIssue);
-        Assert.Equal(_drivingLicense.DateOfIssue, responseLicense.DrivingLicenseView.DateOfIssue);
-        Assert.Equal(_drivingLicense.DateOfExpiry, responseLicense.DrivingLicenseView.DateOfExpiry);
-        Assert.Contains(_frontPhotoKey, responseLicense.DrivingLicenseView.FrontPhotoS3Url);
-        Assert.Contains(_backPhotoKey, responseLicense.DrivingLicenseView.BackPhotoS3Url);
+            responseLicense.DrivingLicense.Name);
+        Assert.Equal(_drivingLicense.CategoryList.Categories, responseLicense.DrivingLicense.CategoryList);
+        Assert.Equal(_drivingLicense.Number.Value, responseLicense.DrivingLicense.Number);
+        Assert.Equal(_drivingLicense.CityOfBirth.Name, responseLicense.DrivingLicense.CityOfBirth);
+        Assert.Equal(_drivingLicense.DateOfBirth, responseLicense.DrivingLicense.DateOfBirth);
+        Assert.Equal(_drivingLicense.CodeOfIssue.Value, responseLicense.DrivingLicense.CodeOfIssue);
+        Assert.Equal(_drivingLicense.DateOfIssue, responseLicense.DrivingLicense.DateOfIssue);
+        Assert.Equal(_drivingLicense.DateOfExpiry, responseLicense.DrivingLicense.DateOfExpiry);
+        Assert.Contains(_frontPhotoKey, responseLicense.DrivingLicense.FrontPhotoS3Url);
+        Assert.Contains(_backPhotoKey, responseLicense.DrivingLicense.BackPhotoS3Url);
     }
 
     [Fact]
@@ -77,8 +77,8 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
         // Assert
         var responseLicense = response.Value;
         Assert.NotNull(responseLicense);
-        Assert.Null(responseLicense.DrivingLicenseView.FrontPhotoS3Url);
-        Assert.Null(responseLicense.DrivingLicenseView.BackPhotoS3Url);
+        Assert.Null(responseLicense.DrivingLicense.FrontPhotoS3Url);
+        Assert.Null(responseLicense.DrivingLicense.BackPhotoS3Url);
     }
     
     private async Task AddDrivingLicenseAndPhoto(Photos photo)

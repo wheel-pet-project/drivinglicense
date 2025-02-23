@@ -30,7 +30,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         if (result.IsFailed)
             return ParseErrorToRpcException<GetLicenseByIdResponse>(result.Errors);
 
-        var resultView = result.Value.DrivingLicenseView;
+        var resultView = result.Value.DrivingLicense;
         var response = new GetLicenseByIdResponse
         {
             Id = resultView.Id.ToString(),
@@ -163,6 +163,9 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
     {
         if (errors.Exists(x => x is NotFound))
             throw new RpcException(new Status(StatusCode.NotFound, string.Join(' ', errors.Select(x => x.Message))));
+        
+        if (errors.Exists(x => x is CommitFail))
+            throw new RpcException(new Status(StatusCode.Unavailable, string.Join(' ', errors.Select(x => x.Message))));
 
         if (errors.Exists(x => x is ObjectStorageUnavailable))
             throw new RpcException(new Status(StatusCode.Unavailable, string.Join(' ', errors.Select(x => x.Message))));

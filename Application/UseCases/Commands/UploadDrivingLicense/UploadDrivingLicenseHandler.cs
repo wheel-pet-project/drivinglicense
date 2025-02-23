@@ -26,8 +26,8 @@ public class UploadDrivingLicenseHandler(
             command.DateOfBirth, command.DateOfIssue, codeOfIssue, command.DateOfExpiry, timeProvider);
 
         await drivingLicenseRepository.Add(license);
-        await unitOfWork.Commit();
+        var commitResult = await unitOfWork.Commit();
 
-        return Result.Ok(new UploadDrivingLicenseResponse(license.Id));
+        return commitResult.IsSuccess ? Result.Ok(new UploadDrivingLicenseResponse(license.Id)) : commitResult;
     }
 }

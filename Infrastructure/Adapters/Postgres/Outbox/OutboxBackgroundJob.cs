@@ -1,18 +1,20 @@
 using Domain.SharedKernel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Quartz;
 
 namespace Infrastructure.Adapters.Postgres.Outbox;
 
+[DisallowConcurrentExecution]
 public class OutboxBackgroundJob(
     DataContext context,
-    IMediator mediator)
+    IMediator mediator,
+    ILogger<OutboxBackgroundJob> logger)
     : IJob
 {
-    private readonly JsonSerializerSettings
-        _jsonSerializerSettings = new() { TypeNameHandling = TypeNameHandling.All };
+    private readonly JsonSerializerSettings _jsonSerializerSettings = new() { TypeNameHandling = TypeNameHandling.All };
 
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
@@ -43,8 +45,9 @@ public class OutboxBackgroundJob(
                 await context.SaveChangesAsync(jobExecutionContext.CancellationToken);
                 await transaction.CommitAsync();
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError("Failed of processing outbox events and save updates, exception: {e}", e);
                 await transaction.RollbackAsync();
             }
         }

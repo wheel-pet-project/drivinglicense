@@ -18,8 +18,7 @@ public class RejectDrivingLicenseHandler(
         license.Reject();
 
         drivingLicenseRepository.Update(license);
-        await unitOfWork.Commit();
-
-        return Result.Ok();
+        
+        return await unitOfWork.Commit();
     }
 }

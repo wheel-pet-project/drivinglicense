@@ -13,5 +13,5 @@ public record PhotosAddedDomainEvent : DomainEvent
         DrivingLicenseId = drivingLicenseId;
     }
 
-    public Guid DrivingLicenseId { get; private set; }
+    public Guid DrivingLicenseId { get; }
 }

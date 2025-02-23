@@ -15,7 +15,7 @@ public class DrivingLicenseNumber : ValueObject
     }
 
 
-    public string Value { get; private set; } = null!;
+    public string Value { get; } = null!;
 
     public static DrivingLicenseNumber Create(string input)
     {
