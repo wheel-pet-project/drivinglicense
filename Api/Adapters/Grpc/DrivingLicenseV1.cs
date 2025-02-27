@@ -48,11 +48,11 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
                 resultView.DateOfExpiry.ToDateTime(new TimeOnly(), DateTimeKind.Utc))
         };
 
-        
+
         var categories = new RepeatedField<string>
             { resultView.CategoryList.Select(x => new string(x, 1)).AsEnumerable() };
         response.Categories.AddRange(categories);
-        
+
         if (resultView is { FrontPhotoS3Url: not null, BackPhotoS3Url: not null })
         {
             response.FrontPhotoS3Url = resultView.FrontPhotoS3Url;
@@ -163,7 +163,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
     {
         if (errors.Exists(x => x is NotFound))
             throw new RpcException(new Status(StatusCode.NotFound, string.Join(' ', errors.Select(x => x.Message))));
-        
+
         if (errors.Exists(x => x is CommitFail))
             throw new RpcException(new Status(StatusCode.Unavailable, string.Join(' ', errors.Select(x => x.Message))));
 

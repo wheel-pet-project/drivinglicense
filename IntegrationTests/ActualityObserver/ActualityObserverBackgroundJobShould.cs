@@ -68,7 +68,7 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
             CodeOfIssue.Create("1234"),
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
             fakeTimeProvider);
-        
+
         drivingLicense.MarkAsPendingProcessing();
         drivingLicense.Approve();
 
@@ -83,7 +83,7 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
     {
         private readonly TimeProvider _timeProvider = TimeProvider.System;
         private readonly Mock<ILogger<ActualityObserverBackgroundJob>> _logger = new();
-        
+
         private DataContext _context = null!;
         private Infrastructure.Adapters.Postgres.UnitOfWork _unitOfWork = null!;
 

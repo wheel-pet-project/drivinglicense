@@ -25,7 +25,7 @@ public class DrivingLicenseShould
     private readonly CodeOfIssue _codeOfIssue = CodeOfIssue.Create("1234");
     private readonly DateOnly _dateOfExpiry = new(2030, 1, 1);
     private readonly TimeProvider _timeProvider = TimeProvider.System;
-    
+
 
     [Fact]
     public void CreateInstanceWithCorrectValues()
@@ -334,7 +334,10 @@ public class DrivingLicenseShould
         license.Approve();
 
         // Act
-        void Act() => license.Expire(null!);
+        void Act()
+        {
+            license.Expire(null!);
+        }
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -346,26 +349,29 @@ public class DrivingLicenseShould
         // Arrange
         var fakeTimeProvider = new FakeTimeProvider();
         fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(-1)));
-        
+
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
         license.Approve();
 
         // Act
-        void Act() => license.Expire(fakeTimeProvider);
+        void Act()
+        {
+            license.Expire(fakeTimeProvider);
+        }
 
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
     }
-    
+
     [Fact]
     public void SetExpiredStatus()
     {
         // Arrange
         var fakeTimeProvider = new FakeTimeProvider();
         fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(1)));
-        
+
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
@@ -384,7 +390,7 @@ public class DrivingLicenseShould
         // Arrange
         var fakeTimeProvider = new FakeTimeProvider();
         fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(1)));
-        
+
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
         license.MarkAsPendingProcessing();
@@ -404,7 +410,7 @@ public class DrivingLicenseShould
         // Arrange
         var fakeTimeProvider = new FakeTimeProvider();
         fakeTimeProvider.SetUtcNow(new DateTimeOffset(_dateOfExpiry.ToDateTime(new TimeOnly()).AddDays(1)));
-        
+
         var license = DrivingLicense.Create(_accountId, _categories, _number, _name, _cityOfBirth, _dateOfBirth,
             _dateOfIssue, _codeOfIssue, _dateOfExpiry, _timeProvider);
 

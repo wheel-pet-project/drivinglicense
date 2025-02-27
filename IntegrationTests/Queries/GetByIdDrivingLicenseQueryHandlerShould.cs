@@ -80,7 +80,7 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
         Assert.Null(responseLicense.DrivingLicense.FrontPhotoS3Url);
         Assert.Null(responseLicense.DrivingLicense.BackPhotoS3Url);
     }
-    
+
     private async Task AddDrivingLicenseAndPhoto(Photos photo)
     {
         Context.Attach(_drivingLicense.Status);

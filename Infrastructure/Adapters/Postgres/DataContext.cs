@@ -108,7 +108,7 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photos>
         builder.Property(x => x.BackPhotoStorageBucketWithKey)
             .HasColumnName("back_photo_storage_bucket_and_key")
             .IsRequired();
-        
+
         builder.Ignore(x => x.DomainEvents);
     }
 }

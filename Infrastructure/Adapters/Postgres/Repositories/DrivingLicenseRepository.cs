@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Adapters.Postgres.Repositories;
 
 public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepository
-{ 
+{
     public async Task<DrivingLicense?> GetById(Guid id)
     {
         return await context.DrivingLicenses

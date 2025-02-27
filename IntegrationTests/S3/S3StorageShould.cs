@@ -42,7 +42,7 @@ public class S3StorageShould : IntegrationTestBase
         // Assert
         Assert.True(actual.IsSuccess);
     }
-    
+
     private class StorageBuilder
     {
         private readonly Mock<IAmazonS3> _s3Mock = new();

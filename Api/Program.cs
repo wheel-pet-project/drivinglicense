@@ -1,4 +1,5 @@
 using Api.Adapters.Grpc;
+using Api.Interceptors;
 
 namespace Api;
 
@@ -9,7 +10,12 @@ public class Program
         var builder = WebApplication.CreateBuilder();
         var services = builder.Services;
 
-        services.AddGrpc(options => options.Interceptors.Add<ExceptionHandlerInterceptor>());
+        services.AddGrpc(options =>
+        {
+            options.Interceptors.Add<ExceptionHandlerInterceptor>();
+            options.Interceptors.Add<TracingInterceptor>();
+            options.Interceptors.Add<LoggingInterceptor>();
+        });
 
         services
             .RegisterPostgresContextAndDataSource()

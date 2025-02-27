@@ -20,7 +20,7 @@ public class ImageSizeValidatorShould
         // Assert
         Assert.True(actual);
     }
-    
+
     [Fact]
     public void ReturnFalseIfImageSizeIsLargerThan1Mb()
     {

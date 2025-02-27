@@ -14,22 +14,22 @@
         <PackageReference Include="AWSSDK.S3" Version="3.7.413.1"/>
         <PackageReference Include="FluentResults" Version="3.16.0"/>
         <PackageReference Include="From.DrivingLicenseKafkaEvents" Version="1.1.0"/>
-        <PackageReference Include="Imageflow.Net" Version="0.13.2" />
+        <PackageReference Include="Imageflow.Net" Version="0.13.2"/>
         <PackageReference Include="JsonNet.ContractResolvers" Version="2.0.0"/>
         <PackageReference Include="MassTransit" Version="8.3.4"/>
         <PackageReference Include="MassTransit.Kafka" Version="8.3.4"/>
         <PackageReference Include="MediatR" Version="12.4.1"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.2"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2"/>
         <PackageReference Include="Quartz" Version="3.13.1"/>

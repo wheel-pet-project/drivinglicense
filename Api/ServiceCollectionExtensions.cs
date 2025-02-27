@@ -1,9 +1,7 @@
 using System.Reflection;
 using Amazon.Runtime;
 using Amazon.S3;
-using Amazon.S3.Internal;
 using Api.Adapters.Mapper;
-using Api.PipelineBehaviours;
 using Application.DomainEventHandlers;
 using Application.Ports.ImageValidators;
 using Application.Ports.Kafka;
@@ -51,12 +49,13 @@ public static class ServiceCollectionExtensions
             {
                 ConnectionStringBuilder =
                 {
-                    ApplicationName = "Driving_license#" + Environment.MachineName,
+                    ApplicationName = "Driving_license#" + Environment.MachineName ?? "dev",
                     Host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost",
                     Port = int.Parse(Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5430"),
                     Database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "drivinglicense_db",
                     Username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "postgres",
-                    Password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password"
+                    Password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password",
+                    BrowsableConnectionString = false
                 }
             };
 
@@ -85,25 +84,23 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterMediatrAndPipelines(this IServiceCollection services)
     {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-            .AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingPipelineBehaviour<,>))
-            .AddScoped(typeof(IPipelineBehavior<,>), typeof(TracingPipelineBehaviour<,>));
-        
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
         // Commands
         services.AddTransient<IRequestHandler<ApproveDrivingLicenseCommand, Result>, ApproveDrivingLicenseHandler>();
         services.AddTransient<IRequestHandler<RejectDrivingLicenseCommand, Result>, RejectDrivingLicenseHandler>();
         services.AddTransient<IRequestHandler<UploadDrivingLicenseCommand, Result<UploadDrivingLicenseResponse>>,
-                UploadDrivingLicenseHandler>();
+            UploadDrivingLicenseHandler>();
         services.AddTransient<IRequestHandler<UploadPhotosCommand, Result>, UploadPhotosHandler>();
-        
+
         // Queries
         var serviceProvider = services.BuildServiceProvider();
         services.AddTransient<IRequestHandler<GetByIdDrivingLicenseQuery, Result<GetByIdDrivingLicenseQueryResponse>>>(
             _ => new GetByIdDrivingLicenseQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
                 Environment.GetEnvironmentVariable("AWS_S3_SERVICE_URL") ?? "https://storage.yandexcloud.net"));
         services.AddTransient<IRequestHandler<GetAllDrivingLicensesQuery, Result<GetAllDrivingLicensesQueryResponse>>,
-                GetAllDrivingLicensesQueryHandler>();
-        
+            GetAllDrivingLicensesQueryHandler>();
+
         // Domain event handlers
         services.AddTransient<INotificationHandler<PhotosAddedDomainEvent>, PhotoAddedHandler>();
         services.AddTransient<INotificationHandler<DrivingLicenseApprovedDomainEvent>, DrivingLicenseApprovedHandler>();
@@ -264,7 +261,7 @@ public static class ServiceCollectionExtensions
         {
             var connectionBuilder = new NpgsqlConnectionStringBuilder
             {
-                ApplicationName = "Identity" + Environment.MachineName,
+                ApplicationName = "Driving_license#" + Environment.MachineName,
                 Host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost",
                 Port = int.Parse(Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5430"),
                 Database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "drivinglicense_db",

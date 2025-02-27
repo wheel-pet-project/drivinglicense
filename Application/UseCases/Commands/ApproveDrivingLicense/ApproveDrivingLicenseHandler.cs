@@ -18,7 +18,7 @@ public class ApproveDrivingLicenseHandler(
         license.Approve();
 
         drivingLicenseRepository.Update(license);
-        
+
         return await unitOfWork.Commit();
     }
 }

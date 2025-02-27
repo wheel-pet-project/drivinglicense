@@ -29,23 +29,23 @@ public class GetByIdDrivingLicenseQueryHandler(
 
         var responseModel = new GetByIdDrivingLicenseQueryResponse(
             new GetByIdDrivingLicenseQueryResponse.DrivingLicenseView(
-                Id: dapperModel.Id,
-                AccountId: dapperModel.AccountId,
-                Status: Status.FromId(dapperModel.StatusId),
-                CategoryList: dapperModel.CategoryList.Select(x => x[0]).ToList(),
-                Number: dapperModel.Number,
-                Name: string.Join(' ', new List<string>(dapperModel.Patronymic is null
+                dapperModel.Id,
+                dapperModel.AccountId,
+                Status.FromId(dapperModel.StatusId),
+                dapperModel.CategoryList.Select(x => x[0]).ToList(),
+                dapperModel.Number,
+                string.Join(' ', new List<string>(dapperModel.Patronymic is null
                     ? [dapperModel.FirstName, dapperModel.LastName]
                     : [dapperModel.FirstName, dapperModel.LastName, dapperModel.Patronymic])),
-                CityOfBirth: dapperModel.CityOfBirth,
-                DateOfBirth: dapperModel.DateOfBirth,
-                DateOfIssue: dapperModel.DateOfIssue,
-                CodeOfIssue: dapperModel.CodeOfIssue,
-                DateOfExpiry: dapperModel.DateOfExpiry,
-                FrontPhotoS3Url: photoKeysModel?.FrontPhotoStorageBucketAndKey is not null
+                dapperModel.CityOfBirth,
+                dapperModel.DateOfBirth,
+                dapperModel.DateOfIssue,
+                dapperModel.CodeOfIssue,
+                dapperModel.DateOfExpiry,
+                photoKeysModel?.FrontPhotoStorageBucketAndKey is not null
                     ? $"{yandexS3StorageHost}/{photoKeysModel?.FrontPhotoStorageBucketAndKey}"
                     : null,
-                BackPhotoS3Url: photoKeysModel?.BackPhotoStorageBucketAndKey is not null
+                photoKeysModel?.BackPhotoStorageBucketAndKey is not null
                     ? $"{yandexS3StorageHost}/{photoKeysModel?.BackPhotoStorageBucketAndKey}"
                     : null));
 

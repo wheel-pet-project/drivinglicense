@@ -26,20 +26,18 @@ public class ActualityObserverBackgroundJob(
             .ToList();
 
         if (expiredLicenses.Count > 0)
-        {
             try
             {
-                foreach (var license in expiredLicenses) 
+                foreach (var license in expiredLicenses)
                     license.Expire(timeProvider);
-                
+
                 context.AttachRange(expiredLicenses.Select(x => x.Status));
                 context.DrivingLicenses.UpdateRange(expiredLicenses);
                 await unitOfWork.Commit();
             }
             catch (Exception ex)
             {
-                logger.LogCritical("Failed to update expiry status for licenses, exception: {ex}", ex);    
+                logger.LogCritical("Failed to update expiry status for licenses, exception: {ex}", ex);
             }
-        }
     }
 }

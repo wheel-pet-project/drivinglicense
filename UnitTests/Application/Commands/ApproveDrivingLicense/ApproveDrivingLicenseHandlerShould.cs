@@ -87,9 +87,11 @@ public class ApproveDrivingLicenseHandlerShould
         {
             _drivingLicenseRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(getByIdShouldReturn);
         }
-        
-        
-        public void ConfigureUnitOfWork(Result commitShouldReturn) =>
+
+
+        public void ConfigureUnitOfWork(Result commitShouldReturn)
+        {
             _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(commitShouldReturn);
+        }
     }
 }

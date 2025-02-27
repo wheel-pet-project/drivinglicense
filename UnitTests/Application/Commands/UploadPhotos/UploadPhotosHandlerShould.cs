@@ -15,7 +15,7 @@ public class UploadPhotosHandlerShould
 {
     private readonly UploadPhotosCommand _command = new(Guid.NewGuid(), Guid.NewGuid(), [1, 2, 3], [1, 2, 3]);
     private readonly Result<(string, string)> _validPhotoKeysResult = Result.Ok(("front", "back"));
-    
+
     [Fact]
     public async Task ReturnOk()
     {
@@ -117,12 +117,15 @@ public class UploadPhotosHandlerShould
 
         public UploadPhotosHandler Build()
         {
-            return new(_photoRepositoryMock.Object, _s3StorageMock.Object, _imageFormatValidatorMock.Object,
+            return new UploadPhotosHandler(_photoRepositoryMock.Object, _s3StorageMock.Object,
+                _imageFormatValidatorMock.Object,
                 _imageSizeValidatorMock.Object, _unitOfWorkMock.Object);
         }
 
-        public void ConfigureUnitOfWork(Result commitShouldReturn) =>
+        public void ConfigureUnitOfWork(Result commitShouldReturn)
+        {
             _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(commitShouldReturn);
+        }
 
         public void ConfigureS3Storage(Result<(string frontPhotoKey, string backPhotoKey)> savePhotosShouldReturn)
         {

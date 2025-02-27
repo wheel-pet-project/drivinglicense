@@ -44,7 +44,7 @@ public class UploadDrivingLicenseHandlerShould
         // Assert
         Assert.True(response.IsFailed);
     }
-    
+
     private class HandlerBuilder
     {
         private readonly Mock<IDrivingLicenseRepository> _drivingLicenseRepositoryMock = new();
@@ -55,8 +55,10 @@ public class UploadDrivingLicenseHandlerShould
             return new UploadDrivingLicenseHandler(_drivingLicenseRepositoryMock.Object, TimeProvider.System,
                 _unitOfWorkMock.Object);
         }
-        
-        public void ConfigureUnitOfWork(Result commitShouldReturn) =>
+
+        public void ConfigureUnitOfWork(Result commitShouldReturn)
+        {
             _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(commitShouldReturn);
+        }
     }
 }

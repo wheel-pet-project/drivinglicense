@@ -19,7 +19,7 @@ public class S3Storage(
     private readonly S3Options _s3Options = options.Value;
 
     public async Task<Result<(string frontPhotoBucketAndKey, string backPhotoBucketAndKey)>> SavePhotos(
-        List<byte> frontPhotoBytes, 
+        List<byte> frontPhotoBytes,
         List<byte> backPhotoBytes)
     {
         var rnd = new Random();

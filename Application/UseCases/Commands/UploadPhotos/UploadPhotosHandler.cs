@@ -24,15 +24,15 @@ public class UploadPhotosHandler(
         if (sizeValidator.IsSupportedSize(command.FrontPhotoBytes.Count) is false ||
             sizeValidator.IsSupportedSize(command.BackPhotoBytes.Count) is false)
             return Result.Fail("Image size is too large");
-        
+
         var uploadingToS3Result = await s3Storage.SavePhotos(command.FrontPhotoBytes, command.BackPhotoBytes);
         if (uploadingToS3Result.IsFailed) return Result.Fail(uploadingToS3Result.Errors);
-        var keys = uploadingToS3Result.Value; 
+        var keys = uploadingToS3Result.Value;
 
         var photo = Photos.Create(command.DrivingLicenseId, keys.frontPhotoBucketAndKey, keys.backPhotoBucketAndKey);
 
         await photoRepository.Add(photo);
-        
+
         return await unitOfWork.Commit();
     }
 }

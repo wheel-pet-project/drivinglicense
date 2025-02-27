@@ -32,7 +32,7 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
                 x.AccountId,
                 string.Join(' ', new List<string>(x.Patronymic is null
                     ? [x.FirstName, x.LastName]
-                    : [x.FirstName, x.LastName, x.Patronymic])), 
+                    : [x.FirstName, x.LastName, x.Patronymic])),
                 Status.FromId(x.StatusId)))
             .ToList();
 

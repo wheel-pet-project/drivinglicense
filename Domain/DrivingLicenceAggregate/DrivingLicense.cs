@@ -77,12 +77,12 @@ public sealed class DrivingLicense : Aggregate
     public void Expire(TimeProvider timeProvider)
     {
         if (timeProvider == null) throw new ValueIsRequiredException($"{nameof(timeProvider)} can't be null");
-        
+
         if (!Status.CanBeChangedToThisStatus(Status.Expired))
             throw new DomainRulesViolationException($"{nameof(Status.Expired)} status can't be settled");
         if (DateOfExpiry > DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime))
             throw new DomainRulesViolationException($"Date of expiry hasn't come yet");
-        
+
         Status = Status.Expired;
         AddDomainEvent(new DrivingLicenseExpiredDomainEvent(AccountId));
     }
