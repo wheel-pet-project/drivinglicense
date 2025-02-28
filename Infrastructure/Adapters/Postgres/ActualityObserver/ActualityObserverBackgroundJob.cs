@@ -7,7 +7,7 @@ using Quartz;
 namespace Infrastructure.Adapters.Postgres.ActualityObserver;
 
 /// <summary>
-/// Отслеживает истекшие водительские права
+///     Отслеживает истекшие водительские права
 /// </summary>
 public class ActualityObserverBackgroundJob(
     DataContext context,
@@ -26,18 +26,18 @@ public class ActualityObserverBackgroundJob(
             .ToList();
 
         if (expiredLicenses.Count > 0)
-            try
-            {
-                foreach (var license in expiredLicenses)
+            foreach (var license in expiredLicenses)
+                try
+                {
                     license.Expire(timeProvider);
+                    context.Attach(license.Status);
+                    context.Update(license);
+                }
+                catch (Exception e)
+                {
+                    logger.LogCritical("Fail to update expiry status for license, exception: {e}", e);
+                }
 
-                context.AttachRange(expiredLicenses.Select(x => x.Status));
-                context.DrivingLicenses.UpdateRange(expiredLicenses);
-                await unitOfWork.Commit();
-            }
-            catch (Exception ex)
-            {
-                logger.LogCritical("Failed to update expiry status for licenses, exception: {ex}", ex);
-            }
+        await unitOfWork.Commit();
     }
 }
