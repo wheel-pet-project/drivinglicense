@@ -22,9 +22,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         GetLicenseByIdRequest request,
         ServerCallContext context)
     {
-        var getDrivingLicenseByIdQuery = new GetByIdDrivingLicenseQuery(
-            ParseGuidOrThrow(request.CorId),
-            ParseGuidOrThrow(request.Id));
+        var getDrivingLicenseByIdQuery = new GetByIdDrivingLicenseQuery(ParseGuidOrThrow(request.Id));
 
         var result = await mediator.Send(getDrivingLicenseByIdQuery, context.CancellationToken);
 
@@ -68,7 +66,6 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var getAllDrivingLicensesQuery = new GetAllDrivingLicensesQuery(
-            ParseGuidOrThrow(request.CorId),
             request.Page,
             request.PageSize,
             mapper.ProtoStatusToDomainStatus(request.FilteringStatus));
@@ -93,7 +90,6 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var uploadDrivingLicenseCommand = new UploadDrivingLicenseCommand(
-            ParseGuidOrThrow(request.CorId),
             ParseGuidOrThrow(request.AccId),
             [..request.Categories.Select(char.Parse)],
             request.Number,
@@ -118,7 +114,6 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var uploadPhotosCommand = new UploadPhotosCommand(
-            ParseGuidOrThrow(request.CorId),
             ParseGuidOrThrow(request.LicenseId),
             request.FrontPhoto.ToList(),
             request.FrontPhoto.ToList());
@@ -134,9 +129,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ApproveLicenseRequest request,
         ServerCallContext context)
     {
-        var approveDrivingLicenseCommand = new ApproveDrivingLicenseCommand(
-            ParseGuidOrThrow(request.CorId),
-            ParseGuidOrThrow(request.LicenseId));
+        var approveDrivingLicenseCommand = new ApproveDrivingLicenseCommand(ParseGuidOrThrow(request.LicenseId));
 
         var result = await mediator.Send(approveDrivingLicenseCommand, context.CancellationToken);
 
@@ -149,9 +142,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         RejectLicenseRequest request,
         ServerCallContext context)
     {
-        var rejectDrivingLicenseCommand = new RejectDrivingLicenseCommand(
-            Guid.Parse(request.CorId),
-            Guid.Parse(request.LicenseId));
+        var rejectDrivingLicenseCommand = new RejectDrivingLicenseCommand(Guid.Parse(request.LicenseId));
 
         var result = await mediator.Send(rejectDrivingLicenseCommand, context.CancellationToken);
 

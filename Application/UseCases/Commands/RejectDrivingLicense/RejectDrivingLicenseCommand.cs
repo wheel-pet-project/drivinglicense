@@ -3,7 +3,4 @@ using MediatR;
 
 namespace Application.UseCases.Commands.RejectDrivingLicense;
 
-public record RejectDrivingLicenseCommand(
-    Guid CorrelationId,
-    Guid DrivingLicenseId)
-    : BaseRequest(CorrelationId), IRequest<Result>;
+public record RejectDrivingLicenseCommand(Guid DrivingLicenseId) : IRequest<Result>;

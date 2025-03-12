@@ -37,7 +37,7 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
         var handler = queryHandlerBuilder.Build();
 
         // Act
-        var response = await handler.Handle(new GetByIdDrivingLicenseQuery(Guid.NewGuid(), _drivingLicense.Id),
+        var response = await handler.Handle(new GetByIdDrivingLicenseQuery(_drivingLicense.Id),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -76,7 +76,7 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
         var handler = queryHandlerBuilder.Build();
 
         // Act
-        var response = await handler.Handle(new GetByIdDrivingLicenseQuery(Guid.NewGuid(), _drivingLicense.Id),
+        var response = await handler.Handle(new GetByIdDrivingLicenseQuery(_drivingLicense.Id),
             TestContext.Current.CancellationToken);
 
         // Assert

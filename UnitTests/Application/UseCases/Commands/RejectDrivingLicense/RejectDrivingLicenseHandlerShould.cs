@@ -20,7 +20,7 @@ public class RejectDrivingLicenseHandlerShould
         CodeOfIssue.Create("1234"), new DateOnly(2030, 1, 1),
         TimeProvider.System);
 
-    private readonly RejectDrivingLicenseCommand _command = new(Guid.NewGuid(), Guid.NewGuid());
+    private readonly RejectDrivingLicenseCommand _command = new(Guid.NewGuid());
 
     [Fact]
     public async Task ReturnOk()

@@ -35,7 +35,7 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Act
         var response = await handler.Handle(
-            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2, Status.Approved),
+            new GetAllDrivingLicensesQuery(1, 2, Status.Approved),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -63,7 +63,7 @@ public class GetAllDrivingLicensesQueryHandlerShould : IntegrationTestBase
 
         // Act
         var response = await handler.Handle(
-            new GetAllDrivingLicensesQuery(Guid.NewGuid(), 1, 2, Status.PendingProcessing),
+            new GetAllDrivingLicensesQuery(1, 2, Status.PendingProcessing),
             TestContext.Current.CancellationToken);
 
         // Assert

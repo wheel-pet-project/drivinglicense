@@ -13,7 +13,7 @@ namespace UnitTests.Application.UseCases.Commands.UploadPhotos;
 [TestSubject(typeof(UploadPhotosHandler))]
 public class UploadPhotosHandlerShould
 {
-    private readonly UploadPhotosCommand _command = new(Guid.NewGuid(), Guid.NewGuid(), [1, 2, 3], [1, 2, 3]);
+    private readonly UploadPhotosCommand _command = new(Guid.NewGuid(), [1, 2, 3], [1, 2, 3]);
     private readonly Result<(string, string)> _validPhotoKeysResult = Result.Ok(("front", "back"));
 
     [Fact]
