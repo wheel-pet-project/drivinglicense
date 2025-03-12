@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 using Moq;
 using Xunit;
 
-namespace UnitTests.Application.Commands.ApproveDrivingLicense;
+namespace UnitTests.Application.UseCases.Commands.ApproveDrivingLicense;
 
 [TestSubject(typeof(ApproveDrivingLicenseHandler))]
 public class ApproveDrivingLicenseHandlerShould

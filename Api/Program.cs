@@ -1,5 +1,6 @@
 using Api.Adapters.Grpc;
 using Api.Interceptors;
+using Application.UseCases.Queries.DapperMappingExtensions;
 
 namespace Api;
 
@@ -37,6 +38,13 @@ public class Program
         app.MapGrpcService<DrivingLicenseV1>();
         app.MapGrpcHealthChecksService();
 
+        RegisterDapperMapping();
+        
         app.Run();
+        
+        void RegisterDapperMapping()
+        {
+            Dapper.SqlMapper.AddTypeHandler(new DateOnlyMapper());
+        }
     }
 }

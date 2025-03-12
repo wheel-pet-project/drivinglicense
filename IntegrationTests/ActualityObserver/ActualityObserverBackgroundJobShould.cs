@@ -3,15 +3,12 @@ using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.ActualityObserver;
 using JetBrains.Annotations;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
-using Npgsql;
 using Quartz;
 using Xunit;
-using IMediator = MediatR.IMediator;
 
 namespace IntegrationTests.ActualityObserver;
 

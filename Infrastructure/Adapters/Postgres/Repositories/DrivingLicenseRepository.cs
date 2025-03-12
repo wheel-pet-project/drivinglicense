@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Application.Ports.Postgres;
 using Domain.DrivingLicenceAggregate;
 using Microsoft.EntityFrameworkCore;

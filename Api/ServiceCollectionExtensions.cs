@@ -242,7 +242,7 @@ public static class ServiceCollectionExtensions
             .WithTracing(builder =>
             {
                 builder
-                    .AddGrpcClientInstrumentation()
+                    .AddGrpcCoreInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddNpgsql()
                     .SetResourceBuilder(ResourceBuilder.CreateDefault()

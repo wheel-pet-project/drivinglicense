@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Domain.DrivingLicenceAggregate;
 
 namespace Application.Ports.Postgres;

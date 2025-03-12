@@ -1,4 +1,5 @@
 using CSharpFunctionalExtensions;
+using Domain.SharedKernel.Exceptions.AlreadyHaveThisState;
 using Domain.SharedKernel.Exceptions.ArgumentException;
 
 namespace Domain.DrivingLicenceAggregate;
@@ -21,9 +22,25 @@ public sealed class Status : Entity<int>
         Name = name;
     }
 
-
+    
     public string Name { get; private set; } = null!;
 
+    public bool CanBeChangedToThisStatus(Status potentialStatus)
+    {
+        if (potentialStatus is null) throw new ValueIsRequiredException($"{nameof(potentialStatus)} cannot be null");
+        if (!All().Contains(potentialStatus))
+            throw new ValueOutOfRangeException($"{nameof(potentialStatus)} cannot be unsupported");
+
+        return potentialStatus switch
+        {
+            _ when this == potentialStatus => throw new AlreadyHaveThisStateException("License already have this status"),
+            _ when this == PendingPhotosAdding && potentialStatus == PendingProcessing => true,
+            _ when this == PendingProcessing && (potentialStatus == Approved || potentialStatus == Rejected) => true,
+            _ when this == Approved && potentialStatus == Expired => true,
+            _ => false
+        };
+    }
+    
     public static IEnumerable<Status> All()
     {
         return
@@ -34,22 +51,6 @@ public sealed class Status : Entity<int>
             Rejected,
             Expired
         ];
-    }
-
-    public bool CanBeChangedToThisStatus(Status potentialStatus)
-    {
-        if (potentialStatus is null) throw new ValueIsRequiredException($"{nameof(potentialStatus)} cannot be null");
-        if (!All().Contains(potentialStatus))
-            throw new ValueOutOfRangeException($"{nameof(potentialStatus)} cannot be unsupported");
-
-        return potentialStatus switch
-        {
-            _ when this == potentialStatus => false,
-            _ when this == PendingPhotosAdding && potentialStatus == PendingProcessing => true,
-            _ when this == PendingProcessing && (potentialStatus == Approved || potentialStatus == Rejected) => true,
-            _ when this == Approved && potentialStatus == Expired => true,
-            _ => false
-        };
     }
 
     public static Status FromName(string name)

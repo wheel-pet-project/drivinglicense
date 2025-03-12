@@ -27,9 +27,9 @@ public class UploadPhotosHandler(
 
         var uploadingToS3Result = await s3Storage.SavePhotos(command.FrontPhotoBytes, command.BackPhotoBytes);
         if (uploadingToS3Result.IsFailed) return Result.Fail(uploadingToS3Result.Errors);
-        var keys = uploadingToS3Result.Value;
+        var (frontPhotoBucketAndKey, backPhotoBucketAndKey) = uploadingToS3Result.Value;
 
-        var photo = Photos.Create(command.DrivingLicenseId, keys.frontPhotoBucketAndKey, keys.backPhotoBucketAndKey);
+        var photo = Photos.Create(command.DrivingLicenseId, frontPhotoBucketAndKey, backPhotoBucketAndKey);
 
         await photoRepository.Add(photo);
 

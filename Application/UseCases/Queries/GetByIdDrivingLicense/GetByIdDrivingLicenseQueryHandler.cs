@@ -16,7 +16,6 @@ public class GetByIdDrivingLicenseQueryHandler(
         GetByIdDrivingLicenseQuery request,
         CancellationToken cancellationToken)
     {
-        SqlMapper.AddTypeHandler(new DateOnlyMapper());
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(_getLicenseSql, new { request.Id }, cancellationToken: cancellationToken);

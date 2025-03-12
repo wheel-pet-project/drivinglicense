@@ -1,7 +1,5 @@
 using Amazon.S3;
 using Application.Ports.S3;
-using Domain.DrivingLicenceAggregate;
-using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.S3;
 using Infrastructure.Options;
 using JetBrains.Annotations;
@@ -9,23 +7,11 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
-namespace IntegrationTests.S3;
+namespace UnitTests.Infrastructure.S3;
 
 [TestSubject(typeof(S3Storage))]
-public class S3StorageShould : IntegrationTestBase
+public class S3StorageShould
 {
-    private readonly DrivingLicense _drivingLicense = DrivingLicense.Create(
-        Guid.NewGuid(),
-        CategoryList.Create([CategoryList.BCategory]),
-        DrivingLicenseNumber.Create("1234 567891"),
-        Name.Create("Иван", "Иванов", "Иванович"),
-        City.Create("Москва"),
-        new DateOnly(1990, 1, 1),
-        new DateOnly(2020, 1, 1),
-        CodeOfIssue.Create("1234"),
-        new DateOnly(2030, 1, 1),
-        TimeProvider.System);
-
     private readonly List<byte> _frontPhotoBytes = [1, 2, 3];
     private readonly List<byte> _backPhotoBytes = [1, 2, 3];
 

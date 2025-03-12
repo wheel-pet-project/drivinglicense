@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Dapper;
 using Domain.SharedKernel;
+using Domain.SharedKernel.Exceptions.AlreadyHaveThisState;
 using JsonNet.ContractResolvers;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,7 @@ public class OutboxBackgroundJob(
                 .AsReadOnly();
 
             var publishTasks = domainEvents
-                .Select(domainEvent => PublishToMediatr(domainEvent, updateQueue,
+                .Select(domainEvent => PublishToMediator(domainEvent, updateQueue,
                     jobExecutionContext.CancellationToken))
                 .ToList()
                 .AsReadOnly();
@@ -66,7 +67,7 @@ public class OutboxBackgroundJob(
 
         return;
 
-        async Task PublishToMediatr(
+        async Task PublishToMediator(
             DomainEvent @event,
             ConcurrentQueue<Guid> updateQueue,
             CancellationToken cancellationToken)
@@ -74,6 +75,10 @@ public class OutboxBackgroundJob(
             try
             {
                 await mediator.Publish(@event, cancellationToken);
+                updateQueue.Enqueue(@event.EventId);
+            }
+            catch (AlreadyHaveThisStateException)
+            {
                 updateQueue.Enqueue(@event.EventId);
             }
             catch (Exception e)

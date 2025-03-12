@@ -1,13 +1,12 @@
-using Amazon.Runtime.Internal.Util;
 using Domain.DrivingLicenceAggregate.DomainEvents;
 using Domain.SharedKernel.ValueObjects;
-using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Outbox;
 using JetBrains.Annotations;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
+using Npgsql;
 using Quartz;
 using Xunit;
 
@@ -47,7 +46,7 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
 
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureContext(Context);
+        jobBuilder.ConfigureDataSource(DataSource);
         var job = jobBuilder.Build();
 
         // Act
@@ -67,7 +66,7 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
 
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureContext(Context);
+        jobBuilder.ConfigureDataSource(DataSource);
         var job = jobBuilder.Build();
 
         // Act
@@ -81,16 +80,16 @@ public class OutboxBackgroundJobShould : IntegrationTestBase
     {
         private readonly Mock<IMediator> _mediatorMock = new();
         private readonly Mock<ILogger<OutboxBackgroundJob>> _logger = new();
-        private DataContext _context = null!;
+        private NpgsqlDataSource _dataSource = null!;
 
         public OutboxBackgroundJob Build()
         {
-            return new OutboxBackgroundJob(_context, _mediatorMock.Object, _logger.Object);
+            return new OutboxBackgroundJob(_dataSource, _mediatorMock.Object, _logger.Object);
         }
 
-        public void ConfigureContext(DataContext context)
+        public void ConfigureDataSource(NpgsqlDataSource dataSource)
         {
-            _context = context;
+            _dataSource = dataSource;
         }
 
         public void VerifyMediatorPublishCall()

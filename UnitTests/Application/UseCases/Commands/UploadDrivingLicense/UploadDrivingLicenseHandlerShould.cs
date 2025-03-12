@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using Moq;
 using Xunit;
 
-namespace UnitTests.Application.Commands.UploadDrivingLicense;
+namespace UnitTests.Application.UseCases.Commands.UploadDrivingLicense;
 
 [TestSubject(typeof(UploadDrivingLicenseHandler))]
 public class UploadDrivingLicenseHandlerShould

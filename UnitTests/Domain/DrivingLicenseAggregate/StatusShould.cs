@@ -1,4 +1,5 @@
 using Domain.DrivingLicenceAggregate;
+using Domain.SharedKernel.Exceptions.AlreadyHaveThisState;
 using Domain.SharedKernel.Exceptions.ArgumentException;
 using JetBrains.Annotations;
 using Xunit;
@@ -64,6 +65,19 @@ public class StatusShould
 
         // Assert
         Assert.Throws<ValueOutOfRangeException>(Act);
+    }
+
+    [Fact]
+    public void ThrowAlreadyHaveThisStateExceptionIfPotentialStatusEqualCurrent()
+    {
+        // Arrange
+        var status = Status.PendingProcessing;
+
+        // Act
+        void Act() => status.CanBeChangedToThisStatus(Status.PendingProcessing);
+
+        // Assert
+        Assert.Throws<AlreadyHaveThisStateException>(Act);
     }
 
     [Fact]
@@ -150,16 +164,16 @@ public class StatusShould
             pendingProcessing.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
 
         var approvedToRejected = approved.CanBeChangedToThisStatus(Status.Rejected);
-        var approvedToUnprocessed = approved.CanBeChangedToThisStatus(Status.PendingProcessing);
+        var approvedToPendingProcessing = approved.CanBeChangedToThisStatus(Status.PendingProcessing);
         var approvedToPendingPhotosAdding = approved.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
 
-        var rejectedToExpired = rejected.CanBeChangedToThisStatus(Status.Rejected);
+        var rejectedToExpired = rejected.CanBeChangedToThisStatus(Status.Expired);
         var rejectedToApproved = rejected.CanBeChangedToThisStatus(Status.Approved);
-        var rejectedToUnprocessed = rejected.CanBeChangedToThisStatus(Status.PendingProcessing);
+        var rejectedToPendingProcessing = rejected.CanBeChangedToThisStatus(Status.PendingProcessing);
         var rejectedToPendingPhotosAdding = rejected.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
 
         var expiredToRejected = expired.CanBeChangedToThisStatus(Status.Rejected);
-        var expiredToUnprocessed = expired.CanBeChangedToThisStatus(Status.PendingProcessing);
+        var expiredToPendingProcessing = expired.CanBeChangedToThisStatus(Status.PendingProcessing);
         var expiredToApproved = expired.CanBeChangedToThisStatus(Status.Approved);
         var expiredToPendingPhotosAdding = expired.CanBeChangedToThisStatus(Status.PendingPhotosAdding);
 
@@ -172,16 +186,16 @@ public class StatusShould
         Assert.False(pendingProcessingToPendingPhotosAdding);
 
         Assert.False(approvedToRejected);
-        Assert.False(approvedToUnprocessed);
+        Assert.False(approvedToPendingProcessing);
         Assert.False(approvedToPendingPhotosAdding);
 
         Assert.False(rejectedToExpired);
         Assert.False(rejectedToApproved);
-        Assert.False(rejectedToUnprocessed);
+        Assert.False(rejectedToPendingProcessing);
         Assert.False(rejectedToPendingPhotosAdding);
 
         Assert.False(expiredToRejected);
-        Assert.False(expiredToUnprocessed);
+        Assert.False(expiredToPendingProcessing);
         Assert.False(expiredToApproved);
         Assert.False(expiredToPendingPhotosAdding);
     }

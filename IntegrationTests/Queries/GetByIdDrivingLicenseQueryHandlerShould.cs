@@ -1,4 +1,6 @@
+using Application.UseCases.Queries.DapperMappingExtensions;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
+using Dapper;
 using Domain.DrivingLicenceAggregate;
 using Domain.PhotoAggregate;
 using Domain.SharedKernel.ValueObjects;
@@ -25,6 +27,7 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
     public async Task ReturnLicenseWithPhotos()
     {
         // Arrange
+        SqlMapper.AddTypeHandler(new DateOnlyMapper());
         var photo = Photos.Create(_drivingLicense.Id, _frontPhotoKey, _backPhotoKey);
 
         await AddDrivingLicenseAndPhoto(photo);
@@ -61,6 +64,8 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
     public async Task ReturnLicenseWithoutPhotos()
     {
         // Arrange
+        SqlMapper.AddTypeHandler(new DateOnlyMapper());
+        
         Context.Attach(_drivingLicense.Status);
         Context.Attach(_drivingLicense.CategoryList);
         await Context.AddAsync(_drivingLicense, TestContext.Current.CancellationToken);

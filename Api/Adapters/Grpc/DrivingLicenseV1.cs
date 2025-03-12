@@ -5,6 +5,7 @@ using Application.UseCases.Commands.UploadPhotos;
 using Application.UseCases.Queries.GetAllDrivingLicenses;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
 using Domain.SharedKernel.Errors;
+using Domain.SharedKernel.Exceptions.ArgumentException;
 using FluentResults;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
@@ -22,8 +23,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var getDrivingLicenseByIdQuery = new GetByIdDrivingLicenseQuery(
-            Guid.Parse(request.CorId),
-            Guid.Parse(request.Id));
+            ParseGuidOrThrow(request.CorId),
+            ParseGuidOrThrow(request.Id));
 
         var result = await mediator.Send(getDrivingLicenseByIdQuery, context.CancellationToken);
 
@@ -67,7 +68,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var getAllDrivingLicensesQuery = new GetAllDrivingLicensesQuery(
-            Guid.Parse(request.CorId),
+            ParseGuidOrThrow(request.CorId),
             request.Page,
             request.PageSize,
             mapper.ProtoStatusToDomainStatus(request.FilteringStatus));
@@ -92,8 +93,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var uploadDrivingLicenseCommand = new UploadDrivingLicenseCommand(
-            Guid.Parse(request.CorId),
-            Guid.Parse(request.AccId),
+            ParseGuidOrThrow(request.CorId),
+            ParseGuidOrThrow(request.AccId),
             [..request.Categories.Select(char.Parse)],
             request.Number,
             request.FirstName,
@@ -117,8 +118,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var uploadPhotosCommand = new UploadPhotosCommand(
-            Guid.Parse(request.CorId),
-            Guid.Parse(request.LicenseId),
+            ParseGuidOrThrow(request.CorId),
+            ParseGuidOrThrow(request.LicenseId),
             request.FrontPhoto.ToList(),
             request.FrontPhoto.ToList());
 
@@ -134,8 +135,8 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         ServerCallContext context)
     {
         var approveDrivingLicenseCommand = new ApproveDrivingLicenseCommand(
-            Guid.Parse(request.CorId),
-            Guid.Parse(request.LicenseId));
+            ParseGuidOrThrow(request.CorId),
+            ParseGuidOrThrow(request.LicenseId));
 
         var result = await mediator.Send(approveDrivingLicenseCommand, context.CancellationToken);
 
@@ -171,5 +172,12 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
             throw new RpcException(new Status(StatusCode.Unavailable, string.Join(' ', errors.Select(x => x.Message))));
 
         throw new RpcException(new Status(StatusCode.InvalidArgument, string.Join(' ', errors.Select(x => x.Message))));
+    }
+    
+    private Guid ParseGuidOrThrow(string potentialId)
+    {
+        return Guid.TryParse(potentialId, out var id)
+            ? id
+            : throw new ValueOutOfRangeException($"{nameof(potentialId)} is invalid uuid");
     }
 }

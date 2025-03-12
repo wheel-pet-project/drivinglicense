@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 using Moq;
 using Xunit;
 
-namespace UnitTests.Application.Commands.UploadPhotos;
+namespace UnitTests.Application.UseCases.Commands.UploadPhotos;
 
 [TestSubject(typeof(UploadPhotosHandler))]
 public class UploadPhotosHandlerShould

@@ -10,7 +10,7 @@ public class IntegrationTestBase : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
         .WithImage("postgres:latest")
-        .WithDatabase("notification")
+        .WithDatabase("vehiclefleet")
         .WithUsername("postgres")
         .WithPassword("password")
         .WithCleanUp(true)
@@ -19,12 +19,13 @@ public class IntegrationTestBase : IAsyncLifetime
     protected DataContext Context = null!;
     protected NpgsqlDataSource DataSource = null!;
 
-
     public async ValueTask InitializeAsync()
     {
         await _postgreSqlContainer.StartAsync();
 
-        var options = new DbContextOptionsBuilder<DataContext>().UseNpgsql(_postgreSqlContainer.GetConnectionString(),
+        var connectionString = _postgreSqlContainer.GetConnectionString();
+        var connectionBuilder = new NpgsqlConnectionStringBuilder(connectionString) { IncludeErrorDetail = true };
+        var options = new DbContextOptionsBuilder<DataContext>().UseNpgsql(connectionBuilder.ConnectionString,
             npgsqlOptions => npgsqlOptions.MigrationsAssembly(typeof(DataContext).Assembly));
         Context = new DataContext(options.Options);
 
