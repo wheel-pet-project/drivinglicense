@@ -123,6 +123,11 @@ public class OutboxEventConfiguration : IEntityTypeConfiguration<OutboxEvent>
 
         builder.Property(x => x.EventId).HasColumnName("event_id").IsRequired();
 
+        builder.HasIndex(x => new { x.OccurredOnUtc, x.ProcessedOnUtc }, "IX_outbox_messages_unprocessed")
+            .IncludeProperties(x => new { x.EventId, x.Type })
+            .IsDescending(false, false)
+            .HasFilter("processed_on_utc IS NULL");
+        
         builder.Property(x => x.Type).HasColumnName("type").IsRequired();
         builder.Property(x => x.Content).HasColumnName("content").IsRequired();
         builder.Property(x => x.OccurredOnUtc).HasColumnName("occurred_on_utc").IsRequired();

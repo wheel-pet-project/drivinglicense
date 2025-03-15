@@ -153,6 +153,11 @@ namespace Infrastructure.Adapters.Postgres.Migrations
 
                     b.HasKey("EventId");
 
+                    b.HasIndex(new[] { "OccurredOnUtc", "ProcessedOnUtc" }, "IX_outbox_messages_unprocessed")
+                        .HasFilter("processed_on_utc IS NULL");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex(new[] { "OccurredOnUtc", "ProcessedOnUtc" }, "IX_outbox_messages_unprocessed"), new[] { "EventId", "Type" });
+
                     b.ToTable("outbox", (string)null);
                 });
 

@@ -106,6 +106,13 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                 column: "status_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_outbox_messages_unprocessed",
+                table: "outbox",
+                columns: new[] { "occurred_on_utc", "processed_on_utc" },
+                filter: "processed_on_utc IS NULL")
+                .Annotation("Npgsql:IndexInclude", new[] { "event_id", "type" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_photos_driving_license_id",
                 table: "photos",
                 column: "driving_license_id");

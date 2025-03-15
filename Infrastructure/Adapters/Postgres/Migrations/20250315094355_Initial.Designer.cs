@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Adapters.Postgres.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250226185734_Initial")]
+    [Migration("20250315094355_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -155,6 +155,11 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                         .HasColumnName("type");
 
                     b.HasKey("EventId");
+
+                    b.HasIndex(new[] { "OccurredOnUtc", "ProcessedOnUtc" }, "IX_outbox_messages_unprocessed")
+                        .HasFilter("processed_on_utc IS NULL");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex(new[] { "OccurredOnUtc", "ProcessedOnUtc" }, "IX_outbox_messages_unprocessed"), new[] { "EventId", "Type" });
 
                     b.ToTable("outbox", (string)null);
                 });
