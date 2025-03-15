@@ -18,6 +18,7 @@ public class ActualityObserverBackgroundJob(
 {
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
+        //TODO: Переделать на даппер и публиковать доменное событие и переписать хэндлер обработчик 
         var expiredLicenses = context.DrivingLicenses
             .Include(x => x.Status)
             .Where(x => x.DateOfExpiry < DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime.Date) &&

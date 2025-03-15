@@ -1,8 +1,10 @@
 using Domain.DrivingLicenceAggregate.DomainEvents;
+using Domain.SharedKernel;
 using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres.Outbox;
 using JetBrains.Annotations;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
@@ -15,87 +17,72 @@ namespace IntegrationTests.Outbox;
 [TestSubject(typeof(OutboxBackgroundJob))]
 public class OutboxBackgroundJobShould : IntegrationTestBase
 {
-    private readonly IReadOnlyList<OutboxEvent> _outboxEvents = new List<OutboxEvent>
-    {
-        new()
-        {
-            EventId = Guid.NewGuid(),
-            Type = typeof(DrivingLicenseApprovedDomainEvent).ToString(),
-            Content = JsonConvert.SerializeObject(
-                new DrivingLicenseApprovedDomainEvent(Guid.NewGuid(), [CategoryList.BCategory]),
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),
-            OccurredOnUtc = DateTime.UtcNow
-        },
-        new()
-        {
-            EventId = Guid.NewGuid(),
-            Type = typeof(DrivingLicenseExpiredDomainEvent).ToString(),
-            Content = JsonConvert.SerializeObject(
-                new DrivingLicenseExpiredDomainEvent(Guid.NewGuid()),
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),
-            OccurredOnUtc = DateTime.UtcNow
-        }
-    }.AsReadOnly();
+    private readonly DomainEvent _domainEvent =
+        new DrivingLicenseApprovedDomainEvent(Guid.NewGuid(), [CategoryList.BCategory]);
 
     [Fact]
-    public async Task MarkAsProcessedOutboxEvents()
+    public async Task CallMediatorPublishMethod()
     {
         // Arrange
-        await Context.Outbox.AddRangeAsync(_outboxEvents, TestContext.Current.CancellationToken);
-        await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-
+        await AddDomainEventToDb(_domainEvent);
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureDataSource(DataSource);
-        var job = jobBuilder.Build();
+        var job = jobBuilder.Build(DataSource);
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        var outboxEvents = Context.Outbox.ToList();
-        Assert.True(outboxEvents.All(x => x.ProcessedOnUtc != null));
+        jobBuilder.VerifyMediatorCalls(1);
     }
 
     [Fact]
-    private async Task MediatorPublishTwoTimesCall()
+    public async Task SetProcessedField()
     {
         // Arrange
-        await Context.Outbox.AddRangeAsync(_outboxEvents, TestContext.Current.CancellationToken);
-        await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-
+        await AddDomainEventToDb(_domainEvent);
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureDataSource(DataSource);
-        var job = jobBuilder.Build();
+        var job = jobBuilder.Build(DataSource);
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        jobBuilder.VerifyMediatorPublishCall();
+        var eventFromDb = await Context.Outbox.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
+        Assert.NotNull(eventFromDb.ProcessedOnUtc);
+    }
+
+    private async Task AddDomainEventToDb(DomainEvent domainEvent)
+    {
+        var jsonSerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+        var outboxEvent = new OutboxEvent
+        {
+            EventId = domainEvent.EventId,
+            Type = domainEvent.GetType().ToString(),
+            Content = JsonConvert.SerializeObject(domainEvent, jsonSerializerSettings),
+            OccurredOnUtc = DateTime.UtcNow
+        };
+
+        await Context.Outbox.AddAsync(outboxEvent);
+        await Context.SaveChangesAsync();
+        Context.ChangeTracker.Clear();
     }
 
     private class JobBuilder
     {
         private readonly Mock<IMediator> _mediatorMock = new();
-        private readonly Mock<ILogger<OutboxBackgroundJob>> _logger = new();
-        private NpgsqlDataSource _dataSource = null!;
+        private readonly Mock<ILogger<OutboxBackgroundJob>> _loggerMock = new();
 
-        public OutboxBackgroundJob Build()
+        public OutboxBackgroundJob Build(NpgsqlDataSource dataSource)
         {
-            return new OutboxBackgroundJob(_dataSource, _mediatorMock.Object, _logger.Object);
+            return new OutboxBackgroundJob(dataSource, _mediatorMock.Object, _loggerMock.Object);
         }
 
-        public void ConfigureDataSource(NpgsqlDataSource dataSource)
+        public void VerifyMediatorCalls(int times)
         {
-            _dataSource = dataSource;
-        }
-
-        public void VerifyMediatorPublishCall()
-        {
-            _mediatorMock.Verify(m => m.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()),
-                Times.Exactly(2));
+            _mediatorMock.Verify(x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(times));
         }
     }
 }

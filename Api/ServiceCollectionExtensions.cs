@@ -82,7 +82,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection RegisterMediatrAndPipelines(this IServiceCollection services)
+    public static IServiceCollection RegisterMediatrAndHandlers(this IServiceCollection services)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
@@ -205,7 +205,7 @@ public static class ServiceCollectionExtensions
             configure
                 .AddJob<ActualityObserverBackgroundJob>(j => j.WithIdentity(actualityObserverJobKey))
                 .AddTrigger(trigger => trigger.ForJob(actualityObserverJobKey)
-                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInSeconds(3).RepeatForever()));
+                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInMinutes(30).RepeatForever()));
         });
 
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);

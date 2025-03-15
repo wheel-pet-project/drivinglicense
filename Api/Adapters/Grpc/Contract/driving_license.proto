@@ -29,7 +29,6 @@ service DrivingLicense {
 
 // Get driving license by id query
 message GetLicenseByIdRequest {
-  string cor_id = 1;
   string id = 2;
 }
 message GetLicenseByIdResponse {
@@ -51,7 +50,6 @@ message GetLicenseByIdResponse {
 
 // Get driving license list query
 message GetAllLicensesRequest{
-  string cor_id = 1;
   int32 page = 2;
   int32 page_size = 3;
   Status filtering_status = 4;
@@ -72,7 +70,6 @@ message GetAllLicensesResponse{
 
 // Upload license command
 message UploadLicenseRequest{
-  string cor_id = 1;
   string acc_id = 2;
   repeated string categories = 4;
   string number = 5;
@@ -92,7 +89,6 @@ message UploadLicenseResponse{
 
 // Upload license's photos command
 message UploadPhotosRequest{
-  string cor_id = 1;
   string license_id = 2;
   bytes front_photo = 3;
   bytes back_photo = 4;
@@ -102,7 +98,6 @@ message UploadPhotosResponse{}
 
 // Approve license command
 message ApproveLicenseRequest{
-  string cor_id = 1;
   string license_id = 2;
 }
 message ApproveLicenseResponse{}
@@ -110,7 +105,6 @@ message ApproveLicenseResponse{}
 
 // Reject license command
 message RejectLicenseRequest{
-  string cor_id = 1;
   string license_id = 2;
 }
 message RejectLicenseResponse{}

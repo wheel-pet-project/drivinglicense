@@ -1,4 +1,3 @@
-using Application.UseCases.Queries.DapperMappingExtensions;
 using Dapper;
 using Domain.DrivingLicenceAggregate;
 using FluentResults;

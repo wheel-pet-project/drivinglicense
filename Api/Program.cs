@@ -23,7 +23,7 @@ public class Program
             .RegisterUnitOfWork()
             .RegisterS3Storage()
             .RegisterOutboxAndActualityObserverBackgroundJobs()
-            .RegisterMediatrAndPipelines()
+            .RegisterMediatrAndHandlers()
             .RegisterMapper()
             .RegisterRepositories()
             .RegisterSerilog()
