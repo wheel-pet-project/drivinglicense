@@ -19,14 +19,14 @@ public class DrivingLicenseExpiredHandler(
         if (license is null)
             throw new DataConsistencyViolationException(
                 $"{nameof(DrivingLicenseExpiredDomainEvent)} created for not exist license");
-        
+
         license.Expire(timeProvider);
-        
+
         drivingLicenseRepository.Update(license);
-        
+
         var commitResult = await unitOfWork.Commit();
         if (commitResult.IsFailed) throw new TaskCanceledException("Could not commit updates");
-        
+
         await messageBus.Publish(@event, cancellationToken);
     }
 }

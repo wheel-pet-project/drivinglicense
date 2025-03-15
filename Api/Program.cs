@@ -39,9 +39,9 @@ public class Program
         app.MapGrpcHealthChecksService();
 
         RegisterDapperMapping();
-        
+
         app.Run();
-        
+
         void RegisterDapperMapping()
         {
             Dapper.SqlMapper.AddTypeHandler(new DateOnlyMapper());

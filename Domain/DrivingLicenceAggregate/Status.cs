@@ -22,7 +22,7 @@ public sealed class Status : Entity<int>
         Name = name;
     }
 
-    
+
     public string Name { get; private set; } = null!;
 
     public bool CanBeChangedToThisStatus(Status potentialStatus)
@@ -33,14 +33,15 @@ public sealed class Status : Entity<int>
 
         return potentialStatus switch
         {
-            _ when this == potentialStatus => throw new AlreadyHaveThisStateException("License already have this status"),
+            _ when this == potentialStatus => throw new AlreadyHaveThisStateException(
+                "License already have this status"),
             _ when this == PendingPhotosAdding && potentialStatus == PendingProcessing => true,
             _ when this == PendingProcessing && (potentialStatus == Approved || potentialStatus == Rejected) => true,
             _ when this == Approved && potentialStatus == Expired => true,
             _ => false
         };
     }
-    
+
     public static IEnumerable<Status> All()
     {
         return

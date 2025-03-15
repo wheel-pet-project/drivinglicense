@@ -23,14 +23,14 @@ public class ActualityObserverBackgroundJob(
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
         List<ExpiredDrivingLicenseDapperModel> expiredLicenses;
-        
+
         await using (var connection = await dataSource.OpenConnectionAsync())
         {
             expiredLicenses = (await connection.QueryAsync<ExpiredDrivingLicenseDapperModel>(Sql,
                     new { Today = timeProvider.GetUtcNow().DateTime, ExpiredStatusId = Status.Expired.Id }))
                 .AsList();
         }
-        
+
         if (expiredLicenses.Count > 0)
             foreach (var license in expiredLicenses)
                 try
@@ -43,7 +43,7 @@ public class ActualityObserverBackgroundJob(
                         "Fail to process update osago expiry status in domain event handler, exception: {e}", e);
                 }
     }
-    
+
     private record ExpiredDrivingLicenseDapperModel(Guid Id, Guid AccountId);
 
     private const string Sql =

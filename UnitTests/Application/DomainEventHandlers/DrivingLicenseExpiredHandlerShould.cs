@@ -22,7 +22,7 @@ public class DrivingLicenseExpiredHandlerShould
         CategoryList.Create([CategoryList.BCategory]), DrivingLicenseNumber.Create("1234 567891"),
         Name.Create("Иван", "Иванов", "Иванович"), City.Create("Москва"),
         new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
-        CodeOfIssue.Create("1234"), DateOnly.FromDateTime(DateTime.UtcNow.AddYears(1)), 
+        CodeOfIssue.Create("1234"), DateOnly.FromDateTime(DateTime.UtcNow.AddYears(1)),
         TimeProvider.System);
 
     private readonly Mock<IDrivingLicenseRepository> _repositoryMock = new();
@@ -39,7 +39,7 @@ public class DrivingLicenseExpiredHandlerShould
         _fakeTimeProvider.SetUtcNow(DateTimeOffset.UtcNow.AddYears(1).AddDays(1));
         _repositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(_drivingLicense);
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Ok);
-        _handler = new DrivingLicenseExpiredHandler(_repositoryMock.Object, _unitOfWorkMock.Object, _fakeTimeProvider, 
+        _handler = new DrivingLicenseExpiredHandler(_repositoryMock.Object, _unitOfWorkMock.Object, _fakeTimeProvider,
             _messageBusMock.Object);
     }
 
@@ -96,6 +96,7 @@ public class DrivingLicenseExpiredHandlerShould
         await _handler.Handle(_domainEvent, TestContext.Current.CancellationToken);
 
         // Assert
-        _messageBusMock.Verify(x => x.Publish(It.IsAny<DrivingLicenseExpiredDomainEvent>(), It.IsAny<CancellationToken>()));
+        _messageBusMock.Verify(x =>
+            x.Publish(It.IsAny<DrivingLicenseExpiredDomainEvent>(), It.IsAny<CancellationToken>()));
     }
 }

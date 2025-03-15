@@ -164,7 +164,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
 
         throw new RpcException(new Status(StatusCode.InvalidArgument, string.Join(' ', errors.Select(x => x.Message))));
     }
-    
+
     private Guid ParseGuidOrThrow(string potentialId)
     {
         return Guid.TryParse(potentialId, out var id)

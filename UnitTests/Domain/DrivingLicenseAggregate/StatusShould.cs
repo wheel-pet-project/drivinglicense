@@ -74,7 +74,10 @@ public class StatusShould
         var status = Status.PendingProcessing;
 
         // Act
-        void Act() => status.CanBeChangedToThisStatus(Status.PendingProcessing);
+        void Act()
+        {
+            status.CanBeChangedToThisStatus(Status.PendingProcessing);
+        }
 
         // Assert
         Assert.Throws<AlreadyHaveThisStateException>(Act);

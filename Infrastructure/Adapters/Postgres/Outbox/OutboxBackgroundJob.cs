@@ -59,9 +59,9 @@ public class OutboxBackgroundJob(
                 parameters.Add($"EventId{i}", updateList[i]);
                 parameters.Add($"ProcessedOnUtc{i}", processedTime);
             }
-            
+
             await connection.ExecuteAsync(formattedSql, parameters, transaction);
-            
+
             await transaction.CommitAsync();
         }
 

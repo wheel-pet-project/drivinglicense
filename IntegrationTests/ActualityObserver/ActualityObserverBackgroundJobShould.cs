@@ -49,7 +49,7 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
         // Assert
         jobBuilder.VerifyMediatorCalls(0);
     }
-    
+
     private async Task AddExpiredDrivingLicense()
     {
         FakeTimeProvider fakeTimeProvider = new();
@@ -71,7 +71,7 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
         await Context.DrivingLicenses.AddAsync(drivingLicense, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync();
     }
-    
+
     private class JobBuilder
     {
         private readonly Mock<IMediator> _mediatorMock = new();

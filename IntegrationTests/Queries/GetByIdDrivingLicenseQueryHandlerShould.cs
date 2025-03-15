@@ -65,7 +65,7 @@ public class GetByIdDrivingLicenseQueryHandlerShould : IntegrationTestBase
     {
         // Arrange
         SqlMapper.AddTypeHandler(new DateOnlyMapper());
-        
+
         Context.Attach(_drivingLicense.Status);
         Context.Attach(_drivingLicense.CategoryList);
         await Context.AddAsync(_drivingLicense, TestContext.Current.CancellationToken);

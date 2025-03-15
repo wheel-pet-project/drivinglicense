@@ -10,7 +10,7 @@ public record DrivingLicenseExpiredDomainEvent : DomainEvent
         if (drivingLicenseId == Guid.Empty)
             throw new ValueIsRequiredException($"{nameof(drivingLicenseId)} cannot be empty");
         if (accountId == Guid.Empty) throw new ValueIsRequiredException($"{nameof(accountId)} cannot be empty");
-        
+
         DrivingLicenseId = drivingLicenseId;
         AccountId = accountId;
     }
