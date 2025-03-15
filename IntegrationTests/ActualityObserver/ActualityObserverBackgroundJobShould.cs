@@ -3,10 +3,12 @@ using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.ActualityObserver;
 using JetBrains.Annotations;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using Moq;
+using Npgsql;
 using Quartz;
 using Xunit;
 
@@ -16,43 +18,38 @@ namespace IntegrationTests.ActualityObserver;
 public class ActualityObserverBackgroundJobShould : IntegrationTestBase
 {
     [Fact]
-    public async Task AddExpiredDomainEventToOutbox()
+    public async Task CallMediatorIfFoundExpiredDrivingLicense()
     {
         // Arrange
         await AddExpiredDrivingLicense();
 
-        var jobExecutionContextMock = new Mock<IJobExecutionContext>();
-
+        var timeProvider = TimeProvider.System;
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureContext(Context);
-        var job = jobBuilder.Build();
+        var job = jobBuilder.Build(DataSource, timeProvider);
+        var jobExecutionContextMock = new Mock<IJobExecutionContext>();
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        var domainEvent = await Context.Outbox.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
-        Assert.NotNull(domainEvent);
+        jobBuilder.VerifyMediatorCalls(1);
     }
 
     [Fact]
-    public async Task DontAddExpiredDomainEventToOutbox()
+    public async Task NotCallMediatorIfNotFoundExpiredDrivingLicense()
     {
-        // Arrange
-        var jobExecutionContextMock = new Mock<IJobExecutionContext>();
-
+        var timeProvider = TimeProvider.System;
         var jobBuilder = new JobBuilder();
-        jobBuilder.ConfigureContext(Context);
-        var job = jobBuilder.Build();
+        var job = jobBuilder.Build(DataSource, timeProvider);
+        var jobExecutionContextMock = new Mock<IJobExecutionContext>();
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        var domainEvent = await Context.Outbox.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
-        Assert.Null(domainEvent);
+        jobBuilder.VerifyMediatorCalls(0);
     }
-
+    
     private async Task AddExpiredDrivingLicense()
     {
         FakeTimeProvider fakeTimeProvider = new();
@@ -74,25 +71,22 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
         await Context.DrivingLicenses.AddAsync(drivingLicense, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync();
     }
-
-
+    
     private class JobBuilder
     {
-        private readonly TimeProvider _timeProvider = TimeProvider.System;
-        private readonly Mock<ILogger<ActualityObserverBackgroundJob>> _logger = new();
+        private readonly Mock<IMediator> _mediatorMock = new();
+        private readonly Mock<ILogger<ActualityObserverBackgroundJob>> _loggerMock = new();
 
-        private DataContext _context = null!;
-        private Infrastructure.Adapters.Postgres.UnitOfWork _unitOfWork = null!;
-
-        public ActualityObserverBackgroundJob Build()
+        public ActualityObserverBackgroundJob Build(NpgsqlDataSource dataSource, TimeProvider timeProvider)
         {
-            return new ActualityObserverBackgroundJob(_context,
-                new Infrastructure.Adapters.Postgres.UnitOfWork(_context), _timeProvider, _logger.Object);
+            return new ActualityObserverBackgroundJob(dataSource, _mediatorMock.Object, timeProvider,
+                _loggerMock.Object);
         }
 
-        public void ConfigureContext(DataContext context)
+        public void VerifyMediatorCalls(int times)
         {
-            _context = context;
+            _mediatorMock.Verify(x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()),
+                Times.Exactly(times));
         }
     }
 }
