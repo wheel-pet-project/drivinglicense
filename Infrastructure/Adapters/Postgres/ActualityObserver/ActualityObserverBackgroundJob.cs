@@ -27,7 +27,12 @@ public class ActualityObserverBackgroundJob(
         await using (var connection = await dataSource.OpenConnectionAsync())
         {
             expiredLicenses = (await connection.QueryAsync<ExpiredDrivingLicenseDapperModel>(Sql,
-                    new { Today = timeProvider.GetUtcNow().DateTime, ExpiredStatusId = Status.Expired.Id }))
+                    new
+                    {
+                        Today = timeProvider.GetUtcNow().DateTime, 
+                        ExpiredStatusId = Status.Expired.Id,
+                        RejectedStatusId = Status.Rejected.Id
+                    }))
                 .AsList();
         }
 
@@ -40,7 +45,7 @@ public class ActualityObserverBackgroundJob(
                 catch (Exception e)
                 {
                     logger.LogCritical(
-                        "Fail to process update osago expiry status in domain event handler, exception: {e}", e);
+                        "Fail to process update license status in domain event handler, exception: {e}", e);
                 }
     }
 
@@ -52,7 +57,7 @@ public class ActualityObserverBackgroundJob(
                account_id AS AccountId
         FROM driving_license
         WHERE date_of_expiry < @Today AND 
-              status_id != @ExpiredStatusId
+              status_id NOT IN (@ExpiredStatusId, @RejectedStatusId)
         ORDER BY date_of_expiry
         LIMIT 100
         """;

@@ -21,7 +21,7 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
     public async Task CallMediatorIfFoundExpiredDrivingLicense()
     {
         // Arrange
-        await AddExpiredDrivingLicense();
+        await AddReadyForTransferToExpiredStatusDrivingLicense();
 
         var timeProvider = TimeProvider.System;
         var jobBuilder = new JobBuilder();
@@ -38,6 +38,7 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
     [Fact]
     public async Task NotCallMediatorIfNotFoundExpiredDrivingLicense()
     {
+        // Arrange
         var timeProvider = TimeProvider.System;
         var jobBuilder = new JobBuilder();
         var job = jobBuilder.Build(DataSource, timeProvider);
@@ -50,7 +51,25 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
         jobBuilder.VerifyMediatorCalls(0);
     }
 
-    private async Task AddExpiredDrivingLicense()
+    [Fact]
+    public async Task NotCallMediatorForRejectedDrivingLicense()
+    {
+        // Arrange
+        await AddRejectedDrivingLicense();
+        
+        var timeProvider = TimeProvider.System;
+        var jobBuilder = new JobBuilder();
+        var job = jobBuilder.Build(DataSource, timeProvider);
+        var jobExecutionContextMock = new Mock<IJobExecutionContext>();
+
+        // Act
+        await job.Execute(jobExecutionContextMock.Object);
+
+        // Assert
+        jobBuilder.VerifyMediatorCalls(0);
+    }
+    
+    private async Task AddReadyForTransferToExpiredStatusDrivingLicense()
     {
         FakeTimeProvider fakeTimeProvider = new();
         fakeTimeProvider.SetUtcNow(new DateTimeOffset(DateTime.UtcNow.AddDays(-10)));
@@ -62,9 +81,31 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
             CodeOfIssue.Create("1234"),
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
             fakeTimeProvider);
-
+        
         drivingLicense.MarkAsPendingProcessing();
         drivingLicense.Approve();
+
+        Context.Attach(drivingLicense.Status);
+        Context.Attach(drivingLicense.CategoryList);
+        await Context.DrivingLicenses.AddAsync(drivingLicense, TestContext.Current.CancellationToken);
+        await Context.SaveChangesAsync();
+    }
+
+    private async Task AddRejectedDrivingLicense()
+    {
+        FakeTimeProvider fakeTimeProvider = new();
+        fakeTimeProvider.SetUtcNow(new DateTimeOffset(DateTime.UtcNow.AddDays(-10)));
+
+        var drivingLicense = DrivingLicense.Create(Guid.NewGuid(),
+            CategoryList.Create([CategoryList.BCategory]),
+            DrivingLicenseNumber.Create("1234 567891"), Name.Create("Иван", "Иванов", "Иванович"),
+            City.Create("Москва"), new DateOnly(1990, 1, 1), new DateOnly(2020, 1, 1),
+            CodeOfIssue.Create("1234"),
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
+            fakeTimeProvider);
+        
+        drivingLicense.MarkAsPendingProcessing();
+        drivingLicense.Reject();
 
         Context.Attach(drivingLicense.Status);
         Context.Attach(drivingLicense.CategoryList);

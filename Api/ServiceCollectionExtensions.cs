@@ -164,6 +164,15 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterMassTransit(this IServiceCollection services)
     {
+        const string drivingLicenseApprovedTopicName = "driving-license-approved-topic";
+        const string drivingLicenseExpiredTopicName = "driving-license-expired-topic";
+
+        services.Configure<KafkaTopicsConfiguration>(options =>
+        {
+            options.DrivingLicenseApprovedTopic = drivingLicenseApprovedTopicName;
+            options.DrivingLicenseExpiredTopic = drivingLicenseExpiredTopicName;
+        });
+        
         services.AddTransient<IMessageBus, KafkaProducer>();
 
         services.AddMassTransit(x =>
@@ -172,8 +181,8 @@ public static class ServiceCollectionExtensions
 
             x.AddRider(rider =>
             {
-                rider.AddProducer<string, DrivingLicenseApproved>("driving-license-approved-topic");
-                rider.AddProducer<string, DrivingLicenseExpired>("driving-license-expired-topic");
+                rider.AddProducer<string, DrivingLicenseApproved>(drivingLicenseApprovedTopicName);
+                rider.AddProducer<string, DrivingLicenseExpired>(drivingLicenseExpiredTopicName);
 
                 rider.UsingKafka((_, k) =>
                     k.Host((Environment.GetEnvironmentVariable("BOOTSTRAP_SERVERS") ?? "localhost:9092").Split("__")));
@@ -205,7 +214,7 @@ public static class ServiceCollectionExtensions
             configure
                 .AddJob<ActualityObserverBackgroundJob>(j => j.WithIdentity(actualityObserverJobKey))
                 .AddTrigger(trigger => trigger.ForJob(actualityObserverJobKey)
-                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInMinutes(30).RepeatForever()));
+                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInMinutes(1).RepeatForever()));
         });
 
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
@@ -215,7 +224,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterTimeProvider(this IServiceCollection services)
     {
-        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<TimeProvider>(TimeProvider.System);
 
         return services;
     }
