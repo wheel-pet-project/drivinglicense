@@ -17,7 +17,7 @@ public class CategoryList : ValueObject
     }
 
 
-    private List<char> _categories = null!;
+    private readonly List<char> _categories = null!;
     public IReadOnlyList<char> Categories => _categories.AsReadOnly();
 
     public static IEnumerable<char> GetSupportedCategories()

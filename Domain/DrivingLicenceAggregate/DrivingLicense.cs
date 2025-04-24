@@ -84,6 +84,7 @@ public sealed class DrivingLicense : Aggregate
             throw new DomainRulesViolationException($"Date of expiry hasn't come yet");
 
         Status = Status.Expired;
+        
         AddDomainEvent(new DrivingLicenseExpiredDomainEvent(Id, AccountId));
     }
 

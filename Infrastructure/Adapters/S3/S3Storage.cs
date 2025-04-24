@@ -1,7 +1,9 @@
+using System.Net;
 using System.Security.Cryptography;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Ports.S3;
+using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.Exceptions.ArgumentException;
 using FluentResults;
 using Infrastructure.Options;
@@ -66,7 +68,10 @@ public class S3Storage(
         catch (AmazonS3Exception ex)
         {
             logger.LogError("Could not upload photos to S3 storage, exception : {ex}", ex);
-            return Result.Fail("Could not upload photos to S3 storage");
+            
+            return ex.StatusCode > HttpStatusCode.InternalServerError 
+                ? Result.Fail(new ObjectStorageUnavailable("Object storage unavailable"))
+                : Result.Fail("Could not upload photos to S3 storage");
         }
         catch (TaskCanceledException ex)
         {

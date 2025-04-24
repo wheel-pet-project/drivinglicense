@@ -2,9 +2,9 @@ using Domain.SharedKernel.Exceptions.ArgumentException;
 using Proto.DrivingLicenseV1;
 using DomainStatus = Domain.DrivingLicenceAggregate.Status;
 
-namespace Api.Adapters.Mapper;
+namespace Api.Adapters;
 
-public class Mapper
+public class EnumMapper
 {
     public DomainStatus ProtoStatusToDomainStatus(Status? protoStatus)
     {

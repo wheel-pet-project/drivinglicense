@@ -50,9 +50,9 @@ message GetLicenseByIdResponse {
 
 // Get driving license list query
 message GetAllLicensesRequest{
-  int32 page = 2;
-  int32 page_size = 3;
-  Status filtering_status = 4;
+  optional int32 page = 1;
+  optional int32 page_size = 2;
+  Status filtering_status = 3;
 }
 message GetAllLicensesResponse{
   message LicenseShortView{

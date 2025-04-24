@@ -16,7 +16,7 @@ using Status = Grpc.Core.Status;
 
 namespace Api.Adapters.Grpc;
 
-public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : DrivingLicense.DrivingLicenseBase
+public class DrivingLicenseV1(IMediator mediator, EnumMapper enumMapper) : DrivingLicense.DrivingLicenseBase
 {
     public override async Task<GetLicenseByIdResponse> GetLicenseById(
         GetLicenseByIdRequest request,
@@ -34,7 +34,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         {
             Id = resultView.Id.ToString(),
             AccId = resultView.AccountId.ToString(),
-            Status = mapper.DomainStatusToProtoStatus(resultView.Status),
+            Status = enumMapper.DomainStatusToProtoStatus(resultView.Status),
             Name = resultView.Name,
             Number = resultView.Number,
             CityOfBirth = resultView.CityOfBirth,
@@ -68,7 +68,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
         var getAllDrivingLicensesQuery = new GetAllDrivingLicensesQuery(
             request.Page,
             request.PageSize,
-            mapper.ProtoStatusToDomainStatus(request.FilteringStatus));
+            enumMapper.ProtoStatusToDomainStatus(request.FilteringStatus));
 
         var result = await mediator.Send(getAllDrivingLicensesQuery, context.CancellationToken);
 
@@ -80,7 +80,7 @@ public class DrivingLicenseV1(IMediator mediator, Mapper.Mapper mapper) : Drivin
                     Id = x.Id.ToString(),
                     AccountId = x.AccountId.ToString(),
                     Name = x.Name,
-                    Status = mapper.DomainStatusToProtoStatus(x.Status)
+                    Status = enumMapper.DomainStatusToProtoStatus(x.Status)
                 }));
         return response;
     }

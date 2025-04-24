@@ -1,6 +1,7 @@
 using Api.Adapters.Grpc;
 using Api.Interceptors;
 using Application.UseCases.Queries.DapperMappingExtensions;
+using Dapper;
 
 namespace Api;
 
@@ -44,7 +45,7 @@ public class Program
 
         void RegisterDapperMapping()
         {
-            Dapper.SqlMapper.AddTypeHandler(new DateOnlyMapper());
+            SqlMapper.AddTypeHandler(new DateOnlyMapper());
         }
     }
 }

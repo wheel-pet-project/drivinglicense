@@ -1,7 +1,7 @@
 using System.Reflection;
 using Amazon.Runtime;
 using Amazon.S3;
-using Api.Adapters.Mapper;
+using Api.Adapters;
 using Application.DomainEventHandlers;
 using Application.Ports.ImageValidators;
 using Application.Ports.Kafka;
@@ -133,7 +133,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterMapper(this IServiceCollection services)
     {
-        services.AddScoped<Mapper>();
+        services.AddScoped<EnumMapper>();
 
         return services;
     }
