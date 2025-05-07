@@ -1,5 +1,4 @@
 using Domain.DrivingLicenceAggregate.DomainEvents;
-using Domain.SharedKernel.Exceptions.ArgumentException;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -24,7 +23,7 @@ public class DrivingLicenseExpiredDomainEventShould
     }
 
     [Fact]
-    public void ThrowValueIsRequiredExceptionWhenAccountIdIsEmpty()
+    public void ThrowArgumentExceptionWhenAccountIdIsEmpty()
     {
         // Arrange
         var accountId = Guid.Empty;
@@ -37,11 +36,11 @@ public class DrivingLicenseExpiredDomainEventShould
         }
 
         // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
+        Assert.Throws<ArgumentException>(Act);
     }
 
     [Fact]
-    public void ThrowValueIsRequiredExceptionWhenLicenseIdIsEmpty()
+    public void ThrowArgumentExceptionWhenLicenseIdIsEmpty()
     {
         // Arrange
         var accountId = Guid.NewGuid();
@@ -54,6 +53,6 @@ public class DrivingLicenseExpiredDomainEventShould
         }
 
         // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
+        Assert.Throws<ArgumentException>(Act);
     }
 }

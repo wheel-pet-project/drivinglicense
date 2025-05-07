@@ -1,7 +1,7 @@
 using Domain.DrivingLicenceAggregate;
 using Domain.DrivingLicenceAggregate.DomainEvents;
-using Domain.SharedKernel.Exceptions.ArgumentException;
-using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Time.Testing;

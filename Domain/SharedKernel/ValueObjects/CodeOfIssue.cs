@@ -1,5 +1,5 @@
 using CSharpFunctionalExtensions;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 
 namespace Domain.SharedKernel.ValueObjects;
 
@@ -19,12 +19,14 @@ public class CodeOfIssue : ValueObject
 
     public static CodeOfIssue Create(string input)
     {
+        const int codeOfIssueLength = 4;
+        
         if (string.IsNullOrWhiteSpace(input))
             throw new ValueIsRequiredException("Code of issue cannot be null or empty");
 
         var code = input.Trim();
 
-        if (code.Length != 4) throw new ValueOutOfRangeException("Code of issue must be 4 digits");
+        if (code.Length != codeOfIssueLength) throw new ValueIsUnsupportedException("Code of issue must be 4 digits");
 
         if (!code.All(char.IsDigit))
             throw new ValueIsInvalidException("Code of issue must be a number");

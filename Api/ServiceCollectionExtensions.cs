@@ -194,8 +194,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterImageValidators(this IServiceCollection services)
     {
-        services.AddTransient<IImageFormatValidator, ImageFormatValidator>();
-        services.AddTransient<IImageSizeValidator, ImageSizeValidator>();
+        services.AddTransient<IImageValidator, ImageValidator>();
 
         return services;
     }
@@ -266,7 +265,23 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterHealthCheckV1(this IServiceCollection services)
     {
-        var getConnectionString = () =>
+        services.AddGrpcHealthChecks()
+            .AddNpgSql(GetConnectionString(), timeout: TimeSpan.FromSeconds(10))
+            .AddKafka(cfg =>
+                    cfg.BootstrapServers = (Environment.GetEnvironmentVariable("BOOTSTRAP_SERVERS")
+                                            ?? "localhost:9092").Split("__")[0],
+                timeout: TimeSpan.FromSeconds(10));
+
+        return services;
+
+        string GetConnectionString()
+        {
+            var connectionBuilder = BuildConnectionString();
+
+            return connectionBuilder.ConnectionString;
+        }
+
+        NpgsqlConnectionStringBuilder BuildConnectionString()
         {
             var connectionBuilder = new NpgsqlConnectionStringBuilder
             {
@@ -278,17 +293,7 @@ public static class ServiceCollectionExtensions
                 Password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password",
                 BrowsableConnectionString = false
             };
-
-            return connectionBuilder.ConnectionString;
-        };
-
-        services.AddGrpcHealthChecks()
-            .AddNpgSql(getConnectionString(), timeout: TimeSpan.FromSeconds(10))
-            .AddKafka(cfg =>
-                    cfg.BootstrapServers = (Environment.GetEnvironmentVariable("BOOTSTRAP_SERVERS")
-                                            ?? "localhost:9092").Split("__")[0],
-                timeout: TimeSpan.FromSeconds(10));
-
-        return services;
+            return connectionBuilder;
+        }
     }
 }

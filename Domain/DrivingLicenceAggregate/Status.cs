@@ -1,6 +1,6 @@
 using CSharpFunctionalExtensions;
-using Domain.SharedKernel.Exceptions.AlreadyHaveThisState;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 
 namespace Domain.DrivingLicenceAggregate;
 
@@ -23,13 +23,13 @@ public sealed class Status : Entity<int>
     }
 
 
-    public string Name { get; private set; } = null!;
+    public string Name { get; } = null!;
 
     public bool CanBeChangedToThisStatus(Status potentialStatus)
     {
         if (potentialStatus is null) throw new ValueIsRequiredException($"{nameof(potentialStatus)} cannot be null");
         if (!All().Contains(potentialStatus))
-            throw new ValueOutOfRangeException($"{nameof(potentialStatus)} cannot be unsupported");
+            throw new ValueIsUnsupportedException($"{nameof(potentialStatus)} cannot be unsupported");
 
         return potentialStatus switch
         {
@@ -58,14 +58,14 @@ public sealed class Status : Entity<int>
     {
         var status = All()
             .SingleOrDefault(s => string.Equals(s.Name, name, StringComparison.CurrentCultureIgnoreCase));
-        if (status == null) throw new ValueOutOfRangeException($"{nameof(name)} unknown status or null");
+        if (status == null) throw new ValueIsUnsupportedException($"{nameof(name)} unknown status or null");
         return status;
     }
 
     public static Status FromId(int id)
     {
         var status = All().SingleOrDefault(s => s.Id == id);
-        if (status == null) throw new ValueOutOfRangeException($"{nameof(id)} unknown status or null");
+        if (status == null) throw new ValueIsUnsupportedException($"{nameof(id)} unknown status or null");
         return status;
     }
 

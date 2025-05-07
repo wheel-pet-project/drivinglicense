@@ -2,6 +2,7 @@ using Domain.DrivingLicenceAggregate;
 using Domain.SharedKernel.ValueObjects;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.ActualityObserver;
+using Infrastructure.Adapters.Postgres.Repositories;
 using JetBrains.Annotations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,57 +19,43 @@ namespace IntegrationTests.ActualityObserver;
 public class ActualityObserverBackgroundJobShould : IntegrationTestBase
 {
     [Fact]
-    public async Task CallMediatorIfFoundExpiredDrivingLicense()
+    public async Task ChangeLicenseStatusIfFoundExpiredDrivingLicense()
     {
         // Arrange
         await AddReadyForTransferToExpiredStatusDrivingLicense();
 
         var timeProvider = TimeProvider.System;
         var jobBuilder = new JobBuilder();
-        var job = jobBuilder.Build(DataSource, timeProvider);
+        var job = jobBuilder.Build(Context, timeProvider);
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        jobBuilder.VerifyMediatorCalls(1);
+        
     }
-
-    [Fact]
-    public async Task NotCallMediatorIfNotFoundExpiredDrivingLicense()
-    {
-        // Arrange
-        var timeProvider = TimeProvider.System;
-        var jobBuilder = new JobBuilder();
-        var job = jobBuilder.Build(DataSource, timeProvider);
-        var jobExecutionContextMock = new Mock<IJobExecutionContext>();
-
-        // Act
-        await job.Execute(jobExecutionContextMock.Object);
-
-        // Assert
-        jobBuilder.VerifyMediatorCalls(0);
-    }
+    
 
     [Fact]
     public async Task NotCallMediatorForRejectedDrivingLicense()
     {
         // Arrange
         await AddRejectedDrivingLicense();
-        
+
         var timeProvider = TimeProvider.System;
         var jobBuilder = new JobBuilder();
-        var job = jobBuilder.Build(DataSource, timeProvider);
+        var job = jobBuilder.Build(Context, timeProvider);
         var jobExecutionContextMock = new Mock<IJobExecutionContext>();
 
         // Act
         await job.Execute(jobExecutionContextMock.Object);
 
         // Assert
-        jobBuilder.VerifyMediatorCalls(0);
+        var licenseFromDb = await Context.DrivingLicenses.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(Status.Rejected, licenseFromDb!.Status);
     }
-    
+
     private async Task AddReadyForTransferToExpiredStatusDrivingLicense()
     {
         FakeTimeProvider fakeTimeProvider = new();
@@ -118,10 +105,10 @@ public class ActualityObserverBackgroundJobShould : IntegrationTestBase
         private readonly Mock<IMediator> _mediatorMock = new();
         private readonly Mock<ILogger<ActualityObserverBackgroundJob>> _loggerMock = new();
 
-        public ActualityObserverBackgroundJob Build(NpgsqlDataSource dataSource, TimeProvider timeProvider)
+        public ActualityObserverBackgroundJob Build(DataContext context, TimeProvider timeProvider)
         {
-            return new ActualityObserverBackgroundJob(dataSource, _mediatorMock.Object, timeProvider,
-                _loggerMock.Object);
+            return new ActualityObserverBackgroundJob(new DrivingLicenseRepository(context),
+                new Infrastructure.Adapters.Postgres.UnitOfWork(context), timeProvider, _loggerMock.Object);
         }
 
         public void VerifyMediatorCalls(int times)

@@ -1,6 +1,6 @@
 using Domain.DrivingLicenceAggregate;
-using Domain.SharedKernel.Exceptions.AlreadyHaveThisState;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -35,7 +35,7 @@ public class StatusShould
         }
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class StatusShould
         }
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]

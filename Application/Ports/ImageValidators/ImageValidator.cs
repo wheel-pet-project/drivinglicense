@@ -1,6 +1,8 @@
 namespace Application.Ports.ImageValidators;
 
-public interface IImageSizeValidator
+public interface IImageValidator
 {
+    bool IsSupportedFormat(List<byte> imageBytes);
+    
     bool IsSupportedSize(int imageSize);
 }

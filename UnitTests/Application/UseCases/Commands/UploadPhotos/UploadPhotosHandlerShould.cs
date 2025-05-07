@@ -23,8 +23,7 @@ public class UploadPhotosHandlerShould
         var handlerBuilder = new HandlerBuilder();
         handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
-        handlerBuilder.ConfigureFormatValidator(true);
-        handlerBuilder.ConfigureSizeValidator(true);
+        handlerBuilder.ConfigureValidator(true, true);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -41,8 +40,7 @@ public class UploadPhotosHandlerShould
         var handlerBuilder = new HandlerBuilder();
         handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(Result.Fail(new ObjectStorageUnavailable("error")));
-        handlerBuilder.ConfigureFormatValidator(true);
-        handlerBuilder.ConfigureSizeValidator(true);
+        handlerBuilder.ConfigureValidator(true, true);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -60,8 +58,7 @@ public class UploadPhotosHandlerShould
         var handlerBuilder = new HandlerBuilder();
         handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
-        handlerBuilder.ConfigureFormatValidator(false);
-        handlerBuilder.ConfigureSizeValidator(true);
+        handlerBuilder.ConfigureValidator(false, true);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -78,8 +75,7 @@ public class UploadPhotosHandlerShould
         var handlerBuilder = new HandlerBuilder();
         handlerBuilder.ConfigureUnitOfWork(Result.Ok());
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
-        handlerBuilder.ConfigureFormatValidator(true);
-        handlerBuilder.ConfigureSizeValidator(false);
+        handlerBuilder.ConfigureValidator(true, false);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -96,8 +92,7 @@ public class UploadPhotosHandlerShould
         var handlerBuilder = new HandlerBuilder();
         handlerBuilder.ConfigureUnitOfWork(Result.Fail("error"));
         handlerBuilder.ConfigureS3Storage(_validPhotoKeysResult);
-        handlerBuilder.ConfigureFormatValidator(true);
-        handlerBuilder.ConfigureSizeValidator(false);
+        handlerBuilder.ConfigureValidator(true, false);
         var handler = handlerBuilder.Build();
 
         // Act
@@ -112,14 +107,12 @@ public class UploadPhotosHandlerShould
         private readonly Mock<IPhotoRepository> _photoRepositoryMock = new();
         private readonly Mock<IS3Storage> _s3StorageMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
-        private readonly Mock<IImageFormatValidator> _imageFormatValidatorMock = new();
-        private readonly Mock<IImageSizeValidator> _imageSizeValidatorMock = new();
+        private readonly Mock<IImageValidator> _imageFormatValidatorMock = new();
 
         public UploadPhotosHandler Build()
         {
             return new UploadPhotosHandler(_photoRepositoryMock.Object, _s3StorageMock.Object,
-                _imageFormatValidatorMock.Object,
-                _imageSizeValidatorMock.Object, _unitOfWorkMock.Object);
+                _imageFormatValidatorMock.Object, _unitOfWorkMock.Object);
         }
 
         public void ConfigureUnitOfWork(Result commitShouldReturn)
@@ -134,15 +127,11 @@ public class UploadPhotosHandlerShould
                 .ReturnsAsync(savePhotosShouldReturn);
         }
 
-        public void ConfigureFormatValidator(bool isSupportedFormatShouldReturn)
+        public void ConfigureValidator(bool isSupportedFormatShouldReturn, bool isSupportedSizeShouldReturn)
         {
             _imageFormatValidatorMock.Setup(x => x.IsSupportedFormat(It.IsAny<List<byte>>()))
                 .Returns(isSupportedFormatShouldReturn);
-        }
-
-        public void ConfigureSizeValidator(bool isSupportedSizeShouldReturn)
-        {
-            _imageSizeValidatorMock.Setup(x => x.IsSupportedSize(It.IsAny<int>())).Returns(isSupportedSizeShouldReturn);
+            _imageFormatValidatorMock.Setup(x => x.IsSupportedSize(It.IsAny<int>())).Returns(isSupportedSizeShouldReturn);
         }
     }
 }

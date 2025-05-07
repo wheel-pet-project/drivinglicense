@@ -1,6 +1,6 @@
 using Domain.PhotoAggregate.DomainEvents;
 using Domain.SharedKernel;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 
 namespace Domain.PhotoAggregate;
 
@@ -21,10 +21,10 @@ public class Photos : Aggregate
         BackPhotoStorageBucketWithKey = backPhotoStorageBucketWithKey;
     }
 
-    public Guid Id { get; private set; }
-    public Guid DrivingLicenseId { get; private set; }
-    public string FrontPhotoStorageBucketAndKey { get; private set; }
-    public string BackPhotoStorageBucketWithKey { get; private set; }
+    public Guid Id { get; }
+    public Guid DrivingLicenseId { get; }
+    public string FrontPhotoStorageBucketAndKey { get; private set; } = null!;
+    public string BackPhotoStorageBucketWithKey { get; private set; } = null!;
 
     public static Photos Create(
         Guid drivingLicenseId,

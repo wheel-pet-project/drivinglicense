@@ -1,7 +1,7 @@
 using Domain.DrivingLicenceAggregate.DomainEvents;
 using Domain.SharedKernel;
-using Domain.SharedKernel.Exceptions.ArgumentException;
-using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 
 namespace Domain.DrivingLicenceAggregate;
@@ -37,17 +37,17 @@ public sealed class DrivingLicense : Aggregate
     }
 
 
-    public Guid Id { get; private set; }
-    public Guid AccountId { get; private set; }
+    public Guid Id { get; }
+    public Guid AccountId { get; }
     public Status Status { get; private set; } = null!;
-    public CategoryList CategoryList { get; private set; } = null!;
+    public CategoryList CategoryList { get; } = null!;
     public DrivingLicenseNumber Number { get; private set; } = null!;
     public Name Name { get; private set; } = null!;
     public City CityOfBirth { get; private set; } = null!;
     public DateOnly DateOfBirth { get; private set; }
     public DateOnly DateOfIssue { get; private set; }
     public CodeOfIssue CodeOfIssue { get; private set; } = null!;
-    public DateOnly DateOfExpiry { get; private set; }
+    public DateOnly DateOfExpiry { get; }
 
     public void MarkAsPendingProcessing()
     {
@@ -80,12 +80,18 @@ public sealed class DrivingLicense : Aggregate
 
         if (!Status.CanBeChangedToThisStatus(Status.Expired))
             throw new DomainRulesViolationException($"{nameof(Status.Expired)} status can't be settled");
-        if (DateOfExpiry > DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime))
-            throw new DomainRulesViolationException($"Date of expiry hasn't come yet");
+        if (IsExpired())
+            throw new DomainRulesViolationException("Date of expiry hasn't come yet");
 
         Status = Status.Expired;
         
         AddDomainEvent(new DrivingLicenseExpiredDomainEvent(Id, AccountId));
+        return;
+
+        bool IsExpired()
+        {
+            return DateOfExpiry > DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime);
+        }
     }
 
     public static DrivingLicense Create(
@@ -122,7 +128,7 @@ public sealed class DrivingLicense : Aggregate
             throw new ValueIsRequiredException($"{nameof(timeProvider)} cannot be null");
 
         if (dateOfBirth > dateOfIssue || dateOfExpiry <= DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime))
-            throw new ValueOutOfRangeException("invalid date(-s) in driving licence");
+            throw new ValueIsUnsupportedException("invalid date(-s) in driving licence");
 
         return new DrivingLicense(accountId, categoryList, number, name, cityOfBirth, dateOfBirth, dateOfIssue,
             codeOfIssue, dateOfExpiry);

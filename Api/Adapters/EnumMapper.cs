@@ -1,4 +1,4 @@
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Proto.DrivingLicenseV1;
 using DomainStatus = Domain.DrivingLicenceAggregate.Status;
 
@@ -15,7 +15,7 @@ public class EnumMapper
             Status.ApprovedUnspecified => DomainStatus.Approved,
             Status.Rejected => DomainStatus.Rejected,
             Status.Expired => DomainStatus.Expired,
-            _ => throw new ValueOutOfRangeException($"{nameof(protoStatus)} is unknown status")
+            _ => throw new ValueIsUnsupportedException($"{nameof(protoStatus)} is unknown status")
         };
     }
 
@@ -28,7 +28,7 @@ public class EnumMapper
             _ when domainStatus == DomainStatus.Approved => Status.ApprovedUnspecified,
             _ when domainStatus == DomainStatus.Rejected => Status.Rejected,
             _ when domainStatus == DomainStatus.Expired => Status.Expired,
-            _ => throw new ValueOutOfRangeException($"{nameof(domainStatus)} is unknown status")
+            _ => throw new ValueIsUnsupportedException($"{nameof(domainStatus)} is unknown status")
         };
     }
 }

@@ -4,11 +4,11 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Ports.S3;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.ArgumentException;
 using FluentResults;
 using Infrastructure.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ArgumentException = System.ArgumentException;
 
 namespace Infrastructure.Adapters.S3;
 
@@ -24,59 +24,82 @@ public class S3Storage(
         List<byte> frontPhotoBytes,
         List<byte> backPhotoBytes)
     {
-        var rnd = new Random();
-        var currentBucket = _s3Options.Buckets[rnd.Next(_s3Options.Buckets.Length)];
+        if (frontPhotoBytes is null || backPhotoBytes is null) throw new ArgumentException("Photos are required");
+        
+        var currentBucket = GetCurrentBucket();
+        var frontPhotoKey = CalculatePhotoKey();
+        var backPhotoKey = CalculatePhotoKey();
 
-        try
+        return await ProcessWithExceptionHandling(async () =>
         {
-            if (frontPhotoBytes is null || backPhotoBytes is null)
-                throw new ValueIsRequiredException("Photos are required");
+            var frontPhotoPutRequest = CreateRequest(currentBucket, frontPhotoKey, frontPhotoBytes);
+            var backPhotoPutRequest = CreateRequest(currentBucket, backPhotoKey, backPhotoBytes);
 
-            var frontPhotoBytesArray = frontPhotoBytes.ToArray();
-            var backPhotoBytesArray = backPhotoBytes.ToArray();
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            var frontPhotoKey = Guid.NewGuid().ToString();
-            var backPhotoKey = Guid.NewGuid().ToString();
-
-            var frontPhotoPutRequest = new PutObjectRequest
-            {
-                BucketName = currentBucket,
-                Key = frontPhotoKey,
-                ContentType = "image/jpeg",
-                InputStream = new MemoryStream(frontPhotoBytesArray),
-                ChecksumSHA256 = Convert.ToBase64String(SHA256.HashData(frontPhotoBytesArray))
-            };
-            var backPhotoPutRequest = new PutObjectRequest
-            {
-                BucketName = currentBucket,
-                Key = backPhotoKey,
-                ContentType = "image/jpeg",
-                InputStream = new MemoryStream(backPhotoBytesArray),
-                ChecksumSHA256 = Convert.ToBase64String(SHA256.HashData(backPhotoBytesArray))
-            };
-
-            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            var cancellationToken = tokenSource.Token;
-
-            var frontPhotoUploadTask = s3Client.PutObjectAsync(frontPhotoPutRequest, cancellationToken);
-            var backPhotoUploadTask = s3Client.PutObjectAsync(backPhotoPutRequest, cancellationToken);
+            var frontPhotoUploadTask = s3Client.PutObjectAsync(frontPhotoPutRequest, cts.Token);
+            var backPhotoUploadTask = s3Client.PutObjectAsync(backPhotoPutRequest, cts.Token);
 
             await Task.WhenAll(frontPhotoUploadTask, backPhotoUploadTask);
 
             return Result.Ok(($"{currentBucket}/{frontPhotoKey}", $"{currentBucket}/{backPhotoKey}"));
+        });
+    }
+    
+    private string GetCurrentBucket()
+    {
+        var rnd = new Random();
+        return _s3Options.Buckets[rnd.Next(_s3Options.Buckets.Length)];
+    }
+    
+    private static string CalculatePhotoKey()
+    {
+        return Guid.NewGuid().ToString();
+    }
+
+    private async Task<Result<T>> ProcessWithExceptionHandling<T>(Func<Task<Result<T>>> func)
+    {
+        try
+        {
+            return await func();
         }
         catch (AmazonS3Exception ex)
         {
             logger.LogError("Could not upload photos to S3 storage, exception : {ex}", ex);
-            
-            return ex.StatusCode > HttpStatusCode.InternalServerError 
-                ? Result.Fail(new ObjectStorageUnavailable("Object storage unavailable"))
-                : Result.Fail("Could not upload photos to S3 storage");
+
+            return ReturnСorrespondingResult<T>(ex);
         }
         catch (TaskCanceledException ex)
         {
             logger.LogWarning("Time-out for uploading photos has expired, exception: {ex}", ex);
-            return Result.Fail("Time-out for uploading photos has expired.");
+
+            return ReturnTimeoutResult<T>();
         }
+    }
+    
+    private PutObjectRequest CreateRequest(string currentBucket, string key, List<byte> bytes)
+    {
+        var bytesArray = bytes.ToArray();
+
+        return new PutObjectRequest
+        {
+            BucketName = currentBucket,
+            Key = key,
+            ContentType = "image/jpeg",
+            InputStream = new MemoryStream(bytesArray),
+            ChecksumSHA256 = Convert.ToBase64String(SHA256.HashData(bytesArray))
+        };
+    }
+
+    private Result<T> ReturnTimeoutResult<T>()
+    {
+        return Result.Fail("Time-out for uploading photos has expired.");
+    }
+
+    private Result<T> ReturnСorrespondingResult<T>(AmazonS3Exception ex)
+    {
+        return ex.StatusCode > HttpStatusCode.InternalServerError
+            ? Result.Fail(new ObjectStorageUnavailable("Object storage unavailable"))
+            : Result.Fail("Could not upload photos to S3 storage");
     }
 }

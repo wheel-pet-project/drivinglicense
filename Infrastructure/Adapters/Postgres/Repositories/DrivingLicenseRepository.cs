@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Ports.Postgres;
 using Domain.DrivingLicenceAggregate;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,20 @@ public class DrivingLicenseRepository(DataContext context) : IDrivingLicenseRepo
         return await context.DrivingLicenses
             .Include(x => x.Status)
             .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<List<DrivingLicense>> GetAllExpired()
+    {
+        return await context.DrivingLicenses
+            .Include(x => x.Status)
+            .Where(IsExpired())
+            .ToListAsync();
+        
+        Expression<Func<DrivingLicense, bool>> IsExpired()
+        {
+            return x => x.DateOfExpiry < DateOnly.FromDateTime(DateTime.UtcNow) 
+                        && (x.Status != Status.Expired || x.Status != Status.Rejected);
+        }
     }
 
     public void Update(DrivingLicense drivingLicense)

@@ -1,4 +1,4 @@
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Xunit;

@@ -2,7 +2,7 @@ using Application.DomainEventHandlers;
 using Application.Ports.Postgres;
 using Domain.DrivingLicenceAggregate;
 using Domain.PhotoAggregate.DomainEvents;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Moq;

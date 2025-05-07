@@ -1,5 +1,4 @@
 using Domain.DrivingLicenceAggregate.DomainEvents;
-using Domain.SharedKernel.Exceptions.ArgumentException;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Xunit;
@@ -25,7 +24,7 @@ public class DrivingLicenseApprovedDomainEventShould
     }
 
     [Fact]
-    public void ThrowValueIsRequiredExceptionIfAccountIdIsEmpty()
+    public void ThrowArgumentExceptionIfAccountIdIsEmpty()
     {
         // Arrange
         var categoryList = CategoryList.Create([CategoryList.BCategory]);
@@ -38,11 +37,11 @@ public class DrivingLicenseApprovedDomainEventShould
         }
 
         // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
+        Assert.Throws<ArgumentException>(Act);
     }
 
     [Fact]
-    public void ThrowValueIsRequiredExceptionIfCategoryListIsNull()
+    public void ThrowArgumentExceptionIfCategoryListIsNull()
     {
         // Arrange
         var accountId = Guid.NewGuid();
@@ -54,6 +53,6 @@ public class DrivingLicenseApprovedDomainEventShould
         }
 
         // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
+        Assert.Throws<ArgumentException>(Act);
     }
 }

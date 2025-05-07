@@ -1,5 +1,4 @@
 using Domain.PhotoAggregate.DomainEvents;
-using Domain.SharedKernel.Exceptions.ArgumentException;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -22,7 +21,7 @@ public class PhotoAddedDomainEventShould
     }
 
     [Fact]
-    public void ThrowValueIsRequiredExceptionWhenDrivingLicenseIdIsEmpty()
+    public void ThrowArgumentExceptionWhenDrivingLicenseIdIsEmpty()
     {
         // Arrange
 
@@ -33,6 +32,6 @@ public class PhotoAddedDomainEventShould
         }
 
         // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
+        Assert.Throws<ArgumentException>(Act);
     }
 }

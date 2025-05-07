@@ -5,7 +5,7 @@ using Application.UseCases.Commands.UploadPhotos;
 using Application.UseCases.Queries.GetAllDrivingLicenses;
 using Application.UseCases.Queries.GetByIdDrivingLicense;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using FluentResults;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
@@ -169,6 +169,6 @@ public class DrivingLicenseV1(IMediator mediator, EnumMapper enumMapper) : Drivi
     {
         return Guid.TryParse(potentialId, out var id)
             ? id
-            : throw new ValueOutOfRangeException($"{nameof(potentialId)} is invalid uuid");
+            : throw new ValueIsUnsupportedException($"{nameof(potentialId)} is invalid uuid");
     }
 }

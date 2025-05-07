@@ -16,38 +16,39 @@ public class GetByIdDrivingLicenseQueryHandler(
         CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
-
         var command = new CommandDefinition(_getLicenseSql, new { request.Id }, cancellationToken: cancellationToken);
-        var dapperModel = await connection.QuerySingleOrDefaultAsync<DapperDrivingLicenseModel>(command);
-        if (dapperModel is null) return Result.Fail("Driving license not found");
+        var license = await connection.QuerySingleOrDefaultAsync<DapperDrivingLicenseModel>(command);
+        if (license is null) return Result.Fail("Driving license not found");
 
-        var photoKeysModel = await connection.QuerySingleOrDefaultAsync<DapperPhotoIdsModel>(
-            _getPhotoIdsSql,
+        var photoKeysModel = await connection.QuerySingleOrDefaultAsync<DapperPhotoIdsModel>(_getPhotoIdsSql,
             new { LicenseId = request.Id });
+        
+        return Result.Ok(MapToResponse(license, photoKeysModel));
+    }
 
-        var responseModel = new GetByIdDrivingLicenseQueryResponse(
+    private GetByIdDrivingLicenseQueryResponse MapToResponse(DapperDrivingLicenseModel license, DapperPhotoIdsModel? photoKeys)
+    {
+        return new GetByIdDrivingLicenseQueryResponse(
             new GetByIdDrivingLicenseQueryResponse.DrivingLicenseView(
-                dapperModel.Id,
-                dapperModel.AccountId,
-                Status.FromId(dapperModel.StatusId),
-                dapperModel.CategoryList.Select(x => x[0]).ToList(),
-                dapperModel.Number,
-                string.Join(' ', new List<string>(dapperModel.Patronymic is null
-                    ? [dapperModel.FirstName, dapperModel.LastName]
-                    : [dapperModel.FirstName, dapperModel.LastName, dapperModel.Patronymic])),
-                dapperModel.CityOfBirth,
-                dapperModel.DateOfBirth,
-                dapperModel.DateOfIssue,
-                dapperModel.CodeOfIssue,
-                dapperModel.DateOfExpiry,
-                photoKeysModel?.FrontPhotoStorageBucketAndKey is not null
-                    ? $"{yandexS3StorageHost}/{photoKeysModel?.FrontPhotoStorageBucketAndKey}"
+                license.Id,
+                license.AccountId,
+                Status.FromId(license.StatusId),
+                license.CategoryList.Select(x => x[0]).ToList(),
+                license.Number,
+                string.Join(' ', new List<string>(license.Patronymic is null
+                    ? [license.FirstName, license.LastName]
+                    : [license.FirstName, license.LastName, license.Patronymic])),
+                license.CityOfBirth,
+                license.DateOfBirth,
+                license.DateOfIssue,
+                license.CodeOfIssue,
+                license.DateOfExpiry,
+                photoKeys?.FrontPhotoStorageBucketAndKey is not null
+                    ? $"{yandexS3StorageHost}/{photoKeys.FrontPhotoStorageBucketAndKey}"
                     : null,
-                photoKeysModel?.BackPhotoStorageBucketAndKey is not null
-                    ? $"{yandexS3StorageHost}/{photoKeysModel?.BackPhotoStorageBucketAndKey}"
+                photoKeys?.BackPhotoStorageBucketAndKey is not null
+                    ? $"{yandexS3StorageHost}/{photoKeys.BackPhotoStorageBucketAndKey}"
                     : null));
-
-        return Result.Ok(responseModel);
     }
 
     private class DapperPhotoIdsModel

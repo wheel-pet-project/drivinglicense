@@ -42,6 +42,7 @@ public class Program
         RegisterDapperMapping();
 
         app.Run();
+        return;
 
         void RegisterDapperMapping()
         {

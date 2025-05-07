@@ -10,20 +10,14 @@ namespace Application.UseCases.Commands.UploadPhotos;
 public class UploadPhotosHandler(
     IPhotoRepository photoRepository,
     IS3Storage s3Storage,
-    IImageFormatValidator formatValidator,
-    IImageSizeValidator sizeValidator,
+    IImageValidator imageValidator,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UploadPhotosCommand, Result>
 {
     public async Task<Result> Handle(UploadPhotosCommand command, CancellationToken cancellationToken)
     {
-        if (formatValidator.IsSupportedFormat(command.FrontPhotoBytes) is false ||
-            formatValidator.IsSupportedFormat(command.BackPhotoBytes) is false)
-            return Result.Fail("Image format is not supported");
-
-        if (sizeValidator.IsSupportedSize(command.FrontPhotoBytes.Count) is false ||
-            sizeValidator.IsSupportedSize(command.BackPhotoBytes.Count) is false)
-            return Result.Fail("Image size is too large");
+        var validatingResult = ValidatePhotos(command);
+        if (validatingResult.IsFailed) return validatingResult;
 
         var uploadingToS3Result = await s3Storage.SavePhotos(command.FrontPhotoBytes, command.BackPhotoBytes);
         if (uploadingToS3Result.IsFailed) return Result.Fail(uploadingToS3Result.Errors);
@@ -34,5 +28,18 @@ public class UploadPhotosHandler(
         await photoRepository.Add(photo);
 
         return await unitOfWork.Commit();
+    }
+
+    private Result ValidatePhotos(UploadPhotosCommand command)
+    {
+        if (imageValidator.IsSupportedFormat(command.FrontPhotoBytes) is false ||
+            imageValidator.IsSupportedFormat(command.BackPhotoBytes) is false)
+            return Result.Fail("Image format is not supported");
+
+        if (imageValidator.IsSupportedSize(command.FrontPhotoBytes.Count) is false ||
+            imageValidator.IsSupportedSize(command.BackPhotoBytes.Count) is false)
+            return Result.Fail("Image size is too large");
+        
+        return Result.Ok();
     }
 }

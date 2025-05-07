@@ -14,7 +14,6 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
         CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
-
         var command = new CommandDefinition(_sql,
             new
             {
@@ -23,20 +22,9 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
                 Limit = query.PageSize
             },
             cancellationToken: cancellationToken);
+        var models = (await connection.QueryAsync<DapperDrivingLicenseShortModel>(command)).AsList();
 
-        var modelsEnumerable = await connection.QueryAsync<DapperDrivingLicenseShortModel>(command);
-        var modelList = modelsEnumerable.AsList();
-
-        var viewList = modelList.Select(x => new GetAllDrivingLicensesQueryResponse.DrivingLicenseShortView(
-                x.Id,
-                x.AccountId,
-                string.Join(' ', new List<string>(x.Patronymic is null
-                    ? [x.FirstName, x.LastName]
-                    : [x.FirstName, x.LastName, x.Patronymic])),
-                Status.FromId(x.StatusId)))
-            .ToList();
-
-        return new GetAllDrivingLicensesQueryResponse(viewList);
+        return MapToResponse(models);
     }
     
     private int CalculateOffset(int? page, int? pageSize)
@@ -47,6 +35,19 @@ public class GetAllDrivingLicensesQueryHandler(NpgsqlDataSource dataSource)
         return page.Value < 1
             ? 1
             : (page.Value - 1) * pageSize.Value;
+    }
+
+    private GetAllDrivingLicensesQueryResponse MapToResponse(List<DapperDrivingLicenseShortModel> models)
+    {
+        return new GetAllDrivingLicensesQueryResponse(models.Select(x =>
+                new GetAllDrivingLicensesQueryResponse.DrivingLicenseShortView(
+                    x.Id,
+                    x.AccountId,
+                    string.Join(' ', new List<string>(x.Patronymic is null
+                        ? [x.FirstName, x.LastName]
+                        : [x.FirstName, x.LastName, x.Patronymic])),
+                    Status.FromId(x.StatusId)))
+            .ToList());
     }
 
     private class DapperDrivingLicenseShortModel

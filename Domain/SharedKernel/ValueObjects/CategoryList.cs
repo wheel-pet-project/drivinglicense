@@ -1,5 +1,5 @@
 using CSharpFunctionalExtensions;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 
 namespace Domain.SharedKernel.ValueObjects;
 
@@ -29,7 +29,7 @@ public class CategoryList : ValueObject
     {
         if (categories.Count == 0) throw new ValueIsRequiredException($"{nameof(categories)} cannot be empty");
         if (!categories.All(x => GetSupportedCategories().Contains(x)))
-            throw new ValueOutOfRangeException($"{nameof(categories)} contains not a supported category");
+            throw new ValueIsUnsupportedException($"{nameof(categories)} contains not a supported category");
 
         return new CategoryList(categories);
     }
