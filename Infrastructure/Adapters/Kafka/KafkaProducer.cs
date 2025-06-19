@@ -18,7 +18,7 @@ public class KafkaProducer(
             new Uri($"topic:{_configuration.DrivingLicenseApprovedTopic}"));
         
         await producer.Produce(domainEvent.EventId.ToString(),
-            new DrivingLicenseApproved(domainEvent.EventId, domainEvent.AccountId, domainEvent.Categories.Select(x => new string(x, 1)).ToList()),
+            new DrivingLicenseApproved(domainEvent.EventId, domainEvent.AccountId, [.. domainEvent.Categories.Select(x => new string(x, 1))]),
             Pipe.Execute<KafkaSendContext<string, DrivingLicenseApproved>>(ctx =>
                 ctx.MessageId = domainEvent.EventId), cancellationToken);
     }
